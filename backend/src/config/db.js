@@ -1,4 +1,5 @@
-﻿import fs from 'fs';
+﻿import mongoose from 'mongoose';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
@@ -7,6 +8,122 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DB_FILE = path.join(__dirname, '../data/store.json');
 
+// Mongoose Models Schemas
+const UserSchema = new mongoose.Schema({
+  id: String,
+  name: String,
+  email: { type: String, unique: true },
+  phone: String,
+  passwordHash: String,
+  role: { type: String, default: 'student' },
+  targetClass: String,
+  createdAt: { type: Date, default: Date.now },
+  isActive: { type: Boolean, default: true }
+});
+
+const AdSchema = new mongoose.Schema({
+  id: String,
+  title: String,
+  description: String,
+  imageUrl: String,
+  destinationUrl: String,
+  placement: String,
+  badge: String,
+  isActive: { type: Boolean, default: true },
+  priority: { type: Number, default: 1 },
+  startDate: String,
+  endDate: String,
+  clicks: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const StudyMaterialSchema = new mongoose.Schema({
+  id: String,
+  title: String,
+  category: String,
+  targetClass: String,
+  subject: String,
+  chapter: String,
+  pages: Number,
+  downloadUrl: String,
+  isPremium: Boolean,
+  fileType: String,
+  dateAdded: String,
+  downloadsCount: { type: Number, default: 0 },
+  previewContent: String
+});
+
+const VideoSchema = new mongoose.Schema({
+  id: String,
+  title: String,
+  youtubeUrl: String,
+  videoId: String,
+  duration: String,
+  views: String,
+  subject: String,
+  targetClass: String,
+  instructor: String,
+  isPublished: { type: Boolean, default: true },
+  dateAdded: String
+});
+
+const ReviewSchema = new mongoose.Schema({
+  id: String,
+  studentName: String,
+  studentClass: String,
+  rating: Number,
+  comment: String,
+  status: { type: String, default: 'pending' },
+  date: String
+});
+
+const SocialLinkSchema = new mongoose.Schema({
+  id: String,
+  platform: String,
+  label: String,
+  url: String,
+  isEnabled: { type: Boolean, default: true }
+});
+
+const SettingSchema = new mongoose.Schema({
+  instituteName: String,
+  directorName: String,
+  contactPhone: String,
+  contactEmail: String,
+  contactAddress: String,
+  emergencyAlertText: String,
+  noticeTickerSpeed: String,
+  heroBadgeText: String,
+  allowStudentReviews: Boolean,
+  maintenanceMode: Boolean
+});
+
+const CourseSchema = new mongoose.Schema({
+  id: String,
+  title: String,
+  category: String,
+  targetClass: String,
+  duration: String,
+  fee: Number,
+  discountFee: Number,
+  rating: Number,
+  instructor: String,
+  image: String,
+  badge: String,
+  features: [String],
+  description: String
+});
+
+export const UserModel = mongoose.models.User || mongoose.model('User', UserSchema);
+export const AdModel = mongoose.models.Ad || mongoose.model('Ad', AdSchema);
+export const StudyMaterialModel = mongoose.models.StudyMaterial || mongoose.model('StudyMaterial', StudyMaterialSchema);
+export const VideoModel = mongoose.models.Video || mongoose.model('Video', VideoSchema);
+export const ReviewModel = mongoose.models.Review || mongoose.model('Review', ReviewSchema);
+export const SocialLinkModel = mongoose.models.SocialLink || mongoose.model('SocialLink', SocialLinkSchema);
+export const SettingModel = mongoose.models.Setting || mongoose.model('Setting', SettingSchema);
+export const CourseModel = mongoose.models.Course || mongoose.model('Course', CourseSchema);
+
+// Initial Default Seed Data
 const defaultData = {
   users: [
     {
@@ -44,8 +161,6 @@ const defaultData = {
       badge: 'PROMOTED • ADMISSION 2026',
       isActive: true,
       priority: 1,
-      startDate: '2026-08-01',
-      endDate: '2026-12-31',
       clicks: 142
     },
     {
@@ -58,8 +173,6 @@ const defaultData = {
       badge: 'SPONSORED DIPLOMA',
       isActive: true,
       priority: 2,
-      startDate: '2026-08-01',
-      endDate: '2026-12-31',
       clicks: 89
     },
     {
@@ -72,8 +185,6 @@ const defaultData = {
       badge: 'FEATURED PROGRAM',
       isActive: true,
       priority: 3,
-      startDate: '2026-08-01',
-      endDate: '2026-12-31',
       clicks: 67
     }
   ],
@@ -283,33 +394,49 @@ const defaultData = {
       isImportant: true,
       badgeText: 'ADMISSIONS OPEN',
       description: 'Admissions are now open for school batches (1-12), Computer Diplomas, and Spoken English. Early bird 75% discount available.'
-    },
-    {
-      id: 'not-2',
-      title: 'Class 10 & 12 Pre-Board Mock Exam Schedule Released',
-      category: 'exam',
-      date: '2026-08-16',
-      isImportant: true,
-      badgeText: 'EXAM SCHEDULE',
-      description: 'Full syllabus mock tests start from next Monday. Students can download date sheet from study vault.'
-    },
-    {
-      id: 'not-3',
-      title: 'New Evening Batch for Spoken English & Public Speaking Starting Monday',
-      category: 'batch',
-      date: '2026-08-14',
-      isImportant: false,
-      badgeText: 'NEW BATCH',
-      description: 'Batch timing: 5:30 PM to 7:00 PM. Limited 20 seats per batch for personalized attention.'
     }
   ],
   inquiries: []
 };
 
-// Initialize DB file if not exists
+// Initialize DB file fallback
 if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify(defaultData, null, 2), 'utf8');
 }
+
+// Connect to Online MongoDB Atlas if MONGODB_URI provided
+export const connectOnlineMongoDB = async () => {
+  const mongoUri = process.env.MONGODB_URI;
+  if (!mongoUri) {
+    console.log('ℹ️ [DATABASE] MONGODB_URI not provided. Operating on persistent local JSON engine.');
+    return false;
+  }
+
+  try {
+    await mongoose.connect(mongoUri);
+    console.log('🍃 [ONLINE CLOUD MONGODB] Connected successfully to MongoDB Atlas Cloud Database!');
+    
+    // Seed admin if not present
+    const adminCount = await UserModel.countDocuments({ role: 'admin' });
+    if (adminCount === 0) {
+      console.log('🌱 Seeding initial admin and collections to MongoDB Atlas...');
+      await UserModel.insertMany(defaultData.users);
+      await AdModel.insertMany(defaultData.ads);
+      await StudyMaterialModel.insertMany(defaultData.studyMaterials);
+      await VideoModel.insertMany(defaultData.videos);
+      await ReviewModel.insertMany(defaultData.reviews);
+      await SocialLinkModel.insertMany(defaultData.socialLinks);
+      await CourseModel.insertMany(defaultData.courses);
+      await SettingModel.create(defaultData.settings);
+      console.log('✅ MongoDB Atlas seeded successfully!');
+    }
+    return true;
+  } catch (err) {
+    console.warn('⚠️ [ONLINE MONGODB] Could not connect to MongoDB Atlas:', err.message);
+    console.log('ℹ️ Falling back to persistent local storage engine.');
+    return false;
+  }
+};
 
 export const getDB = () => {
   try {

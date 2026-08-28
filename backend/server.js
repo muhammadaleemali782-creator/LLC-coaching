@@ -11,7 +11,7 @@ import reviewsRoutes from './src/routes/reviewsRoutes.js';
 import socialRoutes from './src/routes/socialRoutes.js';
 import settingsRoutes from './src/routes/settingsRoutes.js';
 import coursesRoutes from './src/routes/coursesRoutes.js';
-import { getDB } from './src/config/db.js';
+import { getDB, connectOnlineMongoDB } from './src/config/db.js';
 
 dotenv.config();
 
@@ -21,8 +21,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Initialize Database Storage
+// Initialize Storage & Online Cloud MongoDB Atlas
 getDB();
+connectOnlineMongoDB();
 
 // Security & Middleware
 app.use(cors({
@@ -42,6 +43,7 @@ app.get('/api/health', (req, res) => {
     status: 'OK',
     institute: 'Lakshya Career Classes (L.C.C.)',
     version: '2.0.0-production',
+    database: process.env.MONGODB_URI ? 'MongoDB Atlas (Online Cloud)' : 'Persistent JSON Engine',
     timestamp: new Date().toISOString()
   });
 });

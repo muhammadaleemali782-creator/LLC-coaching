@@ -1,8 +1,32 @@
 ﻿services:
+  # 1. Backend Web Service (Node.js + Express + MongoDB Atlas)
   - type: web
-    name: lcc-coaching
+    name: lcc-coaching-backend
+    env: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: admin@lcc.edu
+      - key: ADMIN_INITIAL_PASSWORD
+        value: AmanLCC@2026!
+      - key: MONGODB_URI
+        sync: false # Set your MongoDB Atlas Connection String in Render Dashboard
+
+  # 2. Frontend Static Site (React + Vite + Tailwind)
+  - type: web
+    name: lcc-coaching-frontend
     env: static
-    buildCommand: npm run build
+    rootDir: frontend
+    buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     routes:
       - type: rewrite
