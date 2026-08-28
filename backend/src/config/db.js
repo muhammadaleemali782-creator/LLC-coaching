@@ -1,4 +1,4 @@
-﻿import mongoose from 'mongoose';
+import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -17,8 +17,101 @@ const UserSchema = new mongoose.Schema({
   passwordHash: String,
   role: { type: String, default: 'student' },
   targetClass: String,
+  enrolledCourses: [String],
   createdAt: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: true }
+});
+
+const CourseSchema = new mongoose.Schema({
+  id: String,
+  title: String,
+  category: String,
+  targetClass: String,
+  duration: String,
+  fee: Number,
+  discountFee: Number,
+  rating: Number,
+  enrolledCount: Number,
+  instructor: String,
+  image: String,
+  badge: String,
+  features: [String],
+  description: String,
+  syllabusHighlights: [String],
+  isPaid: { type: Boolean, default: true },
+  schedule: String
+});
+
+const StudyMaterialSchema = new mongoose.Schema({
+  id: String,
+  title: String,
+  category: String,
+  targetClass: String,
+  subject: String,
+  chapter: String,
+  pages: Number,
+  downloadUrl: String,
+  googleDriveUrl: String,
+  isGoogleDrive: { type: Boolean, default: false },
+  isPremium: Boolean,
+  fileType: String,
+  dateAdded: String,
+  downloadsCount: { type: Number, default: 0 },
+  previewContent: String
+});
+
+const VideoSchema = new mongoose.Schema({
+  id: String,
+  title: String,
+  youtubeUrl: String,
+  videoUrl: String,
+  platform: { type: String, default: 'youtube' },
+  videoId: String,
+  youtubeId: String,
+  thumbnail: String,
+  duration: String,
+  views: String,
+  subject: String,
+  targetClass: String,
+  instructor: String,
+  isPublished: { type: Boolean, default: true },
+  isFeatured: { type: Boolean, default: true },
+  dateAdded: String
+});
+
+const NoticeSchema = new mongoose.Schema({
+  id: String,
+  title: String,
+  category: String,
+  date: String,
+  isImportant: Boolean,
+  badgeText: String,
+  description: String
+});
+
+const GallerySchema = new mongoose.Schema({
+  id: String,
+  title: String,
+  description: String,
+  category: String,
+  imageUrl: String,
+  date: String
+});
+
+const SyllabusSchema = new mongoose.Schema({
+  id: String,
+  targetClass: String,
+  subject: String,
+  examBoard: String,
+  totalMarks: Number,
+  academicYear: String,
+  pdfUrl: String,
+  chapters: [{
+    name: String,
+    subtopics: [String],
+    weightage: String,
+    estimatedHours: Number
+  }]
 });
 
 const AdSchema = new mongoose.Schema({
@@ -37,43 +130,13 @@ const AdSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-const StudyMaterialSchema = new mongoose.Schema({
-  id: String,
-  title: String,
-  category: String,
-  targetClass: String,
-  subject: String,
-  chapter: String,
-  pages: Number,
-  downloadUrl: String,
-  isPremium: Boolean,
-  fileType: String,
-  dateAdded: String,
-  downloadsCount: { type: Number, default: 0 },
-  previewContent: String
-});
-
-const VideoSchema = new mongoose.Schema({
-  id: String,
-  title: String,
-  youtubeUrl: String,
-  videoId: String,
-  duration: String,
-  views: String,
-  subject: String,
-  targetClass: String,
-  instructor: String,
-  isPublished: { type: Boolean, default: true },
-  dateAdded: String
-});
-
 const ReviewSchema = new mongoose.Schema({
   id: String,
   studentName: String,
   studentClass: String,
   rating: Number,
   comment: String,
-  status: { type: String, default: 'pending' },
+  status: { type: String, default: 'approved' },
   date: String
 });
 
@@ -98,32 +161,33 @@ const SettingSchema = new mongoose.Schema({
   maintenanceMode: Boolean
 });
 
-const CourseSchema = new mongoose.Schema({
+const InquirySchema = new mongoose.Schema({
   id: String,
-  title: String,
-  category: String,
-  targetClass: String,
-  duration: String,
-  fee: Number,
-  discountFee: Number,
-  rating: Number,
-  instructor: String,
-  image: String,
-  badge: String,
-  features: [String],
-  description: String
+  studentName: String,
+  parentName: String,
+  phone: String,
+  email: String,
+  currentClass: String,
+  targetCourse: String,
+  message: String,
+  date: String,
+  status: { type: String, default: 'New' }
 });
 
 export const UserModel = mongoose.models.User || mongoose.model('User', UserSchema);
-export const AdModel = mongoose.models.Ad || mongoose.model('Ad', AdSchema);
+export const CourseModel = mongoose.models.Course || mongoose.model('Course', CourseSchema);
 export const StudyMaterialModel = mongoose.models.StudyMaterial || mongoose.model('StudyMaterial', StudyMaterialSchema);
 export const VideoModel = mongoose.models.Video || mongoose.model('Video', VideoSchema);
+export const NoticeModel = mongoose.models.Notice || mongoose.model('Notice', NoticeSchema);
+export const GalleryModel = mongoose.models.Gallery || mongoose.model('Gallery', GallerySchema);
+export const SyllabusModel = mongoose.models.Syllabus || mongoose.model('Syllabus', SyllabusSchema);
+export const AdModel = mongoose.models.Ad || mongoose.model('Ad', AdSchema);
 export const ReviewModel = mongoose.models.Review || mongoose.model('Review', ReviewSchema);
 export const SocialLinkModel = mongoose.models.SocialLink || mongoose.model('SocialLink', SocialLinkSchema);
 export const SettingModel = mongoose.models.Setting || mongoose.model('Setting', SettingSchema);
-export const CourseModel = mongoose.models.Course || mongoose.model('Course', CourseSchema);
+export const InquiryModel = mongoose.models.Inquiry || mongoose.model('Inquiry', InquirySchema);
 
-// Initial Default Seed Data
+// Full Comprehensive Seed Dataset (Matches 100% of Frontend Needs)
 const defaultData = {
   users: [
     {
@@ -140,16 +204,262 @@ const defaultData = {
     {
       id: 'usr-student-1',
       name: 'Aarav Patel',
-      email: 'aarav@example.com',
-      phone: '9876543210',
+      email: 'student@lcc.edu',
+      phone: '+919876543210',
       passwordHash: bcrypt.hashSync('Student@123', 10),
       role: 'student',
       targetClass: 'Class 10',
+      enrolledCourses: ['c-9-10', 'c-computer-diploma'],
       createdAt: new Date().toISOString(),
       isActive: true
     }
   ],
-  otpSessions: [],
+  courses: [
+    {
+      id: 'c-1-5',
+      title: 'Junior Champs: Class 1 to 5 Foundation',
+      category: 'primary',
+      targetClass: 'Class 1-5',
+      duration: 'Full Academic Year',
+      fee: 4500,
+      discountFee: 2999,
+      rating: 4.9,
+      enrolledCount: 142,
+      instructor: 'Mrs. Ananya Sharma & Expert Faculty',
+      image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80',
+      badge: 'Popular Foundation',
+      features: ['Maths, EVS, English & Hindi', 'Daily Activity Worksheets', 'Concept Building & Mental Maths', 'Personal Attention (Max 15/batch)'],
+      description: 'A nurturing foundational program designed to build strong cognitive, arithmetic, and linguistic skills for young learners with play-way methodology.',
+      isPaid: true,
+      schedule: 'Mon - Fri | 3:30 PM - 5:00 PM'
+    },
+    {
+      id: 'c-6-8',
+      title: 'Middle School Mastery: Class 6 to 8',
+      category: 'middle',
+      targetClass: 'Class 6-8',
+      duration: 'Full Academic Year',
+      fee: 6500,
+      discountFee: 4499,
+      rating: 4.8,
+      enrolledCount: 210,
+      instructor: 'Mr. Rajesh Verma & Team',
+      image: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&auto=format&fit=crop&q=80',
+      badge: 'Core Strong',
+      features: ['Mathematics, Science, SST & English', 'Chapter-wise DPPs & Weekly Tests', 'Olympiad & NTSE Orientation', 'Doubt Solving Clinics'],
+      description: 'Comprehensive subject mastery for middle school students, bridging school curriculum with advanced logical reasoning.',
+      isPaid: true,
+      schedule: 'Mon - Sat | 4:00 PM - 6:00 PM'
+    },
+    {
+      id: 'c-9-10',
+      title: 'Board Exam Ace: Class 9 & 10 Target 95%+',
+      category: 'secondary',
+      targetClass: 'Class 9-10',
+      duration: 'Full Academic Year + Crash Revision',
+      fee: 9500,
+      discountFee: 6999,
+      rating: 5.0,
+      enrolledCount: 380,
+      instructor: 'Aman Arora (Managing Director) & Senior Mentors',
+      image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
+      badge: 'Topper Choice',
+      features: ['CBSE & State Board Syllabus Mastery', '10 Years PYQs with Model Solutions', '5 Full-length Mock Board Exams', 'Answer Writing Skill Workshop'],
+      description: 'Our flagship board preparation program renowned for producing district toppers year after year with precise pedagogy and test series.',
+      isPaid: true,
+      schedule: 'Mon - Sat | 5:00 PM - 7:30 PM'
+    },
+    {
+      id: 'c-11-12-sci',
+      title: 'Class 11 & 12 Science (PCM / PCB) + Target Boards',
+      category: 'senior',
+      targetClass: 'Class 11-12',
+      duration: '1 & 2 Year Target Program',
+      fee: 14500,
+      discountFee: 9999,
+      rating: 4.9,
+      enrolledCount: 295,
+      instructor: 'Aman Arora & Senior Mentors',
+      image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80',
+      badge: 'Rankers Batch',
+      features: ['Physics, Chemistry, Maths & Biology', 'Formula Booklets & Derivation Guides', 'Competitive Exam Foundation (JEE/NEET/CUET)', '1-on-1 Mentorship & Test Analysis'],
+      description: 'Rigorous conceptual coaching for senior secondary students aiming for top board percentages and strong competitive readiness.',
+      isPaid: true,
+      schedule: 'Daily | 6:00 AM - 8:30 AM & 6:00 PM - 8:30 PM'
+    },
+    {
+      id: 'c-computer-diploma',
+      title: 'Master Computer Diploma (DCA / ADCA / Tally Prime)',
+      category: 'computer',
+      targetClass: 'All Students & Job Aspirants',
+      duration: '6 Months / 1 Year Certificate',
+      fee: 7000,
+      discountFee: 4999,
+      rating: 4.9,
+      enrolledCount: 310,
+      instructor: 'Mr. Amit Kumar (Lead Tech Trainer)',
+      image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80',
+      badge: 'Govt. Recognized Diploma',
+      features: ['100% Practical Lab Training (1:1 PC)', 'MS Office, Word, Excel, PowerPoint', 'Tally Prime with GST & Accounting', 'Job Placement Support'],
+      description: 'Empower yourself with high-demand digital and computational skills. Includes practical lab exposure, projects, and verifiable certification.',
+      isPaid: true,
+      schedule: 'Flexible Batches (Morning / Evening / Weekend)'
+    },
+    {
+      id: 'c-english-fluency',
+      title: 'Spoken English & Public Speaking Masterclass',
+      category: 'spoken',
+      targetClass: 'Open for All Age Groups',
+      duration: '3 Months Intensive Bootcamp',
+      fee: 4000,
+      discountFee: 2499,
+      rating: 4.8,
+      enrolledCount: 185,
+      instructor: 'Ms. Priyanshi Saxena (Communication Coach)',
+      image: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80',
+      badge: 'Confidence Booster',
+      features: ['Daily Group Discussions & Debates', 'Accent & Vocabulary Enhancement', 'Hesitation Removal & Stage Speech', 'Interview & Resume Prep'],
+      description: 'Overcome fear and hesitation. Speak fluent, confident English in public, school, college, and professional job interviews.',
+      isPaid: true,
+      schedule: 'Mon - Fri | 7:00 PM - 8:15 PM'
+    }
+  ],
+  studyMaterials: [
+    {
+      id: 'mat-1',
+      title: 'Class 10 Science: Chemical Reactions & Equations (Full Chapter Notes)',
+      category: 'pdf_notes',
+      targetClass: 'Class 10',
+      subject: 'Science',
+      chapter: 'Chapter 1: Chemical Reactions',
+      pages: 18,
+      downloadUrl: 'https://drive.google.com/file/d/1sampleDocId001/view',
+      googleDriveUrl: 'https://drive.google.com/file/d/1sampleDocId001/view',
+      isGoogleDrive: true,
+      isPremium: false,
+      fileType: 'pdf',
+      dateAdded: '2026-08-15',
+      downloadsCount: 1420,
+      previewContent: 'Complete handwritten and illustrated notes covering Types of Chemical Reactions, Balancing equations, Oxidation-Reduction, Corrosion and Rancidity with Board exam important questions.'
+    },
+    {
+      id: 'mat-2',
+      title: 'Class 10 Maths: Real Numbers & Polynomials Practice Sheet',
+      category: 'practice_sets',
+      targetClass: 'Class 10',
+      subject: 'Mathematics',
+      chapter: 'Real Numbers & Polynomials',
+      pages: 12,
+      downloadUrl: 'https://drive.google.com/file/d/1sampleDocId002/view',
+      googleDriveUrl: 'https://drive.google.com/file/d/1sampleDocId002/view',
+      isGoogleDrive: true,
+      isPremium: false,
+      fileType: 'pdf',
+      dateAdded: '2026-08-14',
+      downloadsCount: 980,
+      previewContent: '50 Curated MCQs, Assertion-Reason questions, and 3-mark step-by-step proofs for Euclid lemma, irrationality of sqrt(5), and zeroes of polynomials.'
+    },
+    {
+      id: 'mat-3',
+      title: 'Class 12 Physics: Electrostatics & Capacitance Formula Sheet + Derivations',
+      category: 'important_questions',
+      targetClass: 'Class 12',
+      subject: 'Physics',
+      chapter: 'Unit 1: Electrostatics',
+      pages: 24,
+      downloadUrl: 'https://drive.google.com/file/d/1sampleDocId003/view',
+      googleDriveUrl: 'https://drive.google.com/file/d/1sampleDocId003/view',
+      isGoogleDrive: true,
+      isPremium: true,
+      fileType: 'pdf',
+      dateAdded: '2026-08-10',
+      downloadsCount: 1850,
+      previewContent: 'Crucial derivations: Electric field on dipole axial/equatorial, Gauss Law applications, Parallel plate capacitor with dielectric, Energy density.'
+    }
+  ],
+  videos: [
+    {
+      id: 'vid-1',
+      title: 'Class 10 Science: Complete Chemical Reactions in 1 Shot | Full Chapter Marathon',
+      subject: 'Science (Chemistry)',
+      targetClass: 'Class 10',
+      duration: '48:30',
+      youtubeUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
+      platform: 'youtube',
+      videoId: 'kJQP7kiw5Fk',
+      thumbnail: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80',
+      instructor: 'Aman Arora',
+      views: '18.4K views',
+      isFeatured: true
+    },
+    {
+      id: 'vid-2',
+      title: 'Class 10 Maths: Real Numbers & Polynomials Most Repeated Board Questions',
+      subject: 'Mathematics',
+      targetClass: 'Class 10',
+      duration: '35:15',
+      youtubeUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
+      platform: 'youtube',
+      videoId: 'kJQP7kiw5Fk',
+      thumbnail: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800&auto=format&fit=crop&q=80',
+      instructor: 'Mr. Rajesh Verma',
+      views: '12.9K views',
+      isFeatured: true
+    }
+  ],
+  notices: [
+    {
+      id: 'not-1',
+      title: 'Admission Open for Session 2026-2027 (Scholarship Test on Sunday)',
+      date: '2026-08-20',
+      category: 'admission',
+      description: 'Admissions are now open for Classes 1 to 12, Computer DCA/ADCA, and Spoken English. Early bird scholarship test offers up to 50% discount on tuition fees.',
+      isImportant: true,
+      badgeText: 'ADMISSIONS OPEN'
+    },
+    {
+      id: 'not-2',
+      title: 'Class 10 & 12 Pre-Board Mock Exam Schedule Released',
+      date: '2026-08-18',
+      category: 'exam',
+      description: 'The Phase-1 Mock Board Examination will commence from 5th September. Timing: 9:00 AM to 12:15 PM.',
+      isImportant: true,
+      badgeText: 'EXAM ALERT'
+    }
+  ],
+  gallery: [
+    {
+      id: 'gal-1',
+      title: 'Annual Felicitation & Merit Award Ceremony 2026',
+      category: 'toppers',
+      imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
+      date: 'July 2026',
+      description: 'Awarding gold medals and scholarships to 10th and 12th board state rankers.'
+    },
+    {
+      id: 'gal-2',
+      title: 'Interactive Smart Classroom in Session',
+      category: 'classroom',
+      imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80',
+      date: 'August 2026',
+      description: 'Modern digital smart boards making concepts vivid and clear.'
+    }
+  ],
+  syllabus: [
+    {
+      id: 'syl-10-sci',
+      targetClass: 'Class 10',
+      subject: 'Science',
+      examBoard: 'CBSE & State Board',
+      totalMarks: 100,
+      academicYear: '2026-2027',
+      pdfUrl: '#',
+      chapters: [
+        { name: 'Chemical Reactions and Equations', subtopics: ['Types of Reactions', 'Balancing Equations'], weightage: '6 Marks', estimatedHours: 12 },
+        { name: 'Acids, Bases and Salts', subtopics: ['pH Scale', 'Indicators'], weightage: '6 Marks', estimatedHours: 10 }
+      ]
+    }
+  ],
   ads: [
     {
       id: 'ad-hero-1',
@@ -179,101 +489,13 @@ const defaultData = {
       id: 'ad-feed-1',
       title: '🗣️ English Fluency & Stage Public Speaking Bootcamp',
       description: 'Overcome stage fright in 30 days with daily interactive GD sessions led by Aman Arora.',
-      imageUrl: '/assets/debate.jpg',
+      imageUrl: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80',
       destinationUrl: '#courses-section',
       placement: 'between_sections',
       badge: 'FEATURED PROGRAM',
       isActive: true,
       priority: 3,
       clicks: 67
-    }
-  ],
-  studyMaterials: [
-    {
-      id: 'm-1',
-      title: 'Class 10 Science Formula & Quick Revision Vault',
-      category: 'pdf_notes',
-      targetClass: 'Class 10',
-      subject: 'Science',
-      chapter: 'Chemical Reactions & Equations',
-      pages: 18,
-      downloadUrl: '/assets/sample_notes.pdf',
-      isPremium: false,
-      fileType: 'pdf',
-      dateAdded: '2026-08-15',
-      downloadsCount: 1240,
-      previewContent: 'Detailed revision formulas, balance equations, reaction mechanisms, and 10-year board questions.'
-    },
-    {
-      id: 'm-2',
-      title: 'Class 12 Physics Complete Derivations Handbook',
-      category: 'formulas',
-      targetClass: 'Class 12',
-      subject: 'Physics',
-      chapter: 'Electrostatics & Magnetism',
-      pages: 34,
-      downloadUrl: '/assets/sample_notes.pdf',
-      isPremium: false,
-      fileType: 'pdf',
-      dateAdded: '2026-08-12',
-      downloadsCount: 980,
-      previewContent: 'All 45 step-by-step calculus derivations for CBSE & State Boards with high-yield diagrams.'
-    },
-    {
-      id: 'm-3',
-      title: 'Computer DCA & Tally Prime Shortcut Keys Cheat Sheet',
-      category: 'cheat_sheets',
-      targetClass: 'Computer / DCA',
-      subject: 'Computer',
-      chapter: 'Tally Prime & Accounting Shortcuts',
-      pages: 12,
-      downloadUrl: '/assets/sample_notes.pdf',
-      isPremium: false,
-      fileType: 'pdf',
-      dateAdded: '2026-08-18',
-      downloadsCount: 1560,
-      previewContent: 'Master voucher keys (F4-F9), GST calculations, inventory reconciliation, and ledger rules.'
-    }
-  ],
-  videos: [
-    {
-      id: 'v-1',
-      title: 'Trigonometry Zero to Hero Mastery - Class 10 Board Secrets',
-      youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-      videoId: 'dQw4w9WgXcQ',
-      duration: '45:20',
-      views: '12.4K',
-      subject: 'Mathematics',
-      targetClass: 'Class 10',
-      instructor: 'Aman Arora',
-      isPublished: true,
-      dateAdded: '2026-08-10'
-    },
-    {
-      id: 'v-2',
-      title: 'Tally Prime Full Course in 1 Video with Live GST Billing',
-      youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-      videoId: 'dQw4w9WgXcQ',
-      duration: '1:15:00',
-      views: '28.9K',
-      subject: 'Computer Science',
-      targetClass: 'Computer / DCA',
-      instructor: 'Mr. Amit Kumar',
-      isPublished: true,
-      dateAdded: '2026-08-08'
-    },
-    {
-      id: 'v-3',
-      title: 'How to Speak English Confidently Without Hesitation',
-      youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-      videoId: 'dQw4w9WgXcQ',
-      duration: '32:10',
-      views: '18.1K',
-      subject: 'Spoken English',
-      targetClass: 'All Age Groups',
-      instructor: 'Ms. Priyanshi Saxena',
-      isPublished: true,
-      dateAdded: '2026-08-05'
     }
   ],
   reviews: [
@@ -294,15 +516,6 @@ const defaultData = {
       comment: 'The 1:1 computer lab practice at L.C.C. gave me hands-on skills in Tally and Excel. I got my first accountant job right after my diploma.',
       status: 'approved',
       date: '2026-08-11'
-    },
-    {
-      id: 'rev-3',
-      studentName: 'Priya Sharma',
-      studentClass: 'Spoken English Batch',
-      rating: 5,
-      comment: 'I was always afraid of speaking on stage. The daily debate sessions and group discussions completely removed my hesitation!',
-      status: 'approved',
-      date: '2026-08-09'
     }
   ],
   socialLinks: [
@@ -323,79 +536,6 @@ const defaultData = {
     allowStudentReviews: true,
     maintenanceMode: false
   },
-  courses: [
-    {
-      id: 'c-1-5',
-      title: 'Junior Champs: Class 1 to 5 Foundation Mastery',
-      category: 'primary',
-      targetClass: 'Class 1–5',
-      duration: '1 Year Academic',
-      fee: 4000,
-      discountFee: 2999,
-      rating: 4.9,
-      instructor: 'Ms. Sunita Sharma',
-      image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80',
-      description: 'A nurturing foundational program designed to build strong cognitive fundamentals, math speed, and reading skills.',
-      badge: 'Popular Foundation',
-      features: ['Daily Mental Math Practice', 'Reading & Vocabulary Builders', 'Creative Science Activities', 'Weekly Parent Report Cards']
-    },
-    {
-      id: 'c-9-10',
-      title: 'Class 9 & 10 Board Exam Ace: Science & Math Mastery',
-      category: 'secondary',
-      targetClass: 'Class 9–10',
-      duration: '1 Year Full Course',
-      fee: 9500,
-      discountFee: 6999,
-      rating: 5.0,
-      instructor: 'Aman Arora (Managing Director)',
-      image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
-      description: 'Comprehensive coaching for CBSE and State Board examinations focusing on step-by-step formula derivations and high-yield question patterns.',
-      badge: 'Board Toppers Batch',
-      features: ['10-Year Chapterwise PYQs', 'Weekly Sunday Board Mocks', '1:1 Doubt Solving Clinics', 'Printed Color Theory Modules']
-    },
-    {
-      id: 'c-computer-diploma',
-      title: 'Professional Computer Diploma (DCA / ADCA / Tally Prime)',
-      category: 'computer',
-      targetClass: 'All Students & Job Seekers',
-      duration: '6 Months to 1 Year',
-      fee: 7000,
-      discountFee: 4999,
-      rating: 4.9,
-      instructor: 'Mr. Amit Kumar',
-      image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80',
-      description: 'Hands-on practical diploma covering MS Office, Advanced Excel, Tally Prime with GST accounting, Internet & Typing.',
-      badge: 'Govt. Recognized Diploma',
-      features: ['1:1 Dedicated PC Lab Slot', 'ISO 9001:2015 Verified Certificate', 'Live GST Billing Practice', 'Job Placement Guidance']
-    },
-    {
-      id: 'c-english-fluency',
-      title: 'Fluent Spoken English & Stage Public Speaking Masterclass',
-      category: 'spoken',
-      targetClass: 'Open for All Age Groups',
-      duration: '3 Months Intensive',
-      fee: 4000,
-      discountFee: 2499,
-      rating: 4.8,
-      instructor: 'Ms. Priyanshi Saxena',
-      image: '/assets/debate.jpg',
-      description: 'Transform your communication skills with real-time stage debates, extempore speeches, and accent correction.',
-      badge: 'Confidence Booster',
-      features: ['Daily Stage Debates & GDs', 'Grammar & Vocabulary Drills', 'Interview & Presentation Mastery', 'Confidence Building Workshops']
-    }
-  ],
-  notices: [
-    {
-      id: 'not-1',
-      title: 'Admission Open for Session 2026-2027 (Scholarship Test on Sunday)',
-      category: 'admission',
-      date: '2026-08-20',
-      isImportant: true,
-      badgeText: 'ADMISSIONS OPEN',
-      description: 'Admissions are now open for school batches (1-12), Computer Diplomas, and Spoken English. Early bird 75% discount available.'
-    }
-  ],
   inquiries: []
 };
 
@@ -419,16 +559,19 @@ export const connectOnlineMongoDB = async () => {
     // Seed admin if not present
     const adminCount = await UserModel.countDocuments({ role: 'admin' });
     if (adminCount === 0) {
-      console.log('🌱 Seeding initial admin and collections to MongoDB Atlas...');
+      console.log('🌱 Seeding initial admin and all collections to MongoDB Atlas...');
       await UserModel.insertMany(defaultData.users);
-      await AdModel.insertMany(defaultData.ads);
+      await CourseModel.insertMany(defaultData.courses);
       await StudyMaterialModel.insertMany(defaultData.studyMaterials);
       await VideoModel.insertMany(defaultData.videos);
+      await NoticeModel.insertMany(defaultData.notices);
+      await GalleryModel.insertMany(defaultData.gallery);
+      await SyllabusModel.insertMany(defaultData.syllabus);
+      await AdModel.insertMany(defaultData.ads);
       await ReviewModel.insertMany(defaultData.reviews);
       await SocialLinkModel.insertMany(defaultData.socialLinks);
-      await CourseModel.insertMany(defaultData.courses);
       await SettingModel.create(defaultData.settings);
-      console.log('✅ MongoDB Atlas seeded successfully!');
+      console.log('✅ MongoDB Atlas seeded successfully with all collections!');
     }
     return true;
   } catch (err) {

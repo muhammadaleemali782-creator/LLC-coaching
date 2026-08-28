@@ -1,4 +1,4 @@
-﻿const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const getAuthHeader = (): Record<string, string> => {
   const token = localStorage.getItem('lcc_auth_token') || localStorage.getItem('lcc_admin_token');
@@ -64,6 +64,25 @@ export const api = {
     getUsers: () => request<{ success: boolean; data: any[] }>('/auth/users'),
     toggleUser: (id: string) => request<{ success: boolean; message: string; user: any }>(`/auth/users/${id}/toggle`, {
       method: 'PATCH'
+    }),
+    deleteUser: (id: string) => request<{ success: boolean; message: string }>(`/auth/users/${id}`, {
+      method: 'DELETE'
+    })
+  },
+
+  // Courses API
+  courses: {
+    get: () => request<{ success: boolean; data: any[] }>('/courses'),
+    create: (course: any) => request<{ success: boolean; message: string; data: any }>('/courses', {
+      method: 'POST',
+      body: JSON.stringify(course)
+    }),
+    update: (id: string, course: any) => request<{ success: boolean; message: string; data: any }>(`/courses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(course)
+    }),
+    delete: (id: string) => request<{ success: boolean; message: string }>(`/courses/${id}`, {
+      method: 'DELETE'
     })
   },
 
@@ -117,6 +136,42 @@ export const api = {
     })
   },
 
+  // Notices API
+  notices: {
+    get: () => request<{ success: boolean; data: any[] }>('/notices'),
+    create: (notice: any) => request<{ success: boolean; message: string; data: any }>('/notices', {
+      method: 'POST',
+      body: JSON.stringify(notice)
+    }),
+    delete: (id: string) => request<{ success: boolean; message: string }>(`/notices/${id}`, {
+      method: 'DELETE'
+    })
+  },
+
+  // Gallery API
+  gallery: {
+    get: () => request<{ success: boolean; data: any[] }>('/gallery'),
+    create: (item: any) => request<{ success: boolean; message: string; data: any }>('/gallery', {
+      method: 'POST',
+      body: JSON.stringify(item)
+    }),
+    delete: (id: string) => request<{ success: boolean; message: string }>(`/gallery/${id}`, {
+      method: 'DELETE'
+    })
+  },
+
+  // Syllabus API
+  syllabus: {
+    get: () => request<{ success: boolean; data: any[] }>('/syllabus'),
+    create: (item: any) => request<{ success: boolean; message: string; data: any }>('/syllabus', {
+      method: 'POST',
+      body: JSON.stringify(item)
+    }),
+    delete: (id: string) => request<{ success: boolean; message: string }>(`/syllabus/${id}`, {
+      method: 'DELETE'
+    })
+  },
+
   // Reviews
   reviews: {
     get: (all = false) => request<{ success: boolean; data: any[] }>(`/reviews${all ? '?all=true' : ''}`),
@@ -159,6 +214,10 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(body)
     }),
-    get: () => request<{ success: boolean; data: any[] }>('/inquiries')
+    get: () => request<{ success: boolean; data: any[] }>('/inquiries'),
+    updateStatus: (id: string, status: string) => request<{ success: boolean; message: string; data: any }>(`/inquiries/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status })
+    })
   }
 };

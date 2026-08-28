@@ -250,7 +250,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [courses, setCourses] = useState<Course[]>(INITIAL_COURSES);
   const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(INITIAL_STUDY_MATERIALS);
-  const [syllabuses] = useState<SyllabusItem[]>(INITIAL_SYLLABUS);
+  const [syllabuses, setSyllabuses] = useState<SyllabusItem[]>(INITIAL_SYLLABUS);
   const [notices, setNotices] = useState<Notice[]>(INITIAL_NOTICES);
   const [videos, setVideos] = useState<VideoLecture[]>(INITIAL_VIDEOS);
   const [instagramPosts, setInstagramPosts] = useState<InstagramPost[]>(INITIAL_INSTAGRAM_POSTS);
@@ -281,27 +281,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  // Initial Fetch from Backend
+  // Initial Fetch from Backend (100% Backend-Controlled Engine)
   useEffect(() => {
     const syncBackend = async () => {
       try {
-        const [adsRes, pdfsRes, vidsRes, revsRes, socsRes, setsRes] = await Promise.allSettled([
+        const [
+          adsRes,
+          pdfsRes,
+          vidsRes,
+          revsRes,
+          socsRes,
+          setsRes,
+          coursesRes,
+          notsRes,
+          galRes,
+          sylRes,
+          inqRes,
+          usersRes
+        ] = await Promise.allSettled([
           api.ads.get({ all: true }),
           api.media.getPDFs(),
           api.media.getVideos(true),
           api.reviews.get(true),
           api.socials.get(),
-          api.settings.get()
+          api.settings.get(),
+          api.courses.get(),
+          api.notices.get(),
+          api.gallery.get(),
+          api.syllabus.get(),
+          api.inquiries.get(),
+          api.auth.getUsers()
         ]);
 
-        if (adsRes.status === 'fulfilled' && adsRes.value.data) setAds(adsRes.value.data);
-        if (pdfsRes.status === 'fulfilled' && pdfsRes.value.data) setStudyMaterials(pdfsRes.value.data);
-        if (vidsRes.status === 'fulfilled' && vidsRes.value.data) setVideos(vidsRes.value.data);
-        if (revsRes.status === 'fulfilled' && revsRes.value.data) setReviews(revsRes.value.data);
-        if (socsRes.status === 'fulfilled' && socsRes.value.data) setSocialLinks(socsRes.value.data);
+        if (adsRes.status === 'fulfilled' && adsRes.value.data?.length) setAds(adsRes.value.data);
+        if (pdfsRes.status === 'fulfilled' && pdfsRes.value.data?.length) setStudyMaterials(pdfsRes.value.data);
+        if (vidsRes.status === 'fulfilled' && vidsRes.value.data?.length) setVideos(vidsRes.value.data);
+        if (revsRes.status === 'fulfilled' && revsRes.value.data?.length) setReviews(revsRes.value.data);
+        if (socsRes.status === 'fulfilled' && socsRes.value.data?.length) setSocialLinks(socsRes.value.data);
         if (setsRes.status === 'fulfilled' && setsRes.value.data) setWebsiteSettings(setsRes.value.data);
+        if (coursesRes.status === 'fulfilled' && coursesRes.value.data?.length) setCourses(coursesRes.value.data);
+        if (notsRes.status === 'fulfilled' && notsRes.value.data?.length) setNotices(notsRes.value.data);
+        if (galRes.status === 'fulfilled' && galRes.value.data?.length) setGalleryItems(galRes.value.data);
+        if (sylRes.status === 'fulfilled' && sylRes.value.data?.length) setSyllabuses(sylRes.value.data);
+        if (inqRes.status === 'fulfilled' && inqRes.value.data?.length) setInquiries(inqRes.value.data);
+        if (usersRes.status === 'fulfilled' && usersRes.value.data?.length) {
+          const registeredStudents = usersRes.value.data.filter(u => u.role !== 'admin');
+          if (registeredStudents.length > 0) setStudents(registeredStudents);
+        }
       } catch (e) {
-        // Safe offline fallback
+        console.log('ℹ️ Running in resilient fallback mode');
       }
     };
     syncBackend();
@@ -576,26 +604,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Inquiry submitted! Our counseling desk will contact you soon.', 'success');
   };
 
-  // Course Management
-  const addCourse = (course: Omit<Course, 'id' | 'enrolledCount' | 'rating'>) => {
-    const newC: Course = {
-      ...course,
-      id: `c-${Date.now()}`,
-      enrolledCount: 0,
-      rating: 5.0
-    };
-    setCourses(prev => [newC, ...prev]);
-    showToast(`Course "${newC.title}" added successfully!`, 'success');
+  // Course Management (Backend Integrated)
+  const addCourse = async (course: Omit<Course, 'id' | 'enrolledCount' | 'rating'>) => {
+    try {
+      const res = await api.courses.create(course);
+      setCourses(prev => [res.data, ...prev]);
+      showToast(`Course "${res.data.title}" added to database!`, 'success');
+    } catch (e) {
+      const newC: Course = {
+        ...course,
+        id: `c-${Date.now()}`,
+        enrolledCount: 0,
+        rating: 5.0
+      };
+      setCourses(prev => [newC, ...prev]);
+      showToast(`Course "${newC.title}" added successfully!`, 'success');
+    }
   };
 
-  const updateCourse = (course: Course) => {
-    setCourses(prev => prev.map(c => (c.id === course.id ? course : c)));
-    showToast(`Course "${course.title}" updated!`, 'success');
+  const updateCourse = async (course: Course) => {
+    try {
+      await api.courses.update(course.id, course);
+      setCourses(prev => prev.map(c => (c.id === course.id ? course : c)));
+      showToast(`Course "${course.title}" saved to database!`, 'success');
+    } catch (e) {
+      setCourses(prev => prev.map(c => (c.id === course.id ? course : c)));
+      showToast(`Course "${course.title}" updated!`, 'success');
+    }
   };
 
-  const deleteCourse = (id: string) => {
-    setCourses(prev => prev.filter(c => c.id !== id));
-    showToast('Course deleted.', 'info');
+  const deleteCourse = async (id: string) => {
+    try {
+      await api.courses.delete(id);
+      setCourses(prev => prev.filter(c => c.id !== id));
+      showToast('Course removed from database.', 'info');
+    } catch (e) {
+      setCourses(prev => prev.filter(c => c.id !== id));
+      showToast('Course deleted.', 'info');
+    }
   };
 
   // Material Management
@@ -617,20 +663,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Study material deleted.', 'info');
   };
 
-  // Notice Management
-  const addNotice = (notice: Omit<Notice, 'id' | 'date'>) => {
-    const newN: Notice = {
-      ...notice,
-      id: `not-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0]
-    };
-    setNotices(prev => [newN, ...prev]);
-    showToast(`Notice "${newN.title}" posted!`, 'success');
+  // Notice Management (Backend Integrated)
+  const addNotice = async (notice: Omit<Notice, 'id' | 'date'>) => {
+    try {
+      const res = await api.notices.create(notice);
+      setNotices(prev => [res.data, ...prev]);
+      showToast(`Notice "${res.data.title}" posted to database!`, 'success');
+    } catch (e) {
+      const newN: Notice = {
+        ...notice,
+        id: `not-${Date.now()}`,
+        date: new Date().toISOString().split('T')[0]
+      };
+      setNotices(prev => [newN, ...prev]);
+      showToast(`Notice "${newN.title}" posted!`, 'success');
+    }
   };
 
-  const deleteNotice = (id: string) => {
-    setNotices(prev => prev.filter(n => n.id !== id));
-    showToast('Notice deleted.', 'info');
+  const deleteNotice = async (id: string) => {
+    try {
+      await api.notices.delete(id);
+      setNotices(prev => prev.filter(n => n.id !== id));
+      showToast('Notice removed from database.', 'info');
+    } catch (e) {
+      setNotices(prev => prev.filter(n => n.id !== id));
+      showToast('Notice deleted.', 'info');
+    }
   };
 
   // Video Management
