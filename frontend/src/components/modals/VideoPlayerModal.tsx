@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { Video, X, Eye, Clock, User, Share2 } from 'lucide-react';
 
@@ -12,7 +12,17 @@ export const VideoPlayerModal: React.FC = () => {
     showToast('Video link copied to clipboard!', 'info');
   };
 
-  const videoId = selectedVideoForPlayer.videoId || selectedVideoForPlayer.youtubeId || 'dQw4w9WgXcQ';
+  const platform = selectedVideoForPlayer.platform || (selectedVideoForPlayer.youtubeUrl?.includes('instagram') ? 'instagram' : selectedVideoForPlayer.youtubeUrl?.includes('facebook') ? 'facebook' : 'youtube');
+  const videoId = selectedVideoForPlayer.videoId || selectedVideoForPlayer.youtubeId || 'kJQP7kiw5Fk';
+
+  let playerIframeSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+  if (platform === 'instagram') {
+    const cleanUrl = (selectedVideoForPlayer.videoUrl || selectedVideoForPlayer.youtubeUrl || '').split('?')[0].replace(/\/+$/, '');
+    playerIframeSrc = `${cleanUrl}/embed/`;
+  } else if (platform === 'facebook') {
+    const rawUrl = selectedVideoForPlayer.videoUrl || selectedVideoForPlayer.youtubeUrl || '';
+    playerIframeSrc = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(rawUrl)}&show_text=0`;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
@@ -21,13 +31,19 @@ export const VideoPlayerModal: React.FC = () => {
         {/* Header */}
         <div className="p-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="p-2 rounded-xl bg-red-500/20 text-red-400 shrink-0">
+            <div className={`p-2 rounded-xl shrink-0 ${
+              platform === 'instagram'
+                ? 'bg-pink-500/20 text-pink-400'
+                : platform === 'facebook'
+                ? 'bg-blue-500/20 text-blue-400'
+                : 'bg-red-500/20 text-red-400'
+            }`}>
               <Video className="w-5 h-5" />
             </div>
             <div className="truncate">
               <h3 className="text-sm font-black text-white truncate">{selectedVideoForPlayer.title}</h3>
               <span className="text-[11px] text-slate-400 font-medium">
-                {selectedVideoForPlayer.subject} • {selectedVideoForPlayer.targetClass}
+                {selectedVideoForPlayer.subject} • {selectedVideoForPlayer.targetClass} • <span className="uppercase text-amber-400 font-bold">{platform}</span>
               </span>
             </div>
           </div>
@@ -42,17 +58,17 @@ export const VideoPlayerModal: React.FC = () => {
             </button>
             <button
               onClick={() => setSelectedVideoForPlayer(null)}
-              className="p-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white"
+              className="p-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Video Player */}
-        <div className="relative w-full aspect-video bg-black">
+        {/* Video Player Frame */}
+        <div className="relative w-full aspect-video bg-black flex items-center justify-center">
           <iframe
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
+            src={playerIframeSrc}
             title={selectedVideoForPlayer.title}
             className="w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

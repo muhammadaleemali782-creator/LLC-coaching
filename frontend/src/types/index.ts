@@ -1,4 +1,4 @@
-﻿export type ColorTheme = 'cobalt' | 'emerald' | 'purple' | 'sunset' | 'midnight';
+export type ColorTheme = 'cobalt' | 'emerald' | 'purple' | 'sunset' | 'midnight';
 
 export type CourseCategory = 'primary' | 'middle' | 'secondary' | 'senior' | 'computer' | 'spoken' | 'competitive';
 
@@ -38,6 +38,8 @@ export interface StudyMaterial {
   dateAdded: string;
   downloadsCount: number;
   previewContent?: string;
+  googleDriveUrl?: string;
+  isGoogleDrive?: boolean;
 }
 
 export interface SyllabusChapter {
@@ -68,10 +70,14 @@ export interface Notice {
   description: string;
 }
 
+export type VideoPlatform = 'youtube' | 'instagram' | 'facebook';
+
 export interface VideoLecture {
   id: string;
   title: string;
   youtubeUrl: string;
+  videoUrl?: string;
+  platform?: VideoPlatform;
   videoId?: string;
   youtubeId?: string;
   thumbnail?: string;

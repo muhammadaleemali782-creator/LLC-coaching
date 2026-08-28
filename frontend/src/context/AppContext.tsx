@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   Course,
   StudyMaterial,
@@ -170,7 +170,7 @@ const INITIAL_ADS: Advertisement[] = [
     id: 'ad-feed-1',
     title: '🗣️ English Fluency & Stage Public Speaking Bootcamp',
     description: 'Overcome stage fright in 30 days with daily interactive GD sessions led by Aman Arora.',
-    imageUrl: '/assets/debate.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80',
     destinationUrl: '#courses-section',
     placement: 'between_sections',
     badge: 'FEATURED PROGRAM',
@@ -233,8 +233,20 @@ const INITIAL_SETTINGS: WebsiteSettings = {
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeView, setActiveView] = useState<ActiveView>('home');
   const [scrollSection, setScrollSection] = useState<string>('home');
-  const [theme, setTheme] = useState<'dark' | 'light'>('light');
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = localStorage.getItem('lcc_theme');
+    return (saved as 'dark' | 'light') || 'light';
+  });
   const [colorTheme, setColorTheme] = useState<ColorTheme>('cobalt');
+
+  useEffect(() => {
+    localStorage.setItem('lcc_theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
   const [courses, setCourses] = useState<Course[]>(INITIAL_COURSES);
   const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(INITIAL_STUDY_MATERIALS);

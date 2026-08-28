@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { NoticeTicker } from './components/NoticeTicker';
@@ -33,15 +33,17 @@ import { LiveVisualEditor } from './components/admin/LiveVisualEditor';
 import { ToastContainer } from './components/Toast';
 
 const MainContent: React.FC = () => {
-  const { activeView, isAdminAuthenticated } = useApp();
+  const { activeView, isAdminAuthenticated, theme } = useApp();
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-between text-slate-900">
+    <div className={`min-h-screen flex flex-col justify-between transition-colors duration-200 ${
+      theme === 'dark' ? 'bg-slate-950 text-slate-100 dark' : 'bg-white text-slate-900'
+    }`}>
       <div>
         <Navbar />
         <NoticeTicker />
 
-        <main>
+        <main className={activeView !== 'admin-panel' ? 'pb-32 xl:pb-16' : ''}>
           {activeView === 'home' && (
             <>
               <Hero />

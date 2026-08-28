@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { AdminLayout, AdminTab } from './AdminLayout';
 import { DashboardOverview } from './DashboardOverview';
@@ -17,7 +17,7 @@ export const AdminPanel: React.FC = () => {
 
   return (
     <AdminLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-      {activeTab === 'overview' && <DashboardOverview />}
+      {activeTab === 'overview' && <DashboardOverview onSelectTab={setActiveTab} />}
       {activeTab === 'ads' && <AdsManager />}
       {activeTab === 'users' && <UsersManagement />}
       {activeTab === 'pdfs' && <BooksPdfManager />}

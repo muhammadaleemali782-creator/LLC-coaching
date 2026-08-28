@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -51,8 +51,64 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col md:flex-row">
       
-      {/* Sidebar Navigation */}
-      <aside className="w-full md:w-72 bg-slate-950 border-r border-slate-800/80 flex flex-col justify-between shrink-0">
+      {/* Mobile Top App Bar & Horizontal Tabs (Mobile Only) */}
+      <div className="md:hidden bg-slate-950 border-b border-slate-800 sticky top-0 z-40">
+        <div className="p-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0066FF] to-blue-700 flex items-center justify-center text-white shadow-sm">
+              <Shield className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-xs font-black text-white">Director Desk</h2>
+              <span className="text-[9px] text-emerald-400 font-mono font-bold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                ONLINE
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => navigateTo('home')}
+              className="px-2.5 py-1 rounded-lg bg-slate-800 text-[10px] font-bold text-slate-300 flex items-center gap-1"
+            >
+              <ExternalLink className="w-3 h-3" />
+              <span>Public Site</span>
+            </button>
+            <button
+              onClick={logoutAdmin}
+              className="p-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20"
+              title="Logout"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Horizontal Scrolling Tabs */}
+        <div className="flex items-center gap-1.5 px-3 pb-2.5 overflow-x-auto scrollbar-none">
+          {navItems.map(item => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id as AdminTab)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 flex items-center gap-1.5 transition-all ${
+                  isActive
+                    ? 'bg-[#0066FF] text-white shadow-sm font-black'
+                    : 'bg-slate-900 text-slate-400 border border-slate-800'
+                }`}
+              >
+                <item.icon className="w-3.5 h-3.5" />
+                <span>{item.label.split(' ')[0]}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Desktop Sidebar Navigation */}
+      <aside className="hidden md:flex w-72 bg-slate-950 border-r border-slate-800/80 flex-col justify-between shrink-0 h-screen sticky top-0 overflow-y-auto">
         <div className="p-5 space-y-6">
           
           {/* Brand Header */}
@@ -124,8 +180,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
       </aside>
 
       {/* Main Page Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-slate-900 overflow-y-auto">
-        <header className="px-6 py-4 border-b border-slate-800 bg-slate-950/60 backdrop-blur-md flex items-center justify-between sticky top-0 z-30">
+      <main className="flex-1 flex flex-col min-w-0 bg-slate-900 overflow-y-auto pb-36 md:pb-12">
+        <header className="hidden md:flex px-6 py-4 border-b border-slate-800 bg-slate-950/60 backdrop-blur-md items-center justify-between sticky top-0 z-30">
           <div>
             <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Management Control</span>
             <h1 className="text-lg font-black text-white capitalize">{activeTab} Manager</h1>
@@ -142,7 +198,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
           </div>
         </header>
 
-        <div className="p-4 sm:p-6 lg:p-8 flex-1">
+        <div className="p-3.5 sm:p-6 lg:p-8 flex-1">
           {children}
         </div>
       </main>

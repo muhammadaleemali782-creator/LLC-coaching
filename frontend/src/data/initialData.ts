@@ -455,7 +455,7 @@ export const INITIAL_INSTAGRAM_POSTS: InstagramPost[] = [
     title: 'Confidence speaks! English Speaking students debating enthusiastically on Stage 🎤✨',
     likes: '2,110',
     comments: '64',
-    imageUrl: '/assets/debate.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=600&auto=format&fit=crop&q=80',
     postUrl: 'https://instagram.com',
     type: 'reel',
     date: '1 week ago'

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { CourseCategory, Course } from '../types';
 import {
@@ -11,13 +11,17 @@ import {
   Star,
   CheckCircle2,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  Edit3,
+  X,
+  Save
 } from 'lucide-react';
 
 export const CourseSection: React.FC = () => {
-  const { courses, navigateTo, showToast } = useApp();
+  const { courses, updateCourse, isAdminAuthenticated, navigateTo, showToast } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
 
   const categories: { id: string; label: string; icon: string }[] = [
     { id: 'all', label: 'All Courses', icon: '✨' },
@@ -152,8 +156,22 @@ export const CourseSection: React.FC = () => {
             <div
               key={course.id}
               style={{ animationDelay: `${idx * 80}ms` }}
-              className="bg-white border border-slate-200/90 rounded-3xl overflow-hidden shadow-card-clean hover:shadow-learner-lg transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col group animate-in fade-in slide-in-from-bottom-4"
+              className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl overflow-hidden shadow-card-clean hover:shadow-learner-lg transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col group animate-in fade-in slide-in-from-bottom-4 relative"
             >
+              {/* Admin In-Card Edit Pencil */}
+              {isAdminAuthenticated && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingCourse({ ...course });
+                  }}
+                  className="absolute top-3.5 right-20 z-20 p-2 rounded-full bg-amber-400 text-slate-950 font-black shadow-lg hover:scale-110 transition-transform cursor-pointer"
+                  title="Director: Edit this Course"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                </button>
+              )}
+
               {/* Image & Price Badge */}
               <div className="relative h-48 sm:h-52 overflow-hidden bg-slate-900">
                 <img
@@ -187,18 +205,18 @@ export const CourseSection: React.FC = () => {
               {/* Card Body */}
               <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
                 <div>
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 group-hover:text-[#0066FF] transition-colors leading-snug line-clamp-1">
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white group-hover:text-[#0066FF] transition-colors leading-snug line-clamp-1">
                     {course.title}
                   </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed font-medium mt-1.5 line-clamp-2">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium mt-1.5 line-clamp-2">
                     {course.description}
                   </p>
                 </div>
 
                 {/* Features List */}
-                <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
                   {course.features.slice(0, 3).map((feat, i) => (
-                    <div key={i} className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                    <div key={i} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 font-medium">
                       <CheckCircle2 className="w-3.5 h-3.5 text-[#0066FF] shrink-0" />
                       <span className="truncate">{feat}</span>
                     </div>
@@ -206,10 +224,10 @@ export const CourseSection: React.FC = () => {
                 </div>
 
                 {/* Bottom Enroll & Details */}
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
                   <div>
                     <span className="text-[10px] text-slate-400 block line-through">₹{course.fee}</span>
-                    <span className="text-sm sm:text-base font-black text-slate-900">₹{course.discountFee}</span>
+                    <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">₹{course.discountFee}</span>
                   </div>
 
                   <button
@@ -226,14 +244,106 @@ export const CourseSection: React.FC = () => {
         </div>
 
         {filteredCourses.length === 0 && (
-          <div className="p-12 bg-slate-50 rounded-3xl border border-slate-200 text-center space-y-3">
+          <div className="p-12 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-center space-y-3">
             <p className="text-slate-500 text-sm font-medium">No courses found matching your filter.</p>
             <button
               onClick={() => { setSelectedCategory('all'); setSearchQuery(''); }}
-              className="px-4 py-2 bg-[#0066FF] text-white text-xs font-bold rounded-full"
+              className="px-4 py-2 bg-[#0066FF] text-white text-xs font-bold rounded-full cursor-pointer"
             >
               Reset Filters
             </button>
+          </div>
+        )}
+
+        {/* Live Admin Course Editor Modal */}
+        {editingCourse && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
+            <div className="relative w-full max-w-lg bg-slate-950 text-white rounded-3xl border border-slate-800 p-6 space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <Edit3 className="w-4 h-4 text-amber-400" />
+                  <h3 className="text-sm font-black uppercase">Edit Course Details (Director Desk)</h3>
+                </div>
+                <button
+                  onClick={() => setEditingCourse(null)}
+                  className="p-1.5 rounded-full text-slate-400 hover:text-white cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="text-[11px] font-bold text-slate-400 block mb-1">Course Title</label>
+                  <input
+                    type="text"
+                    value={editingCourse.title}
+                    onChange={e => setEditingCourse({ ...editingCourse, title: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-slate-400 block mb-1">Original Fee (₹)</label>
+                  <input
+                    type="number"
+                    value={editingCourse.fee}
+                    onChange={e => setEditingCourse({ ...editingCourse, fee: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-slate-400 block mb-1">Discounted Fee (₹)</label>
+                  <input
+                    type="number"
+                    value={editingCourse.discountFee}
+                    onChange={e => setEditingCourse({ ...editingCourse, discountFee: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="text-[11px] font-bold text-slate-400 block mb-1">Course Image URL</label>
+                  <input
+                    type="text"
+                    value={editingCourse.image}
+                    onChange={e => setEditingCourse({ ...editingCourse, image: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="text-[11px] font-bold text-slate-400 block mb-1">Description</label>
+                  <textarea
+                    rows={2}
+                    value={editingCourse.description}
+                    onChange={e => setEditingCourse({ ...editingCourse, description: e.target.value })}
+                    className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <button
+                  onClick={() => setEditingCourse(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-300 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    updateCourse(editingCourse);
+                    setEditingCourse(null);
+                    showToast('Course updated and saved live!', 'success');
+                  }}
+                  className="px-6 py-2 rounded-xl bg-[#0066FF] hover:bg-blue-600 text-white text-xs font-black uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-md"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Save Live</span>
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
