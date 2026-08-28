@@ -1,143 +1,98 @@
 ﻿import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+import authRoutes from './src/routes/authRoutes.js';
+import adsRoutes from './src/routes/adsRoutes.js';
+import mediaRoutes from './src/routes/mediaRoutes.js';
+import reviewsRoutes from './src/routes/reviewsRoutes.js';
+import socialRoutes from './src/routes/socialRoutes.js';
+import settingsRoutes from './src/routes/settingsRoutes.js';
+import coursesRoutes from './src/routes/coursesRoutes.js';
+import { getDB } from './src/config/db.js';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Initialize Database Storage
+getDB();
 
-// In-Memory Database (Ready to connect with MongoDB / PostgreSQL / Prisma)
-let courses = [
-  {
-    id: 'c-1-5',
-    title: 'Primary Foundation (Classes 1 to 5)',
-    category: 'primary',
-    targetClass: 'Class 1–5',
-    fee: 4000,
-    discountFee: 2999,
-    rating: 4.9,
-    instructor: 'Ms. Sunita Sharma',
-    image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80',
-    badge: 'Foundation Batch'
-  },
-  {
-    id: 'c-9-10',
-    title: 'Class 9 & 10 Board Excellence Mastery Batch',
-    category: 'secondary',
-    targetClass: 'Class 9–10',
-    fee: 8000,
-    discountFee: 5999,
-    rating: 5.0,
-    instructor: 'Aman Arora (Managing Director)',
-    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
-    badge: 'Most Popular'
-  },
-  {
-    id: 'c-computer-diploma',
-    title: 'Master Computer Diploma (DCA / ADCA / Tally Prime)',
-    category: 'computer',
-    targetClass: 'All Students & Job Aspirants',
-    fee: 7000,
-    discountFee: 4999,
-    rating: 4.9,
-    instructor: 'Mr. Amit Kumar',
-    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80',
-    badge: 'Govt. Recognized Diploma'
-  },
-  {
-    id: 'c-english-fluency',
-    title: 'Spoken English & Public Speaking Masterclass',
-    category: 'spoken',
-    targetClass: 'Open for All Age Groups',
-    fee: 4000,
-    discountFee: 2499,
-    rating: 4.8,
-    instructor: 'Ms. Priyanshi Saxena',
-    image: '/assets/debate.jpg',
-    badge: 'Confidence Booster'
-  }
-];
+// Security & Middleware
+app.use(cors({
+  origin: '*', // Allows Vercel preview & local development
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-let inquiries = [];
-let notices = [
-  {
-    id: 'not-1',
-    title: 'Admission Open for Session 2026-2027 (Scholarship Test on Sunday)',
-    category: 'admission',
-    date: '2026-08-20',
-    isImportant: true,
-    badgeText: 'ADMISSIONS OPEN',
-    description: 'Admissions are now open for school batches (1-12), Computer Diplomas, and Spoken English. Early bird 75% discount available.'
-  }
-];
+// Static uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Health Route
+// Health Check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'L.C.C. Coaching Backend API is running perfectly!' });
+  res.json({
+    status: 'OK',
+    institute: 'Lakshya Career Classes (L.C.C.)',
+    version: '2.0.0-production',
+    timestamp: new Date().toISOString()
+  });
 });
 
-// Courses API
-app.get('/api/courses', (req, res) => {
-  res.json({ success: true, data: courses });
-});
+// REST API Endpoints
+app.use('/api/auth', authRoutes);
+app.use('/api/ads', adsRoutes);
+app.use('/api/media', mediaRoutes);
+app.use('/api/reviews', reviewsRoutes);
+app.use('/api/socials', socialRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/courses', coursesRoutes);
 
-app.post('/api/courses', (req, res) => {
-  const newCourse = { id: `c-${Date.now()}`, ...req.body };
-  courses.unshift(newCourse);
-  res.status(201).json({ success: true, message: 'Course created successfully', data: newCourse });
-});
-
-app.delete('/api/courses/:id', (req, res) => {
-  courses = courses.filter(c => c.id !== req.params.id);
-  res.json({ success: true, message: 'Course deleted successfully' });
-});
-
-// Inquiries API
+// Inquiries Endpoint
 app.get('/api/inquiries', (req, res) => {
-  res.json({ success: true, data: inquiries });
+  const db = getDB();
+  res.json({ success: true, data: db.inquiries || [] });
 });
 
 app.post('/api/inquiries', (req, res) => {
+  const db = getDB();
   const inquiry = {
     id: `inq-${Date.now()}`,
     ...req.body,
     date: new Date().toISOString().split('T')[0],
     status: 'New'
   };
-  inquiries.unshift(inquiry);
+  if (!db.inquiries) db.inquiries = [];
+  db.inquiries.unshift(inquiry);
   res.status(201).json({ success: true, message: 'Inquiry received. Counseling desk will contact you.', data: inquiry });
 });
 
-// Notices API
+// Notices Endpoint
 app.get('/api/notices', (req, res) => {
-  res.json({ success: true, data: notices });
+  const db = getDB();
+  res.json({ success: true, data: db.notices || [] });
 });
 
-app.post('/api/notices', (req, res) => {
-  const newNotice = {
-    id: `not-${Date.now()}`,
-    date: new Date().toISOString().split('T')[0],
-    ...req.body
-  };
-  notices.unshift(newNotice);
-  res.status(201).json({ success: true, data: newNotice });
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: 'Endpoint not found.' });
 });
 
-// Admin Auth Route
-app.post('/api/admin/login', (req, res) => {
-  const { password } = req.body;
-  if (password === 'admin123' || password === process.env.ADMIN_PASSWORD) {
-    return res.json({ success: true, message: 'Admin authorized', token: 'mock-jwt-admin-token' });
-  }
-  return res.status(401).json({ success: false, message: 'Invalid Admin Password' });
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('Server Error:', err);
+  res.status(500).json({ success: false, message: 'Internal server error occurred.' });
 });
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`🚀 L.C.C. Backend Server running on port ${PORT}`);
+  console.log(`🚀 L.C.C. Production Backend API active on port ${PORT}`);
+  console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
 });

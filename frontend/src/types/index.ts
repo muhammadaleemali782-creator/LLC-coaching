@@ -1,4 +1,4 @@
-export type ColorTheme = 'cobalt' | 'emerald' | 'purple' | 'sunset' | 'midnight';
+﻿export type ColorTheme = 'cobalt' | 'emerald' | 'purple' | 'sunset' | 'midnight';
 
 export type CourseCategory = 'primary' | 'middle' | 'secondary' | 'senior' | 'computer' | 'spoken' | 'competitive';
 
@@ -22,7 +22,7 @@ export interface Course {
   schedule?: string;
 }
 
-export type MaterialCategory = 'pdf_notes' | 'worksheets' | 'homework' | 'practice_sets' | 'pyq' | 'important_questions';
+export type MaterialCategory = 'pdf_notes' | 'formulas' | 'cheat_sheets' | 'worksheets' | 'homework' | 'practice_sets' | 'pyq' | 'important_questions';
 
 export interface StudyMaterial {
   id: string;
@@ -58,52 +58,53 @@ export interface SyllabusItem {
   academicYear: string;
 }
 
-export type NoticeCategory = 'exam' | 'holiday' | 'batch' | 'admission' | 'ptm' | 'general';
-
 export interface Notice {
   id: string;
   title: string;
+  category: 'admission' | 'exam' | 'batch' | 'holiday' | 'event' | 'general' | 'ptm';
   date: string;
-  category: NoticeCategory;
-  description: string;
   isImportant: boolean;
-  fileUrl?: string;
   badgeText?: string;
+  description: string;
 }
 
 export interface VideoLecture {
   id: string;
   title: string;
+  youtubeUrl: string;
+  videoId?: string;
+  youtubeId?: string;
+  thumbnail?: string;
+  duration: string;
+  views: string;
   subject: string;
   targetClass: string;
-  duration: string;
-  youtubeId: string;
-  youtubeUrl: string;
-  thumbnail: string;
   instructor: string;
-  views: string;
-  isFeatured: boolean;
+  isPublished?: boolean;
+  isFeatured?: boolean;
   notesPdfUrl?: string;
+  dateAdded?: string;
 }
 
 export interface InstagramPost {
   id: string;
-  title: string;
-  likes: string;
-  comments: string;
-  imageUrl: string;
   postUrl: string;
-  type: 'reel' | 'post';
+  title?: string;
+  caption?: string;
+  likes: number | string;
+  comments: number | string;
   date: string;
+  imageUrl: string;
+  type?: 'reel' | 'post' | string;
 }
 
 export interface GalleryItem {
   id: string;
   title: string;
-  category: 'event' | 'students' | 'achievements' | 'classroom' | 'toppers';
+  description?: string;
+  category: 'classroom' | 'computer_lab' | 'celebration' | 'awards' | 'toppers' | 'event' | 'students';
   imageUrl: string;
   date: string;
-  description: string;
 }
 
 export interface Student {
@@ -111,12 +112,17 @@ export interface Student {
   name: string;
   email: string;
   phone: string;
-  classEnrolled: string;
-  enrolledCourses: string[];
-  courseProgress: { [courseId: string]: number };
-  completedLessons: string[];
-  joinedDate: string;
+  targetClass?: string;
+  classEnrolled?: string;
   avatarUrl?: string;
+  enrolledCourses: string[];
+  completedLessons?: string[];
+  courseProgress: { [courseId: string]: number };
+  quizScores?: { [testId: string]: number };
+  dateJoined?: string;
+  joinedDate?: string;
+  role?: 'student' | 'admin';
+  isActive?: boolean;
 }
 
 export interface Transaction {
@@ -163,4 +169,57 @@ export interface AdmissionInquiry {
   message: string;
   date: string;
   status: 'New' | 'Contacted' | 'Enrolled';
+}
+
+// Advertisement Types
+export type AdPlacement = 'hero_top' | 'between_sections' | 'study_vault' | 'mobile_in_feed';
+
+export interface Advertisement {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  destinationUrl: string;
+  placement: AdPlacement;
+  badge?: string;
+  isActive: boolean;
+  priority: number;
+  startDate?: string;
+  endDate?: string;
+  clicks?: number;
+  createdAt?: string;
+}
+
+// Review Types
+export interface Review {
+  id: string;
+  studentName: string;
+  studentClass: string;
+  rating: number;
+  comment: string;
+  status: 'pending' | 'approved' | 'rejected';
+  date: string;
+}
+
+// Social Media Link
+export interface SocialLink {
+  id: string;
+  platform: 'youtube' | 'instagram' | 'whatsapp' | 'facebook';
+  label: string;
+  url: string;
+  isEnabled: boolean;
+}
+
+// Website Global Settings
+export interface WebsiteSettings {
+  instituteName: string;
+  directorName: string;
+  contactPhone: string;
+  contactEmail: string;
+  contactAddress: string;
+  emergencyAlertText: string;
+  noticeTickerSpeed: 'slow' | 'normal' | 'fast';
+  heroBadgeText: string;
+  allowStudentReviews: boolean;
+  maintenanceMode: boolean;
 }

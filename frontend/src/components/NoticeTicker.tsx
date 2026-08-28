@@ -13,34 +13,49 @@ export const NoticeTicker: React.FC = () => {
 
   return (
     <>
-      <div className="bg-blue-50/90 border-b border-blue-100 py-1.5 px-2 sm:px-4 relative overflow-hidden">
+      <div className="bg-blue-50/95 border-b border-blue-100 py-1.5 px-2 sm:px-4 relative overflow-hidden">
         <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-3">
           
           {/* Label Badge */}
-          <div className="flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[#0066FF] text-white text-[10px] sm:text-[11px] font-black tracking-wider uppercase shrink-0 shadow-xs">
+          <div className="flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[#0066FF] text-white text-[10px] sm:text-[11px] font-black tracking-wider uppercase shrink-0 shadow-xs z-10">
             <Bell className="w-3 h-3 animate-bounce" />
             <span className="whitespace-nowrap">L.C.C. LIVE ALERT</span>
           </div>
 
-          {/* Marquee ticker text with smooth overflow handling */}
-          <div className="flex-1 overflow-x-auto whitespace-nowrap scrollbar-none py-0.5">
-            <div className="inline-flex items-center gap-4 text-xs text-slate-700">
-              {activeNotices.map((notice, idx) => (
+          {/* Smooth Slow Continuous Infinite Marquee Ticker */}
+          <div className="flex-1 overflow-hidden relative">
+            <div className="animate-marquee-slow flex items-center gap-8 py-0.5 whitespace-nowrap">
+              {/* Loop Batch 1 */}
+              {activeNotices.map((notice) => (
                 <button
-                  key={notice.id}
+                  key={`n1-${notice.id}`}
                   onClick={() => setSelectedNotice(notice)}
-                  className="inline-flex items-center gap-1.5 hover:text-[#0066FF] transition-colors group cursor-pointer"
+                  className="inline-flex items-center gap-2 hover:text-[#0066FF] transition-colors group cursor-pointer shrink-0"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0066FF] shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-[#0066FF] shrink-0 animate-ping" />
                   <span className="font-extrabold text-slate-900 group-hover:text-[#0066FF] text-xs">
                     {notice.title}
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono font-bold">
-                    ({notice.date})
+                  <span className="text-[10px] text-slate-500 font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                    {notice.date}
                   </span>
-                  {idx < activeNotices.length - 1 && (
-                    <span className="text-slate-300 ml-2">•</span>
-                  )}
+                </button>
+              ))}
+
+              {/* Loop Batch 2 (Duplicate for Seamless Infinite Scroll) */}
+              {activeNotices.map((notice) => (
+                <button
+                  key={`n2-${notice.id}`}
+                  onClick={() => setSelectedNotice(notice)}
+                  className="inline-flex items-center gap-2 hover:text-[#0066FF] transition-colors group cursor-pointer shrink-0"
+                >
+                  <span className="w-2 h-2 rounded-full bg-[#0066FF] shrink-0 animate-ping" />
+                  <span className="font-extrabold text-slate-900 group-hover:text-[#0066FF] text-xs">
+                    {notice.title}
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                    {notice.date}
+                  </span>
                 </button>
               ))}
             </div>
@@ -49,7 +64,7 @@ export const NoticeTicker: React.FC = () => {
           {/* View All Button */}
           <button
             onClick={() => navigateTo('notices')}
-            className="hidden sm:flex items-center gap-1 text-xs font-bold text-[#0066FF] hover:text-blue-800 shrink-0 transition-colors"
+            className="hidden sm:flex items-center gap-1 text-xs font-bold text-[#0066FF] hover:text-blue-800 shrink-0 transition-colors z-10 bg-blue-50 px-2 py-0.5 rounded-lg"
           >
             <span>All</span>
             <ChevronRight className="w-3.5 h-3.5" />

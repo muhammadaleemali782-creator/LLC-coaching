@@ -1,91 +1,78 @@
-﻿import React, { useState, useEffect } from 'react';
-import { useApp, ActiveView } from '../context/AppContext';
+﻿import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
 import {
   GraduationCap,
+  Sparkles,
   BookOpen,
+  User,
+  Shield,
+  Phone,
+  MessageSquare,
   FileText,
   Video,
   Image,
   Bell,
-  UserCheck,
-  Shield,
   Menu,
   X,
-  Phone,
-  MessageSquare,
-  Sparkles,
-  Layers,
-  Award,
-  ChevronRight,
-  LogOut,
-  User
+  Palette,
+  ChevronDown
 } from 'lucide-react';
+import { ColorTheme } from '../types';
 
 export const Navbar: React.FC = () => {
   const {
-    activeView,
-    navigateTo,
     currentStudent,
-    isAdminLoggedIn,
+    isAdminAuthenticated,
+    activeView,
+    scrollSection,
+    navigateTo,
     setIsStudentAuthModalOpen,
     setIsAdminAuthModalOpen,
     logoutStudent,
-    notices
+    notices,
+    colorTheme,
+    setColorTheme,
+    showToast
   } = useApp();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [scrollSection, setScrollSection] = useState<string>('home');
+  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
 
   const importantNoticesCount = notices.filter(n => n.isImportant).length;
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const coursesEl = document.getElementById('courses-section');
-      const studyEl = document.getElementById('study-material-section');
-      const batchesEl = document.getElementById('batches-section');
-      const contactEl = document.getElementById('contact-section');
+  const themes: { id: ColorTheme; label: string; bg: string; border: string }[] = [
+    { id: 'cobalt', label: 'Cobalt (Default)', bg: 'bg-[#0066FF]', border: 'border-[#0066FF]' },
+    { id: 'emerald', label: 'Emerald Mint', bg: 'bg-emerald-600', border: 'border-emerald-600' },
+    { id: 'purple', label: 'Royal Purple', bg: 'bg-purple-600', border: 'border-purple-600' },
+    { id: 'sunset', label: 'Sunset Amber', bg: 'bg-amber-600', border: 'border-amber-600' },
+    { id: 'midnight', label: 'Midnight Blue', bg: 'bg-slate-900', border: 'border-slate-900' }
+  ];
 
-      if (contactEl && scrollY >= contactEl.offsetTop - 200) {
-        setScrollSection('contact');
-      } else if (studyEl && scrollY >= studyEl.offsetTop - 200) {
-        setScrollSection('study-material');
-      } else if (batchesEl && scrollY >= batchesEl.offsetTop - 200) {
-        setScrollSection('batches');
-      } else if (coursesEl && scrollY >= coursesEl.offsetTop - 200) {
-        setScrollSection('courses');
-      } else {
-        setScrollSection('home');
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const navItems: { label: string; view: ActiveView; anchor?: string; icon: React.FC<{ className?: string }> }[] = [
-    { label: 'Home', view: 'home', icon: Sparkles },
-    { label: 'Courses', view: 'courses', anchor: 'courses-section', icon: GraduationCap },
-    { label: 'Study Vault', view: 'study-material', anchor: 'study-material-section', icon: FileText },
-    { label: 'Syllabus', view: 'syllabus', anchor: 'syllabus-section', icon: BookOpen },
-    { label: 'Batches', view: 'batches', anchor: 'batches-section', icon: Layers },
-    { label: 'Lectures', view: 'videos', anchor: 'youtube-section', icon: Video },
-    { label: 'Gallery', view: 'gallery', anchor: 'gallery-section', icon: Image },
-    { label: 'Notices', view: 'notices', icon: Bell },
-    { label: 'Admission', view: 'admission', anchor: 'admission-section', icon: Award },
-    { label: 'Contact', view: 'contact', anchor: 'contact-section', icon: Phone }
+  const navItems = [
+    { label: 'Home', view: 'home' as const, anchor: 'home' },
+    { label: 'Courses', view: 'courses' as const, anchor: 'courses-section' },
+    { label: 'Study Vault', view: 'study-material' as const, anchor: 'study-material-section' },
+    { label: 'Syllabus', view: 'syllabus' as const, anchor: 'syllabus-section' },
+    { label: 'Batches', view: 'batches' as const, anchor: 'batches-section' },
+    { label: 'Lectures', view: 'videos' as const, anchor: 'videos-section' },
+    { label: 'Reviews', view: 'reviews' as const, anchor: 'reviews-section' },
+    { label: 'Gallery', view: 'gallery' as const, anchor: 'gallery-section' },
+    { label: 'Notices', view: 'notices' as const, anchor: 'notices-section' },
+    { label: 'Admission', view: 'admission' as const, anchor: 'admission-section' },
+    { label: 'Contact', view: 'contact' as const, anchor: 'contact-section' }
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-slate-100 transition-all shadow-card-clean">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
         
-        {/* Top Emergency Strip */}
-        <div className="bg-[#0066FF] py-1 px-3 sm:px-6 text-white overflow-hidden">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-1.5 truncate">
-              <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[9px] sm:text-[10px] uppercase whitespace-nowrap shrink-0">
-                BATCH 2026-27
+        {/* Top Emergency & Admission Helpline Bar */}
+        <div className="bg-[#0066FF] text-white py-1.5 px-3 sm:px-6 text-xs transition-colors">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+            
+            <div className="flex items-center gap-2 overflow-hidden">
+              <span className="bg-amber-400 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
+                BATCH 2026–27
               </span>
               <span className="hidden md:inline font-bold text-[11px] truncate">
                 Admissions Open for Classes 1–12, Computer DCA & Spoken English
@@ -137,7 +124,7 @@ export const Navbar: React.FC = () => {
                 <button
                   key={item.label}
                   onClick={() => navigateTo(item.view, item.anchor)}
-                  className={`transition-all py-1.5 px-3 rounded-full relative hover:text-[#0066FF] ${
+                  className={`transition-all py-1.5 px-3 rounded-full relative hover:text-[#0066FF] cursor-pointer ${
                     isActive ? 'text-[#0066FF] bg-blue-50 font-extrabold' : ''
                   }`}
                 >
@@ -158,59 +145,58 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => navigateTo('student-portal')}
-                  className="px-3 py-1.5 rounded-full bg-blue-50 text-[#0066FF] border border-blue-200 text-xs font-bold hover:bg-blue-100 transition-colors flex items-center gap-1 shadow-xs"
+                  className="px-3 sm:px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-100 transition-all cursor-pointer"
                 >
                   <User className="w-3.5 h-3.5" />
-                  <span className="truncate max-w-[70px] sm:max-w-none">{currentStudent.name.split(' ')[0]}</span>
+                  <span className="truncate max-w-[80px] sm:max-w-[120px]">{currentStudent.name.split(' ')[0]}</span>
                 </button>
                 <button
                   onClick={logoutStudent}
+                  className="p-2 text-slate-400 hover:text-red-500 rounded-full hover:bg-slate-100 transition-colors"
                   title="Logout"
-                  className="p-1.5 rounded-full hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => setIsStudentAuthModalOpen(true)}
-                className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white text-xs font-bold tracking-wide shadow-md shadow-blue-500/25 transition-all flex items-center gap-1"
+                className="px-3 sm:px-4 py-2 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
               >
-                <UserCheck className="w-3.5 h-3.5 shrink-0" />
-                <span className="whitespace-nowrap">Student Login</span>
+                <User className="w-3.5 h-3.5" />
+                <span>Student Login</span>
               </button>
             )}
 
-            {/* Admin Portal Trigger */}
+            {/* Admin Shield Access */}
             <button
               onClick={() => {
-                if (isAdminLoggedIn) navigateTo('admin-panel');
-                else setIsAdminAuthModalOpen(true);
+                if (isAdminAuthenticated) {
+                  navigateTo('admin-panel');
+                } else {
+                  setIsAdminAuthModalOpen(true);
+                }
               }}
-              className={`p-1.5 rounded-full border transition-colors shrink-0 ${
-                isAdminLoggedIn
-                  ? 'bg-slate-900 text-white border-slate-900'
-                  : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
-              }`}
-              title="Admin Portal (admin123)"
+              className="p-2 rounded-full border border-slate-200 text-slate-600 hover:text-[#0066FF] hover:bg-slate-50 transition-colors cursor-pointer"
+              title="Admin Portal"
             >
               <Shield className="w-4 h-4" />
             </button>
 
-            {/* Mobile Hamburger */}
+            {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="xl:hidden p-1.5 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+              className="xl:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors"
             >
-              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
-          </div>
 
+          </div>
         </nav>
 
-        {/* Mobile Slide-Down Drawer */}
+        {/* Mobile Navigation Drawer */}
         {isMobileMenuOpen && (
-          <div className="xl:hidden bg-white border-b border-slate-100 px-4 py-4 space-y-3 shadow-2xl animate-in slide-in-from-top-4 duration-200">
+          <div className="xl:hidden border-t border-slate-200 bg-white px-4 py-6 space-y-4 shadow-xl animate-in slide-in-from-top-4 duration-200 max-h-[80vh] overflow-y-auto">
             <div className="grid grid-cols-2 gap-2">
               {navItems.map(item => (
                 <button
@@ -219,32 +205,42 @@ export const Navbar: React.FC = () => {
                     navigateTo(item.view, item.anchor);
                     setIsMobileMenuOpen(false);
                   }}
-                  className="p-3 rounded-2xl text-left text-xs font-bold border transition-colors flex items-center gap-2 bg-slate-50 border-slate-200/80 text-slate-700 hover:border-blue-400 hover:bg-blue-50"
+                  className="py-2.5 px-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-700 text-left flex items-center justify-between"
                 >
-                  <item.icon className="w-4 h-4 text-[#0066FF] shrink-0" />
                   <span>{item.label}</span>
                 </button>
               ))}
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
+            <div className="pt-2 border-t border-slate-100 space-y-2">
               <button
                 onClick={() => {
-                  setIsStudentAuthModalOpen(true);
+                  if (currentStudent) {
+                    navigateTo('student-portal');
+                  } else {
+                    setIsStudentAuthModalOpen(true);
+                  }
                   setIsMobileMenuOpen(false);
                 }}
-                className="w-full py-3 rounded-2xl bg-[#0066FF] text-white font-bold text-xs shadow-md shadow-blue-500/20 text-center"
+                className="w-full py-3 rounded-2xl bg-[#0066FF] text-white font-black text-xs uppercase tracking-wider text-center"
               >
-                Student Portal & Quizzes
+                {currentStudent ? `Student Portal (${currentStudent.name})` : 'Student Portal & Quizzes'}
               </button>
+
+              {/* Clean Admin Portal Button (Zero Demo Password Displayed) */}
               <button
                 onClick={() => {
-                  setIsAdminAuthModalOpen(true);
+                  if (isAdminAuthenticated) {
+                    navigateTo('admin-panel');
+                  } else {
+                    setIsAdminAuthModalOpen(true);
+                  }
                   setIsMobileMenuOpen(false);
                 }}
-                className="w-full py-2.5 rounded-2xl bg-slate-100 text-slate-600 font-semibold text-xs text-center"
+                className="w-full py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs text-center flex items-center justify-center gap-1.5"
               >
-                Admin Control Login (admin123)
+                <Shield className="w-3.5 h-3.5 text-[#0066FF]" />
+                <span>Director & Admin Control Desk</span>
               </button>
             </div>
           </div>

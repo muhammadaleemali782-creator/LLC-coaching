@@ -16,9 +16,10 @@ import {
   Layers,
   ArrowDownToLine
 } from 'lucide-react';
+import { AdBanner } from './ads/AdBanner';
 
 export const StudyMaterialSection: React.FC = () => {
-  const { studyMaterials, setSelectedDocForPreview, incrementDownloadCount, showToast } = useApp();
+  const { studyMaterials, setSelectedDocForPreview, showToast } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -26,11 +27,10 @@ export const StudyMaterialSection: React.FC = () => {
   const categories: { id: string; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: 'all', label: 'All Resources', icon: Layers },
     { id: 'pdf_notes', label: 'PDF Notes', icon: FileText },
-    { id: 'practice_sets', label: 'Practice Sets', icon: FileCheck },
-    { id: 'worksheets', label: 'Worksheets', icon: BookOpen },
-    { id: 'important_questions', label: 'Important Qs', icon: HelpCircle },
-    { id: 'pyq', label: 'Past Papers', icon: Clock },
-    { id: 'homework', label: 'Homework Sheets', icon: CheckCircle }
+    { id: 'formulas', label: 'Formula Books', icon: FileCheck },
+    { id: 'cheat_sheets', label: 'Cheat Sheets', icon: BookOpen },
+    { id: 'worksheets', label: 'Worksheets', icon: HelpCircle },
+    { id: 'pyq', label: 'Past Papers', icon: Clock }
   ];
 
   const classFilters = ['all', 'Class 8', 'Class 9', 'Class 10', 'Class 12', 'Computer / DCA', 'English Speaking'];
@@ -46,7 +46,6 @@ export const StudyMaterialSection: React.FC = () => {
   });
 
   const handleDownload = (mat: StudyMaterial) => {
-    incrementDownloadCount(mat.id);
     showToast(`Downloading: ${mat.title}`, 'success');
     
     const element = document.createElement('a');
@@ -59,145 +58,106 @@ export const StudyMaterialSection: React.FC = () => {
   };
 
   return (
-    <section id="study-material-section" className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F8FAFC] border-t border-slate-200/80 relative">
-      <div className="max-w-7xl mx-auto">
+    <section id="study-material-section" className="py-16 sm:py-20 px-3 sm:px-6 lg:px-8 bg-[#F8FAFC] relative overflow-hidden">
+      <div className="max-w-7xl mx-auto space-y-8">
         
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/80 text-[#0066FF] text-xs font-black uppercase tracking-wider mb-3">
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-[#0066FF] border border-blue-200 text-xs font-black uppercase tracking-wider shadow-xs">
             <FileText className="w-3.5 h-3.5" />
-            <span>Digital Study Vault</span>
+            <span>Digital Study Material & PDF Vault</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-4">
-            Free & Verified <span className="text-[#0066FF]">Study Notes & PDFs</span>
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+            Free Revision <span className="text-[#0066FF]">Notes & Handbooks</span>
           </h2>
-          <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-medium">
-            Download chapter-wise revision notes, high-yield worksheets, model practice sets, and previous 10 years solved board papers prepared by senior faculties.
+          <p className="text-slate-600 text-xs sm:text-base leading-relaxed font-medium">
+            Download verified formula sheets, handwritten notes, sample question banks, and computer shortcut cards.
           </p>
         </div>
 
-        {/* Filter Toolbar Box */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 mb-10 shadow-card-clean space-y-4">
-          
-          {/* Top row: Category Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-            {categories.map(cat => (
+        {/* Dynamic Study Vault Advertisement Banner */}
+        <AdBanner placement="study_vault" />
+
+        {/* Search & Class Filter Bar */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-slate-200 shadow-card-clean">
+          <div className="relative w-full md:w-80">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search by topic, chapter, subject..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#0066FF]"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
+            {classFilters.map(cls => (
               <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                  selectedCategory === cat.id
-                    ? 'bg-[#0066FF] text-white shadow-md shadow-blue-500/20'
-                    : 'bg-slate-50 text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/70'
+                key={cls}
+                onClick={() => setSelectedClass(cls)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                  selectedClass === cls
+                    ? 'bg-[#0066FF] text-white shadow-sm'
+                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                 }`}
               >
-                <cat.icon className="w-3.5 h-3.5" />
-                <span>{cat.label}</span>
+                {cls === 'all' ? 'All Classes' : cls}
               </button>
             ))}
           </div>
-
-          {/* Bottom row: Class Filter + Search */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
-            <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
-              <span className="text-xs font-black text-slate-700 uppercase tracking-wider shrink-0 flex items-center gap-1">
-                <Filter className="w-3.5 h-3.5 text-[#0066FF]" />
-                Class:
-              </span>
-              {classFilters.map(cf => (
-                <button
-                  key={cf}
-                  onClick={() => setSelectedClass(cf)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                    selectedClass === cf
-                      ? 'bg-blue-50 text-[#0066FF] border border-blue-300'
-                      : 'text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  {cf === 'all' ? 'All Classes' : cf}
-                </button>
-              ))}
-            </div>
-
-            <div className="relative w-full md:w-80">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search chapter, subject, or topic..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0066FF] transition-colors font-medium"
-              />
-            </div>
-          </div>
-
         </div>
 
-        {/* Materials Cards Grid */}
-        {filteredMaterials.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 shadow-sm">
-            <FileText className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-            <h4 className="text-lg font-black text-slate-900 mb-1">No Study Materials Found</h4>
-            <p className="text-xs text-slate-500">Please select a different category or search term.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredMaterials.map(mat => (
-              <div
-                key={mat.id}
-                className="bg-white border border-slate-200/90 hover:border-blue-300 rounded-3xl p-6 shadow-card-clean hover:shadow-learner transition-all duration-300 flex flex-col justify-between group"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="px-2.5 py-0.5 rounded-lg bg-blue-50 text-[#0066FF] font-black text-[11px] border border-blue-200">
-                      {mat.targetClass}
-                    </span>
-                    <span className="text-[11px] text-slate-500 font-bold">
-                      {mat.pages} Pages • PDF
-                    </span>
-                  </div>
-
-                  <span className="text-xs font-black text-slate-400 uppercase tracking-wider block mb-1">
-                    {mat.subject}
+        {/* Materials Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredMaterials.map((mat) => (
+            <div
+              key={mat.id}
+              className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-card-clean hover:shadow-learner-lg transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between space-y-4 group"
+            >
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-1 rounded-full bg-blue-50 text-[#0066FF] text-[10px] font-black uppercase border border-blue-100">
+                    {mat.targetClass}
                   </span>
-
-                  <h3 className="text-base font-extrabold text-slate-900 group-hover:text-[#0066FF] transition-colors line-clamp-2 leading-snug mb-2">
-                    {mat.title}
-                  </h3>
-
-                  <p className="text-xs text-slate-500 font-medium line-clamp-2 mb-4">
-                    {mat.chapter}
-                  </p>
+                  <span className="text-[11px] text-slate-400 font-mono">
+                    {mat.pages} Pages • PDF
+                  </span>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
-                  <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                    <ArrowDownToLine className="w-3.5 h-3.5 text-[#0066FF]" />
-                    {mat.downloadsCount} Downloads
-                  </span>
+                <h3 className="text-base font-black text-slate-900 group-hover:text-[#0066FF] transition-colors leading-snug">
+                  {mat.title}
+                </h3>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setSelectedDocForPreview(mat)}
-                      className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 transition-colors"
-                      title="Read Online"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>Read</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleDownload(mat)}
-                      className="px-4 py-2 rounded-xl bg-[#0066FF] hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-colors"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Download</span>
-                    </button>
-                  </div>
-                </div>
-
+                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed font-medium">
+                  {mat.previewContent || 'Comprehensive theory, derivations, and board examination highlights.'}
+                </p>
               </div>
-            ))}
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+                <button
+                  onClick={() => setSelectedDocForPreview(mat)}
+                  className="px-3.5 py-2 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Eye className="w-3.5 h-3.5 text-[#0066FF]" />
+                  <span>Preview</span>
+                </button>
+
+                <button
+                  onClick={() => handleDownload(mat)}
+                  className="px-4 py-2 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download</span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {filteredMaterials.length === 0 && (
+          <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 text-slate-500 text-xs font-medium">
+            No study materials found matching the selected filters.
           </div>
         )}
 

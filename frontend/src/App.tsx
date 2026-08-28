@@ -13,11 +13,13 @@ import { StudyMaterialSection } from './components/StudyMaterialSection';
 import { SyllabusSection } from './components/SyllabusSection';
 import { YouTubeSection } from './components/YouTubeSection';
 import { InstagramSection } from './components/InstagramSection';
+import { ReviewsSection } from './components/reviews/ReviewsSection';
 import { GallerySection } from './components/GallerySection';
 import { AppDownloadSection } from './components/AppDownloadSection';
 import { AdmissionSection } from './components/AdmissionSection';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
+import { AdBanner } from './components/ads/AdBanner';
 
 // Modals & Panels
 import { PaymentModal } from './components/modals/PaymentModal';
@@ -30,7 +32,7 @@ import { AdminPanel } from './components/admin/AdminPanel';
 import { ToastContainer } from './components/Toast';
 
 const MainContent: React.FC = () => {
-  const { activeView } = useApp();
+  const { activeView, isAdminAuthenticated } = useApp();
 
   return (
     <div className="min-h-screen bg-white flex flex-col justify-between text-slate-900">
@@ -47,10 +49,12 @@ const MainContent: React.FC = () => {
               <GuaranteeSection />
               <AboutSection />
               <CourseSection />
+              <AdBanner placement="between_sections" />
               <PaidBatchesSection />
               <StudyMaterialSection />
               <SyllabusSection />
               <YouTubeSection />
+              <ReviewsSection />
               <InstagramSection />
               <GallerySection />
               <AppDownloadSection />
@@ -62,6 +66,7 @@ const MainContent: React.FC = () => {
           {activeView === 'courses' && (
             <div className="pt-6">
               <CourseSection />
+              <AdBanner placement="between_sections" />
               <PaidBatchesSection />
             </div>
           )}
@@ -91,6 +96,12 @@ const MainContent: React.FC = () => {
             </div>
           )}
 
+          {activeView === 'reviews' && (
+            <div className="pt-6">
+              <ReviewsSection />
+            </div>
+          )}
+
           {activeView === 'gallery' && (
             <div className="pt-6">
               <GallerySection />
@@ -98,12 +109,11 @@ const MainContent: React.FC = () => {
           )}
 
           {activeView === 'notices' && (
-            <div className="pt-6 max-w-7xl mx-auto px-4 py-16">
-              <div className="text-center max-w-2xl mx-auto mb-10">
-                <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Official Notice & Exam Board</h2>
-                <p className="text-xs text-slate-500">Live examination schedules, holiday circulars, and announcements.</p>
+            <div className="pt-6">
+              <NoticeTicker />
+              <div className="max-w-7xl mx-auto px-4 py-12">
+                <AdmissionSection />
               </div>
-              <AboutSection />
             </div>
           )}
 
@@ -119,13 +129,19 @@ const MainContent: React.FC = () => {
             </div>
           )}
 
-          {activeView === 'student-portal' && <StudentDashboard />}
+          {activeView === 'student-portal' && (
+            <div className="pt-4 pb-16">
+              <StudentDashboard />
+            </div>
+          )}
 
-          {activeView === 'admin-panel' && <AdminPanel />}
+          {activeView === 'admin-panel' && (
+            <AdminPanel />
+          )}
         </main>
       </div>
 
-      <Footer />
+      {activeView !== 'admin-panel' && <Footer />}
 
       {/* Global Modals */}
       <PaymentModal />
@@ -145,5 +161,4 @@ export function App() {
     </AppProvider>
   );
 }
-
 export default App;
