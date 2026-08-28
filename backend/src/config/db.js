@@ -98,6 +98,16 @@ const GallerySchema = new mongoose.Schema({
   date: String
 });
 
+const InstagramSchema = new mongoose.Schema({
+  id: String,
+  imageUrl: String,
+  caption: String,
+  likes: Number,
+  comments: Number,
+  postUrl: String,
+  timestamp: String
+});
+
 const SyllabusSchema = new mongoose.Schema({
   id: String,
   targetClass: String,
@@ -180,6 +190,7 @@ export const StudyMaterialModel = mongoose.models.StudyMaterial || mongoose.mode
 export const VideoModel = mongoose.models.Video || mongoose.model('Video', VideoSchema);
 export const NoticeModel = mongoose.models.Notice || mongoose.model('Notice', NoticeSchema);
 export const GalleryModel = mongoose.models.Gallery || mongoose.model('Gallery', GallerySchema);
+export const InstagramModel = mongoose.models.Instagram || mongoose.model('Instagram', InstagramSchema);
 export const SyllabusModel = mongoose.models.Syllabus || mongoose.model('Syllabus', SyllabusSchema);
 export const AdModel = mongoose.models.Ad || mongoose.model('Ad', AdSchema);
 export const ReviewModel = mongoose.models.Review || mongoose.model('Review', ReviewSchema);
@@ -443,6 +454,43 @@ const defaultData = {
       imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80',
       date: 'August 2026',
       description: 'Modern digital smart boards making concepts vivid and clear.'
+    },
+    {
+      id: 'gal-3',
+      title: 'High-Tech DCA Computer & Tally Lab',
+      category: 'lab',
+      imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80',
+      date: 'August 2026',
+      description: 'Dedicated high-speed PC workstations with real-world accounting software.'
+    }
+  ],
+  instagramPosts: [
+    {
+      id: 'ig-1',
+      imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
+      caption: 'Celebration of District Toppers at L.C.C. Annual Felicitation Day! Proud moments ❤️🎉',
+      likes: 1420,
+      comments: 88,
+      postUrl: 'https://instagram.com/lcc_coaching_official',
+      timestamp: '2 days ago'
+    },
+    {
+      id: 'ig-2',
+      imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80',
+      caption: 'Hands-on practical session in our advanced computer lab! Students mastering Tally Prime & GST Billing. 💻✨',
+      likes: 980,
+      comments: 42,
+      postUrl: 'https://instagram.com/lcc_coaching_official',
+      timestamp: '4 days ago'
+    },
+    {
+      id: 'ig-3',
+      imageUrl: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80',
+      caption: 'Spoken English stage debate on "AI in Modern Education" by Aman Arora. Great energy in class today! 🔥🎙️',
+      likes: 1250,
+      comments: 67,
+      postUrl: 'https://instagram.com/lcc_coaching_official',
+      timestamp: '1 week ago'
     }
   ],
   syllabus: [
@@ -455,8 +503,23 @@ const defaultData = {
       academicYear: '2026-2027',
       pdfUrl: '#',
       chapters: [
-        { name: 'Chemical Reactions and Equations', subtopics: ['Types of Reactions', 'Balancing Equations'], weightage: '6 Marks', estimatedHours: 12 },
-        { name: 'Acids, Bases and Salts', subtopics: ['pH Scale', 'Indicators'], weightage: '6 Marks', estimatedHours: 10 }
+        { name: 'Chemical Reactions and Equations', subtopics: ['Types of Reactions', 'Balancing Equations', 'Corrosion & Rancidity'], weightage: '6 Marks', estimatedHours: 12 },
+        { name: 'Acids, Bases and Salts', subtopics: ['pH Scale', 'Indicators', 'Salts Preparation'], weightage: '6 Marks', estimatedHours: 10 },
+        { name: 'Metals and Non-Metals', subtopics: ['Reactivity Series', 'Ionic Bonds', 'Metallurgy'], weightage: '7 Marks', estimatedHours: 14 }
+      ]
+    },
+    {
+      id: 'syl-10-maths',
+      targetClass: 'Class 10',
+      subject: 'Mathematics',
+      examBoard: 'CBSE & State Board',
+      totalMarks: 100,
+      academicYear: '2026-2027',
+      pdfUrl: '#',
+      chapters: [
+        { name: 'Real Numbers', subtopics: ['Fundamental Theorem of Arithmetic', 'Irrationality Proofs'], weightage: '6 Marks', estimatedHours: 8 },
+        { name: 'Polynomials', subtopics: ['Geometrical Meaning of Zeroes', 'Relationship of Coefficients'], weightage: '4 Marks', estimatedHours: 8 },
+        { name: 'Trigonometry', subtopics: ['Trigonometric Ratios', 'Standard Angles (0-90)', 'Trigonometric Identities'], weightage: '12 Marks', estimatedHours: 18 }
       ]
     }
   ],
@@ -566,6 +629,7 @@ export const connectOnlineMongoDB = async () => {
       await VideoModel.insertMany(defaultData.videos);
       await NoticeModel.insertMany(defaultData.notices);
       await GalleryModel.insertMany(defaultData.gallery);
+      await InstagramModel.insertMany(defaultData.instagramPosts);
       await SyllabusModel.insertMany(defaultData.syllabus);
       await AdModel.insertMany(defaultData.ads);
       await ReviewModel.insertMany(defaultData.reviews);

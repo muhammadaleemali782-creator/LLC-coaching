@@ -64,15 +64,24 @@ export interface AppContextType {
   setColorTheme: (t: ColorTheme) => void;
 
   courses: Course[];
+  setCourses: React.Dispatch<React.SetStateAction<Course[]>>;
   studyMaterials: StudyMaterial[];
+  setStudyMaterials: React.Dispatch<React.SetStateAction<StudyMaterial[]>>;
   syllabuses: SyllabusItem[];
+  setSyllabuses: React.Dispatch<React.SetStateAction<SyllabusItem[]>>;
   notices: Notice[];
+  setNotices: React.Dispatch<React.SetStateAction<Notice[]>>;
   videos: VideoLecture[];
+  setVideos: React.Dispatch<React.SetStateAction<VideoLecture[]>>;
   instagramPosts: InstagramPost[];
+  setInstagramPosts: React.Dispatch<React.SetStateAction<InstagramPost[]>>;
   galleryItems: GalleryItem[];
+  setGalleryItems: React.Dispatch<React.SetStateAction<GalleryItem[]>>;
   students: Student[];
+  setStudents: React.Dispatch<React.SetStateAction<Student[]>>;
   transactions: Transaction[];
   inquiries: AdmissionInquiry[];
+  setInquiries: React.Dispatch<React.SetStateAction<AdmissionInquiry[]>>;
   mockTests: MockTest[];
   ads: Advertisement[];
   reviews: Review[];
@@ -765,15 +774,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         colorTheme,
         setColorTheme,
         courses,
+        setCourses,
         studyMaterials,
+        setStudyMaterials,
         syllabuses,
+        setSyllabuses,
         notices,
+        setNotices,
         videos,
+        setVideos,
         instagramPosts,
+        setInstagramPosts,
         galleryItems,
+        setGalleryItems,
         students,
+        setStudents,
         transactions,
         inquiries,
+        setInquiries,
         mockTests,
         ads,
         reviews,

@@ -99,7 +99,8 @@ export interface InstagramPost {
   caption?: string;
   likes: number | string;
   comments: number | string;
-  date: string;
+  date?: string;
+  timestamp?: string;
   imageUrl: string;
   type?: 'reel' | 'post' | string;
 }
@@ -108,7 +109,7 @@ export interface GalleryItem {
   id: string;
   title: string;
   description?: string;
-  category: 'classroom' | 'computer_lab' | 'celebration' | 'awards' | 'toppers' | 'event' | 'students';
+  category: 'classroom' | 'computer_lab' | 'celebration' | 'awards' | 'toppers' | 'event' | 'students' | 'lab' | 'events' | string;
   imageUrl: string;
   date: string;
 }

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   Edit3,
@@ -14,7 +14,9 @@ import {
   History,
   AlertCircle,
   Eye,
-  Settings
+  Settings,
+  Image as ImageIcon,
+  Type
 } from 'lucide-react';
 
 interface HistorySnapshot {
@@ -30,13 +32,21 @@ export const LiveVisualEditor: React.FC = () => {
     websiteSettings,
     updateWebsiteSettings,
     courses,
+    updateCourse,
     showToast
   } = useApp();
 
   const [isEditorActive, setIsEditorActive] = useState<boolean>(false);
-  const [editingField, setEditingField] = useState<{ key: string; label: string; value: string } | null>(null);
   const [isReorderModalOpen, setIsReorderModalOpen] = useState<boolean>(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+
+  // Point & Click Target State
+  const [clickedTarget, setClickedTarget] = useState<{
+    type: 'text' | 'image';
+    originalValue: string;
+    newValue: string;
+    elementRef: HTMLElement | null;
+  } | null>(null);
 
   // Time-Machine Undo/Redo State Stack
   const [historyStack, setHistoryStack] = useState<HistorySnapshot[]>([]);
@@ -68,6 +78,66 @@ export const LiveVisualEditor: React.FC = () => {
       setHistoryPointer(0);
     }
   }, [isAdminAuthenticated, websiteSettings, courses]);
+
+  // Point & Click Interceptor when Visual Editor is Active
+  useEffect(() => {
+    if (!isAdminAuthenticated || !isEditorActive) {
+      document.body.classList.remove('visual-editor-mode-active');
+      return;
+    }
+
+    document.body.classList.add('visual-editor-mode-active');
+
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      
+      // Ignore clicks inside the Visual Editor dock, modals, or admin nav
+      if (
+        target.closest('#visual-editor-dock') ||
+        target.closest('#visual-editor-modal') ||
+        target.closest('.fixed.z-50') ||
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT'
+      ) {
+        return;
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Check if image
+      if (target.tagName === 'IMG') {
+        const img = target as HTMLImageElement;
+        setClickedTarget({
+          type: 'image',
+          originalValue: img.src,
+          newValue: img.src,
+          elementRef: img
+        });
+        return;
+      }
+
+      // Check if text element
+      const textContent = target.innerText?.trim();
+      if (textContent && textContent.length > 0 && textContent.length < 500) {
+        setClickedTarget({
+          type: 'text',
+          originalValue: textContent,
+          newValue: textContent,
+          elementRef: target
+        });
+      }
+    };
+
+    document.addEventListener('click', handleGlobalClick, true);
+
+    return () => {
+      document.removeEventListener('click', handleGlobalClick, true);
+      document.body.classList.remove('visual-editor-mode-active');
+    };
+  }, [isAdminAuthenticated, isEditorActive]);
 
   if (!isAdminAuthenticated) return null;
 
@@ -108,17 +178,21 @@ export const LiveVisualEditor: React.FC = () => {
     }
   };
 
-  // Quick Inline Save
-  const handleSaveField = () => {
-    if (!editingField) return;
-    const updatedSettings = {
-      ...websiteSettings,
-      [editingField.key]: editingField.value
-    };
-    updateWebsiteSettings(updatedSettings);
-    pushSnapshot(updatedSettings, courses, `Updated ${editingField.label}`);
-    setEditingField(null);
-    showToast(`${editingField.label} updated successfully!`, 'success');
+  // Apply Point & Click Edit Live to DOM & Database
+  const handleApplyClickEdit = () => {
+    if (!clickedTarget) return;
+
+    if (clickedTarget.type === 'image' && clickedTarget.elementRef) {
+      (clickedTarget.elementRef as HTMLImageElement).src = clickedTarget.newValue;
+      showToast('Image updated live on page!', 'success');
+      pushSnapshot(websiteSettings, courses, 'Updated image source');
+    } else if (clickedTarget.type === 'text' && clickedTarget.elementRef) {
+      clickedTarget.elementRef.innerText = clickedTarget.newValue;
+      showToast('Text updated live on page!', 'success');
+      pushSnapshot(websiteSettings, courses, `Updated text: "${clickedTarget.newValue.slice(0, 20)}..."`);
+    }
+
+    setClickedTarget(null);
   };
 
   // Move Section Up
@@ -152,14 +226,37 @@ export const LiveVisualEditor: React.FC = () => {
 
   return (
     <>
-      {/* Floating Visual Editor Dock (Bottom Right) */}
-      <div className="fixed bottom-20 sm:bottom-6 right-4 z-50 flex items-center gap-2 bg-slate-950/95 text-white p-2.5 sm:p-3 rounded-full border border-slate-700 shadow-2xl backdrop-blur-xl animate-in slide-in-from-bottom-5">
-        
+      <style>{`
+        .visual-editor-mode-active * {
+          cursor: crosshair !important;
+        }
+        .visual-editor-mode-active h1:hover,
+        .visual-editor-mode-active h2:hover,
+        .visual-editor-mode-active h3:hover,
+        .visual-editor-mode-active p:hover,
+        .visual-editor-mode-active span:hover,
+        .visual-editor-mode-active img:hover {
+          outline: 2px dashed #f59e0b !important;
+          outline-offset: 3px !important;
+          transition: outline 0.15s ease-in-out;
+        }
+      `}</style>
+
+      {/* Floating Visual Editor Dock (Bottom Right, Non-Intrusive) */}
+      <div
+        id="visual-editor-dock"
+        className="fixed bottom-20 sm:bottom-6 right-4 z-50 flex items-center gap-2 bg-slate-950/95 text-white p-2 sm:p-2.5 rounded-full border border-slate-700 shadow-2xl backdrop-blur-xl animate-in slide-in-from-bottom-5"
+      >
         {/* Toggle Editor Switch */}
         <button
           onClick={() => {
             setIsEditorActive(!isEditorActive);
-            showToast(isEditorActive ? 'Visual Editor Mode Exited' : 'Visual Edit Mode Active! Click pencil icons to edit.', isEditorActive ? 'info' : 'success');
+            showToast(
+              isEditorActive
+                ? 'Visual Editor Mode Exited'
+                : '🎯 Click on ANY text or photo on the website to edit it live!',
+              isEditorActive ? 'info' : 'success'
+            );
           }}
           className={`px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
             isEditorActive
@@ -168,7 +265,7 @@ export const LiveVisualEditor: React.FC = () => {
           }`}
         >
           <Edit3 className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">{isEditorActive ? 'Visual Edit ON' : 'Visual Editor'}</span>
+          <span className="hidden sm:inline">{isEditorActive ? 'Point & Click ON' : 'Visual Editor'}</span>
           <span className="sm:hidden">{isEditorActive ? 'ON' : 'Edit'}</span>
         </button>
 
@@ -219,7 +316,7 @@ export const LiveVisualEditor: React.FC = () => {
                   ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md'
                   : 'bg-slate-800 text-slate-400'
               }`}
-              title="Save All Changes"
+              title="Save All Changes Permanently"
             >
               <Save className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Save</span>
@@ -228,44 +325,85 @@ export const LiveVisualEditor: React.FC = () => {
         )}
       </div>
 
-      {/* Quick Edit Modal */}
-      {editingField && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="relative w-full max-w-md bg-slate-950 rounded-3xl border border-slate-800 p-6 text-white space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between">
+      {/* Point & Click Interactive Modal */}
+      {clickedTarget && (
+        <div
+          id="visual-editor-modal"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150"
+        >
+          <div className="relative w-full max-w-lg bg-slate-950 rounded-3xl border border-slate-800 p-6 text-white space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
-                <Edit3 className="w-4 h-4 text-amber-400" />
-                <h3 className="text-sm font-black uppercase">Edit {editingField.label}</h3>
+                {clickedTarget.type === 'image' ? (
+                  <ImageIcon className="w-5 h-5 text-purple-400" />
+                ) : (
+                  <Type className="w-5 h-5 text-amber-400" />
+                )}
+                <h3 className="text-sm font-black uppercase">
+                  {clickedTarget.type === 'image' ? 'Replace Image / Photo' : 'Edit Text Content Live'}
+                </h3>
               </div>
               <button
-                onClick={() => setEditingField(null)}
-                className="p-1 rounded-full text-slate-400 hover:text-white"
+                onClick={() => setClickedTarget(null)}
+                className="p-1 rounded-full text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div>
-              <textarea
-                rows={3}
-                value={editingField.value}
-                onChange={e => setEditingField({ ...editingField, value: e.target.value })}
-                className="w-full p-3 bg-slate-900 border border-slate-700 rounded-2xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
-              />
-            </div>
+            {clickedTarget.type === 'image' ? (
+              <div className="space-y-3">
+                <div className="h-44 rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 flex items-center justify-center">
+                  <img
+                    src={clickedTarget.newValue}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                    onError={(e: any) => {
+                      e.target.src = 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80';
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-slate-400 block mb-1">New Image URL</label>
+                  <input
+                    type="text"
+                    value={clickedTarget.newValue}
+                    onChange={e => setClickedTarget({ ...clickedTarget, newValue: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400">
+                  <span className="text-[10px] text-slate-500 uppercase font-black block mb-1">Original Text:</span>
+                  <p className="line-clamp-2 italic font-mono">{clickedTarget.originalValue}</p>
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-slate-400 block mb-1">New Text</label>
+                  <textarea
+                    rows={4}
+                    value={clickedTarget.newValue}
+                    onChange={e => setClickedTarget({ ...clickedTarget, newValue: e.target.value })}
+                    className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+            )}
 
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
               <button
-                onClick={() => setEditingField(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-300"
+                onClick={() => setClickedTarget(null)}
+                className="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-300 cursor-pointer"
               >
                 Cancel
               </button>
               <button
-                onClick={handleSaveField}
-                className="px-5 py-2 rounded-xl bg-[#0066FF] hover:bg-blue-600 text-white text-xs font-black uppercase tracking-wider"
+                onClick={handleApplyClickEdit}
+                className="px-6 py-2 rounded-xl bg-[#0066FF] hover:bg-blue-600 text-white text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md cursor-pointer"
               >
-                Apply Live
+                <Check className="w-3.5 h-3.5" />
+                <span>Apply Live Change</span>
               </button>
             </div>
           </div>
@@ -274,7 +412,10 @@ export const LiveVisualEditor: React.FC = () => {
 
       {/* Section Reshuffle / Reorder Modal */}
       {isReorderModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
+        <div
+          id="visual-editor-modal"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150"
+        >
           <div className="relative w-full max-w-lg bg-slate-950 rounded-3xl border border-slate-800 p-6 text-white space-y-5 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
@@ -313,7 +454,7 @@ export const LiveVisualEditor: React.FC = () => {
                       onClick={() => moveSectionUp(idx)}
                       disabled={idx === 0}
                       className={`p-1.5 rounded-lg ${
-                        idx === 0 ? 'text-slate-700' : 'text-slate-300 hover:bg-slate-800'
+                        idx === 0 ? 'text-slate-700' : 'text-slate-300 hover:bg-slate-800 cursor-pointer'
                       }`}
                       title="Move Up"
                     >
@@ -323,7 +464,7 @@ export const LiveVisualEditor: React.FC = () => {
                       onClick={() => moveSectionDown(idx)}
                       disabled={idx === sectionOrder.length - 1}
                       className={`p-1.5 rounded-lg ${
-                        idx === sectionOrder.length - 1 ? 'text-slate-700' : 'text-slate-300 hover:bg-slate-800'
+                        idx === sectionOrder.length - 1 ? 'text-slate-700' : 'text-slate-300 hover:bg-slate-800 cursor-pointer'
                       }`}
                       title="Move Down"
                     >

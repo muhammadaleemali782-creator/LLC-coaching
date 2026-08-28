@@ -13,6 +13,7 @@ import settingsRoutes from './src/routes/settingsRoutes.js';
 import coursesRoutes from './src/routes/coursesRoutes.js';
 import noticesRoutes from './src/routes/noticesRoutes.js';
 import galleryRoutes from './src/routes/galleryRoutes.js';
+import instagramRoutes from './src/routes/instagramRoutes.js';
 import syllabusRoutes from './src/routes/syllabusRoutes.js';
 import { getDB, saveDB, connectOnlineMongoDB, InquiryModel } from './src/config/db.js';
 import mongoose from 'mongoose';
@@ -62,6 +63,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/courses', coursesRoutes);
 app.use('/api/notices', noticesRoutes);
 app.use('/api/gallery', galleryRoutes);
+app.use('/api/instagram', instagramRoutes);
 app.use('/api/syllabus', syllabusRoutes);
 
 // Inquiries Endpoints

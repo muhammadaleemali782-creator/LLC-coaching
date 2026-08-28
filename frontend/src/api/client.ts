@@ -160,6 +160,22 @@ export const api = {
     })
   },
 
+  // Instagram API
+  instagram: {
+    get: () => request<{ success: boolean; data: any[] }>('/instagram'),
+    create: (post: any) => request<{ success: boolean; message: string; data: any }>('/instagram', {
+      method: 'POST',
+      body: JSON.stringify(post)
+    }),
+    update: (id: string, post: any) => request<{ success: boolean; message: string; data: any }>(`/instagram/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(post)
+    }),
+    delete: (id: string) => request<{ success: boolean; message: string }>(`/instagram/${id}`, {
+      method: 'DELETE'
+    })
+  },
+
   // Syllabus API
   syllabus: {
     get: () => request<{ success: boolean; data: any[] }>('/syllabus'),
