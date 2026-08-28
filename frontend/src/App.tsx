@@ -29,6 +29,7 @@ import { StudentAuthModal } from './components/modals/StudentAuthModal';
 import { AdminAuthModal } from './components/modals/AdminAuthModal';
 import { StudentDashboard } from './components/student/StudentDashboard';
 import { AdminPanel } from './components/admin/AdminPanel';
+import { LiveVisualEditor } from './components/admin/LiveVisualEditor';
 import { ToastContainer } from './components/Toast';
 
 const MainContent: React.FC = () => {
@@ -150,6 +151,11 @@ const MainContent: React.FC = () => {
       <StudentAuthModal />
       <AdminAuthModal />
       <ToastContainer />
+
+      {/* Admin On-Page Live Visual Editor with Time-Machine Undo/Redo & Reshuffle */}
+      {isAdminAuthenticated && activeView !== 'admin-panel' && (
+        <LiveVisualEditor />
+      )}
     </div>
   );
 };
