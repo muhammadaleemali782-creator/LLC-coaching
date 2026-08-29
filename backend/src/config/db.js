@@ -160,6 +160,10 @@ const SocialLinkSchema = new mongoose.Schema({
 
 const SettingSchema = new mongoose.Schema({
   instituteName: String,
+  shortName: { type: String, default: 'L.C.C.' },
+  instituteTagline: { type: String, default: 'Learning Coaching Center' },
+  logoUrl: { type: String, default: '/logo.jpg' },
+  faviconUrl: { type: String, default: '/logo.jpg' },
   directorName: String,
   contactPhone: String,
   contactEmail: String,
@@ -589,6 +593,10 @@ const defaultData = {
   ],
   settings: {
     instituteName: 'Lakshya Career Classes (L.C.C.)',
+    shortName: 'L.C.C.',
+    instituteTagline: 'Learning Coaching Center',
+    logoUrl: '/logo.jpg',
+    faviconUrl: '/logo.jpg',
     directorName: 'Aman Arora',
     contactPhone: '+91 98765 43210',
     contactEmail: 'admissions@lcc.edu',

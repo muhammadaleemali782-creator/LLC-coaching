@@ -32,6 +32,7 @@ export const Navbar: React.FC = () => {
     setIsAdminAuthModalOpen,
     logoutStudent,
     notices,
+    websiteSettings,
     colorTheme,
     setColorTheme,
     theme,
@@ -111,21 +112,24 @@ export const Navbar: React.FC = () => {
             className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none group shrink-0"
           >
             <img
-              src="/logo.jpg"
-              alt="L.C.C. Learning Coaching Center"
+              src={websiteSettings?.logoUrl || '/logo.jpg'}
+              alt={websiteSettings?.instituteName || 'L.C.C. Learning Coaching Center'}
               className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl object-contain shadow-sm border border-slate-200/50 dark:border-slate-800 bg-white"
+              onError={(e: any) => {
+                e.target.src = '/logo.jpg';
+              }}
             />
             <div className="flex flex-col">
               <div className="flex items-center gap-1">
                 <span className="font-black text-base sm:text-lg tracking-tight text-slate-900 dark:text-white leading-none">
-                  L.C.C.
+                  {websiteSettings?.shortName || 'L.C.C.'}
                 </span>
                 <span className="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider hidden sm:inline-block">
                   Coaching
                 </span>
               </div>
               <span className="text-[10px] sm:text-[11px] font-bold text-[#0066FF] tracking-wide leading-tight">
-                Learning Coaching Center
+                {websiteSettings?.instituteTagline || 'Learning Coaching Center'}
               </span>
             </div>
           </div>

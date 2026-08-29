@@ -4,7 +4,7 @@ import { GraduationCap, Phone, Mail, MapPin, Heart, Shield, Sparkles, ArrowUp } 
 import { Youtube, Instagram } from './SocialIcons';
 
 export const Footer: React.FC = () => {
-  const { navigateTo, setIsAdminAuthModalOpen, isAdminAuthenticated, socialLinks } = useApp();
+  const { navigateTo, websiteSettings, socialLinks } = useApp();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -26,21 +26,24 @@ export const Footer: React.FC = () => {
             className="flex items-center gap-3 cursor-pointer select-none group"
           >
             <img
-              src="/logo.jpg"
-              alt="L.C.C. Learning Coaching Center"
+              src={websiteSettings?.logoUrl || '/logo.jpg'}
+              alt={websiteSettings?.instituteName || 'L.C.C. Learning Coaching Center'}
               className="w-12 h-12 rounded-2xl object-contain shadow-md border border-slate-200 bg-white"
+              onError={(e: any) => {
+                e.target.src = '/logo.jpg';
+              }}
             />
             <div className="flex flex-col text-left">
               <div className="flex items-center gap-1.5">
                 <span className="font-black text-xl tracking-tight text-slate-900 leading-none">
-                  L.C.C.
+                  {websiteSettings?.shortName || 'L.C.C.'}
                 </span>
                 <span className="px-2 py-0.5 rounded bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider">
                   Coaching
                 </span>
               </div>
               <span className="text-xs font-bold text-[#0066FF] tracking-wide mt-0.5">
-                Learning Coaching Center
+                {websiteSettings?.instituteTagline || 'Learning Coaching Center'}
               </span>
             </div>
           </div>
@@ -112,21 +115,12 @@ export const Footer: React.FC = () => {
         {/* Bottom Copyright Strip */}
         <div className="pt-8 border-t border-slate-100 text-center space-y-2">
           <p className="text-xs text-slate-500 font-medium leading-relaxed">
-            © 2016 – 2026 <strong>Lakshya Career Classes (L.C.C.)</strong>. Directed by <strong>Aman Arora</strong>.
+            © 2016 – 2026 <strong>{websiteSettings?.instituteName || 'Lakshya Career Classes (L.C.C.)'}</strong>. Directed by <strong>{websiteSettings?.directorName || 'Aman Arora'}</strong>.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 text-[11px] text-slate-400 font-medium">
             <span>ISO 9001:2015 Certified Coaching Center</span>
             <span>•</span>
-            <button
-              onClick={() => {
-                if (isAdminAuthenticated) navigateTo('admin-panel');
-                else setIsAdminAuthModalOpen(true);
-              }}
-              className="hover:text-[#0066FF] transition-colors font-bold flex items-center gap-1 cursor-pointer"
-            >
-              <Shield className="w-3 h-3" />
-              <span>Director & Admin Desk</span>
-            </button>
+            <span>All Rights Reserved</span>
           </div>
         </div>
 

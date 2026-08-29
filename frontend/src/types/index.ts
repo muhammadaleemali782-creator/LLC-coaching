@@ -220,6 +220,10 @@ export interface SocialLink {
 // Website Global Settings
 export interface WebsiteSettings {
   instituteName: string;
+  shortName?: string;
+  instituteTagline?: string;
+  logoUrl?: string;
+  faviconUrl?: string;
   directorName: string;
   contactPhone: string;
   contactEmail: string;
