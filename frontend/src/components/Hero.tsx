@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useApp } from '../context/AppContext';
 import {
   GraduationCap,
@@ -16,7 +16,7 @@ import {
 import { AdBanner } from './ads/AdBanner';
 
 export const Hero: React.FC = () => {
-  const { navigateTo, setIsStudentAuthModalOpen } = useApp();
+  const { navigateTo, setIsStudentAuthModalOpen, websiteSettings } = useApp();
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#F4F8FE] via-white to-white pt-6 sm:pt-12 pb-14 px-3 sm:px-6 lg:px-8">
@@ -28,28 +28,27 @@ export const Hero: React.FC = () => {
       <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10">
         
         {/* Top Header & Typography */}
-        <div className="text-center max-w-4xl mx-auto space-y-4 sm:space-y-5">
+        <div className="text-center space-y-4 max-w-4xl mx-auto">
           
-          {/* 3D Status Pill */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-[#0066FF] shadow-xs">
-            <Sparkles className="w-3.5 h-3.5 text-[#0066FF] animate-pulse" />
-            <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider">
-              INDIA’S TOP RATED COACHING & EDTECH
-            </span>
-            <span className="w-2 h-2 rounded-full bg-[#0066FF] animate-ping ml-1" />
+          {/* Promoted / Announcement Ad Banner Placement */}
+          <AdBanner placement="hero_top" className="mb-2" />
+
+          {/* Tag Pill Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-[#0066FF] text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-[#0066FF]" />
+            <span>{websiteSettings?.heroBadgeText || "INDIA'S TOP RATED COACHING & EDTECH"}</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#0066FF] animate-pulse" />
           </div>
 
-          {/* Main Headline */}
-          <h1 className="text-2xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
-            Choosing the right coaching course <span className="text-[#0066FF] block sm:inline">for growth</span>
+          {/* High Conversion Main Heading */}
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.12]">
+            Choosing the right coaching course <br className="hidden sm:inline" />
+            <span className="text-[#0066FF]">for growth</span>
           </h1>
-
-          {/* Dynamic Backend-Managed Hero Advertisement Slot (Red Square Target) */}
-          <AdBanner placement="hero_top" />
 
           {/* Subtitle */}
           <p className="text-slate-600 text-xs sm:text-base leading-relaxed font-medium max-w-2xl mx-auto">
-            Join <strong className="text-slate-900 font-extrabold">Learning Coaching Center (L.C.C.)</strong> for comprehensive school coaching (<strong className="text-slate-900 font-extrabold">Classes 1 to 12</strong>), <strong className="text-slate-900 font-extrabold">Computer DCA / ADCA / Tally</strong>, and <strong className="text-slate-900 font-extrabold">Fluent Spoken English</strong> led by <strong className="text-slate-900 font-extrabold">Aman Arora</strong>.
+            Join <strong className="text-slate-900 font-extrabold">{websiteSettings?.instituteName || 'Learning Coaching Center (L.C.C.)'}</strong> for comprehensive school coaching (<strong className="text-slate-900 font-extrabold">Classes 1 to 12</strong>), <strong className="text-slate-900 font-extrabold">Computer DCA / ADCA / Tally</strong>, and <strong className="text-slate-900 font-extrabold">Fluent Spoken English</strong> led by <strong className="text-slate-900 font-extrabold">{websiteSettings?.directorName || 'Aman Arora'}</strong>.
           </p>
 
           {/* Dual Action Buttons */}
@@ -96,10 +95,40 @@ export const Hero: React.FC = () => {
           <div className="relative rounded-3xl overflow-hidden shadow-2xl border-2 sm:border-4 border-white bg-slate-950">
             <div className="relative aspect-[16/10] sm:aspect-[21/9] w-full overflow-hidden">
               <img
-                src="/assets/hero_poster.jpg"
+                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600&auto=format&fit=crop&q=80"
                 alt="L.C.C. Academic Excellence Poster"
-                className="w-full h-full object-cover filter brightness-95"
+                className="w-full h-full object-cover filter brightness-90"
               />
+              
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-slate-950/60" />
+
+              {/* Top Left Official Branding Banner */}
+              <div className="absolute top-3 left-3 sm:top-6 sm:left-6 z-20 flex items-center gap-2.5 sm:gap-3 bg-slate-950/90 backdrop-blur-md px-3.5 py-2 sm:px-5 sm:py-3 rounded-2xl border border-slate-700/80 shadow-2xl">
+                <img
+                  src={websiteSettings?.logoUrl || '/logo.jpg'}
+                  alt="L.C.C."
+                  className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl object-contain bg-white p-0.5 shadow-md"
+                  onError={(e: any) => {
+                    e.target.src = '/logo.jpg';
+                  }}
+                />
+                <div>
+                  <h3 className="text-xs sm:text-base font-black text-white uppercase tracking-tight">
+                    {websiteSettings?.instituteName || 'Learning Coaching Center (L.C.C.)'}
+                  </h3>
+                  <p className="text-[10px] sm:text-xs text-amber-400 font-bold tracking-wider uppercase">
+                    Empowering Tomorrow's Leaders
+                  </p>
+                </div>
+              </div>
+
+              {/* Bottom Left Admission Badge */}
+              <div className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 z-20">
+                <span className="px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-[#0066FF] text-white text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-lg">
+                  PATH TO SUCCESS • ADMISSIONS OPEN 2026–27
+                </span>
+              </div>
             </div>
 
             {/* Bottom Floating Stats Bar */}
