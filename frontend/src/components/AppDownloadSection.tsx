@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Smartphone,
@@ -65,9 +65,9 @@ export const AppDownloadSection: React.FC = () => {
           <div className="lg:col-span-6 flex flex-col items-center">
             
             {/* Screen Tabs Selector */}
-            <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm mb-6 max-w-sm overflow-x-auto w-full justify-center">
+            <div className="flex items-center gap-1 bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200 shadow-sm mb-6 max-w-md w-full overflow-x-auto scrollbar-none justify-start sm:justify-center">
               {[
-                { id: 'home', label: 'Home Feed' },
+                { id: 'home', label: 'Feed' },
                 { id: 'courses', label: 'Lessons' },
                 { id: 'chat', label: 'Doubt Chat' },
                 { id: 'receipt', label: 'E-Receipt' },
@@ -76,10 +76,10 @@ export const AppDownloadSection: React.FC = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveScreen(tab.id as any)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                     activeScreen === tab.id
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                      ? 'bg-[#0066FF] text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white'
                   }`}
                 >
                   {tab.label}
