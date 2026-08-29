@@ -115,7 +115,7 @@ export const DocPreviewModal: React.FC = () => {
               <div className="border-b-2 border-blue-500/20 pb-4 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-black tracking-widest text-[#0066FF] uppercase">
-                    Lakshya Career Classes (L.C.C.)
+                    Learning Coaching Center (L.C.C.)
                   </span>
                   <h2 className="text-xl font-black text-slate-900 dark:text-white mt-0.5">{selectedDocForPreview.title}</h2>
                 </div>

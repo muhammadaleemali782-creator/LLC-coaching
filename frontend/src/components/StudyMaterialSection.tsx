@@ -49,7 +49,7 @@ export const StudyMaterialSection: React.FC = () => {
     showToast(`Downloading: ${mat.title}`, 'success');
     
     const element = document.createElement('a');
-    const file = new Blob([`L.C.C. (Lakshya Career Classes) Study Material\n\nTitle: ${mat.title}\nClass: ${mat.targetClass}\nSubject: ${mat.subject}\nChapter: ${mat.chapter}\nPages: ${mat.pages}\n\nNotes Summary:\n${mat.previewContent || 'Official verified notes from L.C.C. Academic Mentors.'}\n\nWebsite: https://lcc.edu\nHelpline: +91 98765 43210`], { type: 'text/plain' });
+    const file = new Blob([`L.C.C. (Learning Coaching Center) Study Material\n\nTitle: ${mat.title}\nClass: ${mat.targetClass}\nSubject: ${mat.subject}\nChapter: ${mat.chapter}\nPages: ${mat.pages}\n\nNotes Summary:\n${mat.previewContent || 'Official verified notes from L.C.C. Academic Mentors.'}\n\nWebsite: https://lcc.edu\nHelpline: +91 98765 43210`], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
     element.download = `${mat.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
     document.body.appendChild(element);

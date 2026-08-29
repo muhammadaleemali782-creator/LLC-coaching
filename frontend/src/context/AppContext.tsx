@@ -227,7 +227,7 @@ const INITIAL_SOCIALS: SocialLink[] = [
 ];
 
 const INITIAL_SETTINGS: WebsiteSettings = {
-  instituteName: 'Lakshya Career Classes (L.C.C.)',
+  instituteName: 'Learning Coaching Center (L.C.C.)',
   directorName: 'Aman Arora',
   contactPhone: '+91 98765 43210',
   contactEmail: 'admissions@lcc.edu',
@@ -242,20 +242,14 @@ const INITIAL_SETTINGS: WebsiteSettings = {
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeView, setActiveView] = useState<ActiveView>('home');
   const [scrollSection, setScrollSection] = useState<string>('home');
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    const saved = localStorage.getItem('lcc_theme');
-    return (saved as 'dark' | 'light') || 'light';
-  });
+  const [theme] = useState<'light'>('light');
   const [colorTheme, setColorTheme] = useState<ColorTheme>('cobalt');
 
   useEffect(() => {
-    localStorage.setItem('lcc_theme', theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
+    localStorage.removeItem('lcc_theme');
+    document.documentElement.classList.remove('dark');
+    document.body.classList.remove('dark');
+  }, []);
 
   const [courses, setCourses] = useState<Course[]>(INITIAL_COURSES);
   const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(INITIAL_STUDY_MATERIALS);
@@ -355,7 +349,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const toggleTheme = () => {
-    setTheme(t => (t === 'light' ? 'dark' : 'light'));
+    // Light mode enforced
   };
 
   const navigateTo = (view: ActiveView, anchorId?: string) => {

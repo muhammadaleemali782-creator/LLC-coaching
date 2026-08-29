@@ -465,7 +465,7 @@ export const StudentDashboard: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <span className="font-serif italic font-bold text-base text-slate-900 block">Aman Arora</span>
-                  <span className="font-bold text-[11px] text-slate-500">Director, Lakshya Career Classes</span>
+                  <span className="font-bold text-[11px] text-slate-500">Director, Learning Coaching Center</span>
                 </div>
               </div>
             </div>

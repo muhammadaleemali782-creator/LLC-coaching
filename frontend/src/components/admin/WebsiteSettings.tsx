@@ -5,7 +5,7 @@ import { Settings, Save, Bell, Phone, Mail, MapPin, Sparkles, Image as ImageIcon
 export const WebsiteSettings: React.FC = () => {
   const { websiteSettings, updateWebsiteSettings, showToast } = useApp();
   const [form, setForm] = useState({
-    instituteName: websiteSettings.instituteName || 'Lakshya Career Classes (L.C.C.)',
+    instituteName: websiteSettings.instituteName || 'Learning Coaching Center (L.C.C.)',
     shortName: websiteSettings.shortName || 'L.C.C.',
     instituteTagline: websiteSettings.instituteTagline || 'Learning Coaching Center',
     logoUrl: websiteSettings.logoUrl || '/logo.jpg',
@@ -23,7 +23,7 @@ export const WebsiteSettings: React.FC = () => {
 
   useEffect(() => {
     setForm({
-      instituteName: websiteSettings.instituteName || 'Lakshya Career Classes (L.C.C.)',
+      instituteName: websiteSettings.instituteName || 'Learning Coaching Center (L.C.C.)',
       shortName: websiteSettings.shortName || 'L.C.C.',
       instituteTagline: websiteSettings.instituteTagline || 'Learning Coaching Center',
       logoUrl: websiteSettings.logoUrl || '/logo.jpg',
@@ -96,7 +96,7 @@ export const WebsiteSettings: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Lakshya Career Classes (L.C.C.)"
+                    placeholder="e.g. Learning Coaching Center (L.C.C.)"
                     value={form.instituteName}
                     onChange={e => setForm({ ...form, instituteName: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"

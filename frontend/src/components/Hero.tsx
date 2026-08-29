@@ -49,7 +49,7 @@ export const Hero: React.FC = () => {
 
           {/* Subtitle */}
           <p className="text-slate-600 text-xs sm:text-base leading-relaxed font-medium max-w-2xl mx-auto">
-            Join <strong className="text-slate-900 font-extrabold">Lakshya Career Classes (L.C.C.)</strong> for comprehensive school coaching (<strong className="text-slate-900 font-extrabold">Classes 1 to 12</strong>), <strong className="text-slate-900 font-extrabold">Computer DCA / ADCA / Tally</strong>, and <strong className="text-slate-900 font-extrabold">Fluent Spoken English</strong> led by <strong className="text-slate-900 font-extrabold">Aman Arora</strong>.
+            Join <strong className="text-slate-900 font-extrabold">Learning Coaching Center (L.C.C.)</strong> for comprehensive school coaching (<strong className="text-slate-900 font-extrabold">Classes 1 to 12</strong>), <strong className="text-slate-900 font-extrabold">Computer DCA / ADCA / Tally</strong>, and <strong className="text-slate-900 font-extrabold">Fluent Spoken English</strong> led by <strong className="text-slate-900 font-extrabold">Aman Arora</strong>.
           </p>
 
           {/* Dual Action Buttons */}

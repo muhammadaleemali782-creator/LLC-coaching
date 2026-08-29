@@ -54,7 +54,7 @@ export const AboutSection: React.FC = () => {
             About <span className="text-[#0066FF]">L.C.C. Coaching Institute</span>
           </h2>
           <p className="text-slate-600 text-xs sm:text-base leading-relaxed font-medium">
-            Directed and founded by <strong className="text-slate-900 font-extrabold">Aman Arora</strong>, L.C.C. (Lakshya Career Classes) is recognized as a premier educational haven for academic excellence and computer skills.
+            Directed and founded by <strong className="text-slate-900 font-extrabold">Aman Arora</strong>, L.C.C. (Learning Coaching Center) is recognized as a premier educational haven for academic excellence and computer skills.
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export const AboutSection: React.FC = () => {
                   </span>
                   <h3 className="text-2xl font-black text-slate-900">Aman Arora</h3>
                   <p className="text-xs text-[#0066FF] font-bold">
-                    Lead Educator & Academic Mentor • Lakshya Career Classes
+                    Lead Educator & Academic Mentor • Learning Coaching Center
                   </p>
                 </div>
               </div>
@@ -120,7 +120,7 @@ export const AboutSection: React.FC = () => {
                 <span className="text-[#0066FF]">confidence and modern skills</span>
               </h3>
               <p className="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
-                At <strong className="text-slate-900 font-extrabold">Lakshya Career Classes (L.C.C.)</strong>, education is beyond exams. We emphasize strong logical foundations in mathematics and science, practical computer literacy, and stage-speaking charisma.
+                At <strong className="text-slate-900 font-extrabold">Learning Coaching Center (L.C.C.)</strong>, education is beyond exams. We emphasize strong logical foundations in mathematics and science, practical computer literacy, and stage-speaking charisma.
               </p>
             </div>
 

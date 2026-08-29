@@ -157,18 +157,6 @@ export const Navbar: React.FC = () => {
 
           {/* Right Action Buttons */}
           <div className="flex items-center gap-1.5 sm:gap-2">
-            
-            {/* Quick Dark/Light Theme Toggle */}
-            <button
-              onClick={() => {
-                toggleTheme();
-                showToast(`Switched to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`, 'info');
-              }}
-              className="p-1.5 sm:p-2 rounded-full border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-[#0066FF] hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors cursor-pointer"
-              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-            >
-              {theme === 'dark' ? <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" /> : <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-600" />}
-            </button>
 
             {/* Authenticated Director Quick Hub Access */}
             {isAdminAuthenticated && (

@@ -78,7 +78,7 @@ export const PaymentModal: React.FC = () => {
                   SECURE
                 </span>
               </div>
-              <span className="text-[11px] text-blue-100 font-medium">Lakshya Career Classes Official Desk</span>
+              <span className="text-[11px] text-blue-100 font-medium">Learning Coaching Center Official Desk</span>
             </div>
           </div>
           <button

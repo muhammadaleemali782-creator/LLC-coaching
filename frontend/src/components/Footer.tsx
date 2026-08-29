@@ -49,7 +49,7 @@ export const Footer: React.FC = () => {
           </div>
 
           <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto leading-relaxed font-medium">
-            <strong>Lakshya Career Classes (L.C.C.)</strong> — Premier coaching institute for Academic Excellence (Classes 1–12), Computer Certification (DCA/ADCA/Tally), and Fluent Spoken English under the mentorship of <strong>Aman Arora</strong>.
+            <strong>Learning Coaching Center (L.C.C.)</strong> — Premier coaching institute for Academic Excellence (Classes 1–12), Computer Certification (DCA/ADCA/Tally), and Fluent Spoken English under the mentorship of <strong>Aman Arora</strong>.
           </p>
 
           {/* Quick Links Navigation */}
@@ -115,7 +115,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Copyright Strip */}
         <div className="pt-8 border-t border-slate-100 text-center space-y-2">
           <p className="text-xs text-slate-500 font-medium leading-relaxed">
-            © 2016 – 2026 <strong>{websiteSettings?.instituteName || 'Lakshya Career Classes (L.C.C.)'}</strong>. Directed by <strong>{websiteSettings?.directorName || 'Aman Arora'}</strong>.
+            © 2016 – 2026 <strong>{websiteSettings?.instituteName || 'Learning Coaching Center (L.C.C.)'}</strong>. Directed by <strong>{websiteSettings?.directorName || 'Aman Arora'}</strong>.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 text-[11px] text-slate-400 font-medium">
             <span>ISO 9001:2015 Certified Coaching Center</span>

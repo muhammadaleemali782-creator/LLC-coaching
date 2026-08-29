@@ -1,6 +1,6 @@
 ﻿# L.C.C. Coaching Backend API (Express.js)
 
-REST API server for Lakshya Career Classes (L.C.C.).
+REST API server for Learning Coaching Center (L.C.C.).
 
 ## 🚀 Getting Started
 

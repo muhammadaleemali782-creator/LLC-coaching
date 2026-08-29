@@ -27,7 +27,7 @@ export const GalleryManager: React.FC = () => {
       category: newItem.category || 'classroom',
       imageUrl: newItem.imageUrl,
       date: newItem.date || 'Recent Event',
-      description: newItem.description || 'Campus photo from Lakshya Career Classes.'
+      description: newItem.description || 'Campus photo from Learning Coaching Center.'
     };
     setGalleryItems(prev => [item, ...prev]);
     setIsAdding(false);

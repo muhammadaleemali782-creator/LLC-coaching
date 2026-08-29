@@ -1,4 +1,4 @@
-﻿# 🎓 Lakshya Career Classes (L.C.C.) — Fullstack Architecture
+﻿# 🎓 Learning Coaching Center (L.C.C.) — Fullstack Architecture
 
 This project is separated into **Frontend** and **Backend** folders:
 

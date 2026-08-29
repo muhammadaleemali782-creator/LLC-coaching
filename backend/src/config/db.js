@@ -592,7 +592,7 @@ const defaultData = {
     { id: 'soc-fb', platform: 'facebook', label: 'Facebook Page', url: 'https://facebook.com/lcc.coaching', isEnabled: true }
   ],
   settings: {
-    instituteName: 'Lakshya Career Classes (L.C.C.)',
+    instituteName: 'Learning Coaching Center (L.C.C.)',
     shortName: 'L.C.C.',
     instituteTagline: 'Learning Coaching Center',
     logoUrl: '/logo.jpg',
