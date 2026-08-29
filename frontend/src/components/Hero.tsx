@@ -30,9 +30,6 @@ export const Hero: React.FC = () => {
         {/* Top Header & Typography */}
         <div className="text-center space-y-4 max-w-4xl mx-auto">
           
-          {/* Promoted / Announcement Ad Banner Placement */}
-          <AdBanner placement="hero_top" className="mb-2" />
-
           {/* Tag Pill Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-[#0066FF] text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-[#0066FF]" />
@@ -45,6 +42,9 @@ export const Hero: React.FC = () => {
             Choosing the right coaching course <br className="hidden sm:inline" />
             <span className="text-[#0066FF]">for growth</span>
           </h1>
+
+          {/* Promoted / Announcement Ad Banner Placement */}
+          <AdBanner placement="hero_top" className="my-3" />
 
           {/* Subtitle */}
           <p className="text-slate-600 text-xs sm:text-base leading-relaxed font-medium max-w-2xl mx-auto">
