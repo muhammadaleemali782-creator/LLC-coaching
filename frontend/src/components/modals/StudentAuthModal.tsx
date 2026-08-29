@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { User, Mail, Lock, Phone, X, GraduationCap, ArrowRight, Loader2 } from 'lucide-react';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
@@ -67,12 +67,14 @@ export const StudentAuthModal: React.FC = () => {
 
           {/* Compact Blue Header */}
           <div className="px-5 py-4 bg-[#0066FF] text-white flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-white/20">
-              <GraduationCap className="w-5 h-5" />
-            </div>
+            <img
+              src="/logo.jpg"
+              alt="L.C.C."
+              className="w-10 h-10 rounded-xl object-contain bg-white shadow-sm border border-white/20"
+            />
             <div>
-              <h3 className="text-sm sm:text-base font-black">Student Portal</h3>
-              <span className="text-[11px] text-blue-100 font-medium">L.C.C. Academic & Test Hub</span>
+              <h3 className="text-sm sm:text-base font-black">L.C.C. Learning Portal</h3>
+              <span className="text-[11px] text-blue-100 font-medium">Academic, Tests & Counseling Desk</span>
             </div>
           </div>
 

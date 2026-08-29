@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useApp } from '../context/AppContext';
 import { GraduationCap, Phone, Mail, MapPin, Heart, Shield, Sparkles, ArrowUp } from 'lucide-react';
 import { Youtube, Instagram } from './SocialIcons';
@@ -23,15 +23,24 @@ export const Footer: React.FC = () => {
           {/* Brand Badge */}
           <div
             onClick={scrollToTop}
-            className="flex items-center gap-2 cursor-pointer select-none group"
+            className="flex items-center gap-3 cursor-pointer select-none group"
           >
-            <div className="w-10 h-10 rounded-2xl bg-[#0066FF] text-white font-black text-base flex items-center justify-center shadow-md">
-              LCC
-            </div>
-            <div className="flex items-center tracking-tight font-black text-2xl">
-              <span className="text-[#0066FF]">learn</span>
-              <span className="w-6 h-6 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center text-xs font-black -ml-0.5 shadow-xs">
-                er
+            <img
+              src="/logo.jpg"
+              alt="L.C.C. Learning Coaching Center"
+              className="w-12 h-12 rounded-2xl object-contain shadow-md border border-slate-200 bg-white"
+            />
+            <div className="flex flex-col text-left">
+              <div className="flex items-center gap-1.5">
+                <span className="font-black text-xl tracking-tight text-slate-900 leading-none">
+                  L.C.C.
+                </span>
+                <span className="px-2 py-0.5 rounded bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider">
+                  Coaching
+                </span>
+              </div>
+              <span className="text-xs font-bold text-[#0066FF] tracking-wide mt-0.5">
+                Learning Coaching Center
               </span>
             </div>
           </div>

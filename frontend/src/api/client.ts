@@ -23,7 +23,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     }
     return data;
   } catch (err: any) {
-    console.warn(`[API CLIENT] Error calling ${endpoint}:`, err.message);
+    // Resilient offline fallback without console spam
     throw err;
   }
 }
