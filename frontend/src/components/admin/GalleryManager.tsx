@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { GalleryItem } from '../../types';
 import { Plus, Trash2, Image, Layers, Sparkles, ExternalLink, X, Save } from 'lucide-react';
+import { ImageUploaderInput } from '../common/ImageUploaderInput';
 
 export const GalleryManager: React.FC = () => {
   const { galleryItems, setGalleryItems, showToast } = useApp();
@@ -105,14 +106,11 @@ export const GalleryManager: React.FC = () => {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="text-xs font-bold text-slate-300 block mb-1">Image URL *</label>
-              <input
-                type="text"
-                required
-                placeholder="https://images.unsplash.com/..."
-                value={newItem.imageUrl}
-                onChange={e => setNewItem({ ...newItem, imageUrl: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500"
+              <ImageUploaderInput
+                label="Photo Image (File Upload or URL)"
+                value={newItem.imageUrl || ''}
+                onChange={url => setNewItem({ ...newItem, imageUrl: url })}
+                placeholder="Upload campus photo file or paste image URL..."
               />
             </div>
 

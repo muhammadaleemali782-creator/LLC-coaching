@@ -20,6 +20,9 @@ export interface Course {
   syllabusHighlights: string[];
   isPaid: boolean;
   schedule?: string;
+  razorpayKeyId?: string;
+  whatsappRedirectUrl?: string;
+  privatePlaylistUrl?: string;
 }
 
 export type MaterialCategory = 'pdf_notes' | 'formulas' | 'cheat_sheets' | 'worksheets' | 'homework' | 'practice_sets' | 'pyq' | 'important_questions';
@@ -140,7 +143,7 @@ export interface Transaction {
   courseId: string;
   courseName: string;
   amount: number;
-  paymentMethod: 'UPI' | 'Card' | 'NetBanking' | 'QR';
+  paymentMethod: string;
   date: string;
   status: 'Completed' | 'Pending' | 'Failed';
   utrNumber: string;
@@ -233,4 +236,7 @@ export interface WebsiteSettings {
   heroBadgeText: string;
   allowStudentReviews: boolean;
   maintenanceMode: boolean;
+  razorpayKeyId?: string;
+  defaultWhatsappRedirectUrl?: string;
+  defaultPlaylistRedirectUrl?: string;
 }

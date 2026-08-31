@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Settings, Save, Bell, Phone, Mail, MapPin, Sparkles, Image as ImageIcon, CheckCircle2, Shield } from 'lucide-react';
+import { Settings, Save, Bell, Phone, Mail, MapPin, Sparkles, Image as ImageIcon, CheckCircle2, Shield, CreditCard, MessageSquare } from 'lucide-react';
+import { Youtube } from '../SocialIcons';
+import { ImageUploaderInput } from '../common/ImageUploaderInput';
 
 export const WebsiteSettings: React.FC = () => {
   const { websiteSettings, updateWebsiteSettings, showToast } = useApp();
@@ -18,7 +20,10 @@ export const WebsiteSettings: React.FC = () => {
     noticeTickerSpeed: websiteSettings.noticeTickerSpeed || 'normal',
     heroBadgeText: websiteSettings.heroBadgeText || "INDIA'S TOP RATED COACHING & EDTECH",
     allowStudentReviews: websiteSettings.allowStudentReviews !== false,
-    maintenanceMode: !!websiteSettings.maintenanceMode
+    maintenanceMode: !!websiteSettings.maintenanceMode,
+    razorpayKeyId: websiteSettings.razorpayKeyId || '',
+    defaultWhatsappRedirectUrl: websiteSettings.defaultWhatsappRedirectUrl || '',
+    defaultPlaylistRedirectUrl: websiteSettings.defaultPlaylistRedirectUrl || ''
   });
 
   useEffect(() => {
@@ -36,14 +41,17 @@ export const WebsiteSettings: React.FC = () => {
       noticeTickerSpeed: websiteSettings.noticeTickerSpeed || 'normal',
       heroBadgeText: websiteSettings.heroBadgeText || "INDIA'S TOP RATED COACHING & EDTECH",
       allowStudentReviews: websiteSettings.allowStudentReviews !== false,
-      maintenanceMode: !!websiteSettings.maintenanceMode
+      maintenanceMode: !!websiteSettings.maintenanceMode,
+      razorpayKeyId: websiteSettings.razorpayKeyId || '',
+      defaultWhatsappRedirectUrl: websiteSettings.defaultWhatsappRedirectUrl || '',
+      defaultPlaylistRedirectUrl: websiteSettings.defaultPlaylistRedirectUrl || ''
     });
   }, [websiteSettings]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     await updateWebsiteSettings(form);
-    showToast('Institute branding, company name, logo & settings saved successfully!', 'success');
+    showToast('Institute branding, Razorpay key, logo & settings saved successfully!', 'success');
   };
 
   return (
@@ -54,7 +62,7 @@ export const WebsiteSettings: React.FC = () => {
           <span>Company Name, Logo & Website Settings</span>
         </h2>
         <p className="text-xs text-slate-400">
-          Update the institute brand name, official emblem logo, tagline, contact numbers, and live emergency alerts.
+          Update the institute brand name, official emblem logo, tagline, Razorpay Payment Gateway, and live emergency alerts.
         </p>
       </div>
 
@@ -128,23 +136,70 @@ export const WebsiteSettings: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1">Official Logo Image URL / Path *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="/logo.jpg or https://images.unsplash.com/..."
-                  value={form.logoUrl}
-                  onChange={e => setForm({ ...form, logoUrl: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
-                />
-                <span className="text-[10px] text-slate-500 mt-1 block">
-                  You can use local <code className="text-amber-400">/logo.jpg</code> or any external hosted image URL.
-                </span>
-              </div>
+              <ImageUploaderInput
+                label="Official Logo Image (File Upload or URL)"
+                value={form.logoUrl}
+                onChange={url => setForm({ ...form, logoUrl: url })}
+                placeholder="Upload logo file or paste image URL..."
+              />
             </div>
 
           </div>
+        </div>
+
+        {/* Razorpay Integration & Auto-Redirect Section */}
+        <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
+          <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+            <CreditCard className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-sm font-black text-white uppercase tracking-wider">Razorpay Gateway & Auto WhatsApp / Playlist Redirect</h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-xs font-bold text-slate-300 block mb-1 flex items-center gap-1">
+                <span>Razorpay Key ID</span>
+                <span className="text-[10px] text-amber-400 font-normal">(e.g. rzp_live_...)</span>
+              </label>
+              <input
+                type="text"
+                placeholder="rzp_test_... or rzp_live_..."
+                value={form.razorpayKeyId}
+                onChange={e => setForm({ ...form, razorpayKeyId: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF] font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-300 block mb-1 flex items-center gap-1">
+                <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Default WhatsApp Group Link</span>
+              </label>
+              <input
+                type="url"
+                placeholder="https://chat.whatsapp.com/..."
+                value={form.defaultWhatsappRedirectUrl}
+                onChange={e => setForm({ ...form, defaultWhatsappRedirectUrl: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-300 block mb-1 flex items-center gap-1">
+                <Youtube className="w-3.5 h-3.5 text-red-400" />
+                <span>Default Private Playlist Link</span>
+              </label>
+              <input
+                type="url"
+                placeholder="https://youtube.com/playlist?list=..."
+                value={form.defaultPlaylistRedirectUrl}
+                onChange={e => setForm({ ...form, defaultPlaylistRedirectUrl: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+              />
+            </div>
+          </div>
+          <p className="text-[11px] text-slate-400 italic">
+            💡 Jab student course pay karega, tab Razorpay verify hone ke baad system automatically student ko WhatsApp Group ya YouTube Private Playlist link par redirect kar dega!
+          </p>
         </div>
 
         {/* Administration & Contact Details */}

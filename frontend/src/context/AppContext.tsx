@@ -107,7 +107,7 @@ export interface AppContextType {
   loginAdmin: (email: string, pass: string) => Promise<boolean>;
   logoutAdmin: () => void;
 
-  enrollInCourse: (courseId: string, paymentMethod: 'UPI' | 'Card' | 'NetBanking' | 'QR') => Promise<boolean>;
+  enrollInCourse: (courseId: string, paymentMethod: string) => Promise<boolean>;
   submitAdmissionInquiry: (inquiry: Omit<AdmissionInquiry, 'id' | 'date' | 'status'>) => void;
   
   // Ads Actions
@@ -593,7 +593,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const enrollInCourse = async (courseId: string, paymentMethod: 'UPI' | 'Card' | 'NetBanking' | 'QR'): Promise<boolean> => {
+  const enrollInCourse = async (courseId: string, paymentMethod: string): Promise<boolean> => {
     const targetCourse = courses.find(c => c.id === courseId);
     if (!targetCourse) return false;
 

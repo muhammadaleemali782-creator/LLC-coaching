@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Course, CourseCategory } from '../../types';
-import { Plus, Edit3, Trash2, GraduationCap, CheckCircle2, Save, X, Star } from 'lucide-react';
+import { Plus, Edit3, Trash2, GraduationCap, CheckCircle2, Save, X, Star, MessageSquare, CreditCard } from 'lucide-react';
+import { Youtube } from '../SocialIcons';
+import { ImageUploaderInput } from '../common/ImageUploaderInput';
 
 export const CourseManager: React.FC = () => {
   const { courses, addCourse, updateCourse, deleteCourse, showToast } = useApp();
@@ -20,7 +22,9 @@ export const CourseManager: React.FC = () => {
     image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
     badge: 'Toppers Choice',
     features: ['10-Year PYQs Solved', 'Weekly Board Mocks', '1:1 Doubt Solving', 'Printed Theory Modules'],
-    description: 'Comprehensive coaching with focus on step-by-step formula derivations and high-yield questions.'
+    description: 'Comprehensive coaching with focus on step-by-step formula derivations and high-yield questions.',
+    whatsappRedirectUrl: '',
+    privatePlaylistUrl: ''
   });
 
   const handleAddSubmit = async (e: React.FormEvent) => {
@@ -43,7 +47,9 @@ export const CourseManager: React.FC = () => {
       image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
       badge: 'Toppers Choice',
       features: ['10-Year PYQs Solved', 'Weekly Board Mocks', '1:1 Doubt Solving'],
-      description: 'Comprehensive coaching with focus on step-by-step formula derivations.'
+      description: 'Comprehensive coaching with focus on step-by-step formula derivations.',
+      whatsappRedirectUrl: '',
+      privatePlaylistUrl: ''
     });
   };
 
@@ -135,12 +141,11 @@ export const CourseManager: React.FC = () => {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="text-xs font-bold text-slate-300 block mb-1">Poster Image URL</label>
-              <input
-                type="text"
-                value={newCourse.image}
-                onChange={e => setNewCourse({ ...newCourse, image: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+              <ImageUploaderInput
+                label="Poster Image (File Upload or URL)"
+                value={newCourse.image || ''}
+                onChange={url => setNewCourse({ ...newCourse, image: url })}
+                placeholder="Upload course thumbnail file or paste image URL..."
               />
             </div>
 
@@ -151,6 +156,34 @@ export const CourseManager: React.FC = () => {
                 placeholder="e.g. Popular Foundation / Toppers Choice"
                 value={newCourse.badge}
                 onChange={e => setNewCourse({ ...newCourse, badge: e.target.value })}
+                className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-300 block mb-1 flex items-center gap-1">
+                <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Post-Payment WhatsApp Group Link</span>
+              </label>
+              <input
+                type="url"
+                placeholder="https://chat.whatsapp.com/..."
+                value={newCourse.whatsappRedirectUrl || ''}
+                onChange={e => setNewCourse({ ...newCourse, whatsappRedirectUrl: e.target.value })}
+                className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="text-xs font-bold text-slate-300 block mb-1 flex items-center gap-1">
+                <Youtube className="w-3.5 h-3.5 text-red-400" />
+                <span>Post-Payment Private YouTube Playlist Link</span>
+              </label>
+              <input
+                type="url"
+                placeholder="https://youtube.com/playlist?list=..."
+                value={newCourse.privatePlaylistUrl || ''}
+                onChange={e => setNewCourse({ ...newCourse, privatePlaylistUrl: e.target.value })}
                 className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
               />
             </div>

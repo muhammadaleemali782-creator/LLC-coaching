@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { InstagramPost } from '../../types';
 import { Plus, Edit3, Trash2, Heart, MessageCircle, ExternalLink, Save, X } from 'lucide-react';
 import { Instagram } from '../SocialIcons';
+import { ImageUploaderInput } from '../common/ImageUploaderInput';
 
 export const InstagramManager: React.FC = () => {
   const { instagramPosts, setInstagramPosts, showToast } = useApp();
@@ -79,14 +80,11 @@ export const InstagramManager: React.FC = () => {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <label className="text-xs font-bold text-slate-300 block mb-1">Post Image URL *</label>
-              <input
-                type="text"
-                required
-                placeholder="https://images.unsplash.com/..."
-                value={newPost.imageUrl}
-                onChange={e => setNewPost({ ...newPost, imageUrl: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500"
+              <ImageUploaderInput
+                label="Post Image (File Upload or URL)"
+                value={newPost.imageUrl || ''}
+                onChange={url => setNewPost({ ...newPost, imageUrl: url })}
+                placeholder="Upload Instagram photo file or paste image URL..."
               />
             </div>
 
