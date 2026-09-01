@@ -23,7 +23,8 @@ export const WebsiteSettings: React.FC = () => {
     maintenanceMode: !!websiteSettings.maintenanceMode,
     razorpayKeyId: websiteSettings.razorpayKeyId || '',
     defaultWhatsappRedirectUrl: websiteSettings.defaultWhatsappRedirectUrl || '',
-    defaultPlaylistRedirectUrl: websiteSettings.defaultPlaylistRedirectUrl || ''
+    defaultPlaylistRedirectUrl: websiteSettings.defaultPlaylistRedirectUrl || '',
+    heroPosterUrl: websiteSettings.heroPosterUrl || ''
   });
 
   useEffect(() => {
@@ -44,7 +45,8 @@ export const WebsiteSettings: React.FC = () => {
       maintenanceMode: !!websiteSettings.maintenanceMode,
       razorpayKeyId: websiteSettings.razorpayKeyId || '',
       defaultWhatsappRedirectUrl: websiteSettings.defaultWhatsappRedirectUrl || '',
-      defaultPlaylistRedirectUrl: websiteSettings.defaultPlaylistRedirectUrl || ''
+      defaultPlaylistRedirectUrl: websiteSettings.defaultPlaylistRedirectUrl || '',
+      heroPosterUrl: websiteSettings.heroPosterUrl || ''
     });
   }, [websiteSettings]);
 
@@ -141,6 +143,13 @@ export const WebsiteSettings: React.FC = () => {
                 value={form.logoUrl}
                 onChange={url => setForm({ ...form, logoUrl: url })}
                 placeholder="Upload logo file or paste image URL..."
+              />
+
+              <ImageUploaderInput
+                label="Master Hero Poster Banner (File Upload or URL)"
+                value={form.heroPosterUrl}
+                onChange={url => setForm({ ...form, heroPosterUrl: url })}
+                placeholder="Upload master hero banner image file or paste URL..."
               />
             </div>
 

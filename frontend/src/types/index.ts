@@ -239,4 +239,5 @@ export interface WebsiteSettings {
   razorpayKeyId?: string;
   defaultWhatsappRedirectUrl?: string;
   defaultPlaylistRedirectUrl?: string;
+  heroPosterUrl?: string;
 }

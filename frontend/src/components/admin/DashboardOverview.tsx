@@ -26,7 +26,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onSelectTa
 
   const stats: { label: string; value: number; tab: AdminTab; icon: any; color: string; bg: string; action: string }[] = [
     { label: 'Registered Students', value: students.length, tab: 'users', icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20 hover:border-blue-500/50', action: 'Manage Students' },
-    { label: 'Live Courses', value: courses.length, tab: 'overview', icon: GraduationCap, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20 hover:border-emerald-500/50', action: 'View Courses' },
+    { label: 'Live Courses', value: courses.length, tab: 'courses', icon: GraduationCap, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20 hover:border-emerald-500/50', action: 'View Courses' },
     { label: 'Study PDFs & Drive', value: studyMaterials.length, tab: 'pdfs', icon: FileText, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20 hover:border-amber-500/50', action: 'Open Study Vault' },
     { label: 'Video Lectures & Reels', value: videos.length, tab: 'videos', icon: Video, color: 'text-rose-400', bg: 'bg-rose-500/10 border-rose-500/20 hover:border-rose-500/50', action: 'Manage Videos' },
     { label: 'Active Ad Campaigns', value: ads.filter(a => a.isActive).length, tab: 'ads', icon: Megaphone, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20 hover:border-purple-500/50', action: 'Manage Ads' },
@@ -51,7 +51,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onSelectTa
         </div>
         <div className="flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-2xl border border-slate-700">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span className="text-xs font-mono font-bold text-slate-200">Database: MongoDB Atlas Connected</span>
+          <span className="text-xs font-mono font-bold text-slate-200">Database: Cloud Engine Active & Synced</span>
         </div>
       </div>
 

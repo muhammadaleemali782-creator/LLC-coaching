@@ -95,7 +95,7 @@ export const Hero: React.FC = () => {
           <div className="relative rounded-3xl overflow-hidden shadow-2xl border-2 sm:border-4 border-white bg-slate-950">
             <div className="relative aspect-[16/10] sm:aspect-[21/9] w-full overflow-hidden">
               <img
-                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600&auto=format&fit=crop&q=80"
+                src={websiteSettings?.heroPosterUrl || "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600&auto=format&fit=crop&q=80"}
                 alt="L.C.C. Academic Excellence Poster"
                 className="w-full h-full object-cover filter brightness-90"
               />

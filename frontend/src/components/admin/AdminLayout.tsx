@@ -17,7 +17,8 @@ import {
   Image,
   BookOpen,
   Bell,
-  HelpCircle
+  HelpCircle,
+  ArrowLeft
 } from 'lucide-react';
 import { Instagram } from '../SocialIcons';
 import { useApp } from '../../context/AppContext';
@@ -63,35 +64,40 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
     { id: 'reviews', label: 'Reviews Moderation', icon: MessageSquare, badge: 'New' },
     { id: 'socials', label: 'Social Media Handles', icon: Share2, badge: null },
     { id: 'settings', label: 'Website Settings', icon: Settings, badge: null },
-    { id: 'preview', label: 'Mobile Live Preview', icon: Smartphone, badge: 'QA' }
+    { id: 'preview', label: 'Mobile Live QA Preview', icon: Smartphone, badge: null }
   ];
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col md:flex-row font-sans">
       
-      {/* Mobile Top App Bar & Horizontal Tabs (Mobile Only) */}
-      <div className="md:hidden bg-slate-950 border-b border-slate-800 sticky top-0 z-40">
-        <div className="p-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0066FF] to-blue-700 flex items-center justify-center text-white shadow-sm">
-              <Shield className="w-4 h-4" />
-            </div>
-            <div>
+      {/* Mobile Top Header */}
+      <div className="md:hidden bg-slate-950 border-b border-slate-800 sticky top-0 z-30">
+        <div className="p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigateTo('home')}
+              className="p-1.5 rounded-lg bg-slate-800 text-white flex items-center gap-1 cursor-pointer"
+              title="Back to Public Website"
+            >
+              <ArrowLeft className="w-4 h-4 text-amber-400" />
+              <span className="text-[11px] font-bold">Back</span>
+            </button>
+
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-[#0066FF] flex items-center justify-center text-white">
+                <Shield className="w-3.5 h-3.5" />
+              </div>
               <h2 className="text-xs font-black text-white">Director Desk</h2>
-              <span className="text-[9px] text-emerald-400 font-mono font-bold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                ONLINE
-              </span>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => navigateTo('home')}
-              className="px-2.5 py-1 rounded-lg bg-slate-800 text-[10px] font-bold text-slate-300 flex items-center gap-1 cursor-pointer"
+              className="px-2 py-1 rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
             >
               <ExternalLink className="w-3 h-3" />
-              <span>Public Site</span>
+              <span>Website</span>
             </button>
             <button
               onClick={logoutAdmin}
@@ -135,7 +141,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
       <aside className="hidden md:flex w-72 bg-slate-950 border-r border-slate-800/80 flex-col justify-between shrink-0 h-screen sticky top-0">
         <div>
           {/* Header */}
-          <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+          <div className="p-5 border-b border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0066FF] to-blue-700 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
                 <Shield className="w-5 h-5" />
@@ -145,15 +151,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
                 <p className="text-[11px] text-slate-400 font-medium">L.C.C. Cloud Admin Hub</p>
               </div>
             </div>
-
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] text-emerald-400 font-mono font-bold">ONLINE</span>
-            </div>
           </div>
 
           {/* Nav List */}
-          <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-160px)] pr-1">
+          <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-180px)] pr-1">
             {navItems.map(item => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -189,19 +190,19 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
           </nav>
         </div>
 
-        {/* Footer & Live Website Trigger */}
+        {/* Footer Navigation Actions */}
         <div className="p-4 border-t border-slate-800 space-y-2">
           <button
             onClick={() => navigateTo('home')}
-            className="w-full px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-xs font-black text-slate-200 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            className="w-full px-4 py-2.5 rounded-2xl bg-[#0066FF] hover:bg-blue-600 text-xs font-black text-white flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
           >
-            <ExternalLink className="w-3.5 h-3.5 text-[#0066FF]" />
-            <span>Open Public Website</span>
+            <ArrowLeft className="w-4 h-4 text-amber-300" />
+            <span>Back to Public Website</span>
           </button>
 
           <button
             onClick={logoutAdmin}
-            className="w-full px-4 py-2.5 rounded-2xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-xs font-bold text-red-400 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            className="w-full px-4 py-2 rounded-2xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-xs font-bold text-red-400 flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Exit Director Hub</span>
@@ -210,7 +211,35 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
       </aside>
 
       {/* Main Content Viewport */}
-      <main className="flex-1 p-4 sm:p-8 lg:p-10 overflow-y-auto pb-36 md:pb-16 max-w-7xl mx-auto w-full">
+      <main className="flex-1 p-4 sm:p-8 lg:p-10 overflow-y-auto pb-36 md:pb-16 max-w-7xl mx-auto w-full space-y-4">
+        
+        {/* Universal Back Navigation Bar */}
+        <div className="flex items-center justify-between bg-slate-950/80 border border-slate-800/80 px-4 py-2.5 rounded-2xl">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (activeTab !== 'overview') {
+                  setActiveTab('overview');
+                } else {
+                  navigateTo('home');
+                }
+              }}
+              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-black text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4 text-amber-400" />
+              <span>{activeTab !== 'overview' ? '← Back to Overview KPIs' : '← Back to Public Website'}</span>
+            </button>
+          </div>
+
+          <button
+            onClick={() => navigateTo('home')}
+            className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-[#0066FF] hover:underline"
+          >
+            <span>View Public Website</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
         {children}
       </main>
 
