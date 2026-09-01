@@ -188,6 +188,26 @@ const InquirySchema = new mongoose.Schema({
   status: { type: String, default: 'New' }
 });
 
+const TransactionSchema = new mongoose.Schema({
+  id: String,
+  studentName: String,
+  studentEmail: String,
+  studentPhone: String,
+  courseId: String,
+  courseName: String,
+  amount: Number,
+  paymentMethod: String,
+  date: String,
+  status: { type: String, default: 'Completed' },
+  utrNumber: String,
+  razorpayPaymentId: String,
+  razorpayOrderId: String,
+  razorpaySignature: String,
+  isVerified: { type: Boolean, default: false },
+  secureToken: String,
+  verifiedAt: String
+});
+
 export const UserModel = mongoose.models.User || mongoose.model('User', UserSchema);
 export const CourseModel = mongoose.models.Course || mongoose.model('Course', CourseSchema);
 export const StudyMaterialModel = mongoose.models.StudyMaterial || mongoose.model('StudyMaterial', StudyMaterialSchema);
@@ -201,6 +221,7 @@ export const ReviewModel = mongoose.models.Review || mongoose.model('Review', Re
 export const SocialLinkModel = mongoose.models.SocialLink || mongoose.model('SocialLink', SocialLinkSchema);
 export const SettingModel = mongoose.models.Setting || mongoose.model('Setting', SettingSchema);
 export const InquiryModel = mongoose.models.Inquiry || mongoose.model('Inquiry', InquirySchema);
+export const TransactionModel = mongoose.models.Transaction || mongoose.model('Transaction', TransactionSchema);
 
 // Full Comprehensive Seed Dataset (Matches 100% of Frontend Needs)
 const defaultData = {

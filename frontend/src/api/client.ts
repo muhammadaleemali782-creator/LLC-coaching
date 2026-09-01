@@ -235,5 +235,44 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify({ status })
     })
+  },
+
+  // Payments Security Verification
+  payments: {
+    verifyRazorpay: (body: {
+      razorpay_payment_id: string;
+      razorpay_order_id?: string;
+      razorpay_signature?: string;
+      courseId: string;
+      amount: number;
+      studentName?: string;
+      studentEmail?: string;
+      studentPhone?: string;
+    }) => request<{
+      success: boolean;
+      message: string;
+      transaction: any;
+      access: { whatsappUrl: string; playlistUrl: string; secureToken: string };
+    }>('/payments/verify', {
+      method: 'POST',
+      body: JSON.stringify(body)
+    }),
+    submitUTR: (body: {
+      courseId: string;
+      amount: number;
+      utrNumber: string;
+      paymentMethod: string;
+      studentName?: string;
+      studentEmail?: string;
+      studentPhone?: string;
+    }) => request<{
+      success: boolean;
+      message: string;
+      transaction: any;
+    }>('/payments/manual-utr', {
+      method: 'POST',
+      body: JSON.stringify(body)
+    }),
+    getTransactions: () => request<{ success: boolean; data: any[] }>('/payments/transactions')
   }
 };
