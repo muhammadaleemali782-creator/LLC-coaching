@@ -65,15 +65,67 @@ export const CourseSection: React.FC = () => {
     <section id="courses-section" className="py-16 sm:py-20 px-3 sm:px-6 lg:px-8 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto">
         
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+        {/* Highlight Banner Matching Reference: "Choosing the right coaching course for growth" */}
+        <div className="text-center max-w-4xl mx-auto mb-10 space-y-4">
+          <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            Choosing the right coaching course <br className="hidden sm:inline" />
+            <span className="text-[#0066FF]">for growth</span>
+          </h2>
+          <p className="text-slate-600 text-xs sm:text-base leading-relaxed font-medium max-w-2xl mx-auto">
+            Join Learning Coaching Center (L.C.C.) for comprehensive school coaching (Classes 1 to 12), Computer DCA / ADCA / Tally, and fluent Spoken English led by Aman Arora.
+          </p>
+
+          {/* Quick Action Buttons */}
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <button
+              onClick={() => {
+                const elem = document.getElementById('all-courses-grid');
+                elem?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="px-5 py-2.5 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white text-xs font-black uppercase tracking-wider shadow-md transition-all cursor-pointer"
+            >
+              Explore All Courses
+            </button>
+            <button
+              onClick={() => navigateTo('study-material', 'study-material-section')}
+              className="px-5 py-2.5 rounded-full bg-blue-50 hover:bg-blue-100 text-[#0066FF] border border-blue-200 text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
+            >
+              Free Study Vault
+            </button>
+          </div>
+
+          {/* Key Metrics Strip Matching Photo: 98.6% | 10+ Years | 1:1 Lab | 1500+ Students */}
+          <div className="pt-4 max-w-3xl mx-auto">
+            <div className="bg-[#0B3B95] text-white rounded-2xl p-4 sm:p-6 shadow-md grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+              <div>
+                <span className="text-xl sm:text-2xl font-black text-amber-400 block">98.6%</span>
+                <span className="text-[10px] sm:text-xs text-blue-100 font-medium">Board Exam Pass Rate</span>
+              </div>
+              <div>
+                <span className="text-xl sm:text-2xl font-black text-amber-400 block">10+ Years</span>
+                <span className="text-[10px] sm:text-xs text-blue-100 font-medium">Academic Excellence</span>
+              </div>
+              <div>
+                <span className="text-xl sm:text-2xl font-black text-amber-400 block">1:1 Lab</span>
+                <span className="text-[10px] sm:text-xs text-blue-100 font-medium">Dedicated Computers</span>
+              </div>
+              <div>
+                <span className="text-xl sm:text-2xl font-black text-amber-400 block">1500+</span>
+                <span className="text-[10px] sm:text-xs text-blue-100 font-medium">Students Trained</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Section Header: Explore Top-Rated Coaching Courses */}
+        <div id="all-courses-grid" className="text-center max-w-3xl mx-auto mb-8 sm:mb-10 pt-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-[#0066FF] border border-blue-200 text-xs font-black uppercase tracking-wider mb-3">
             <GraduationCap className="w-3.5 h-3.5" />
             <span>Academic Programs 2026-27</span>
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight mb-3">
+          <h3 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight mb-3">
             Explore <span className="text-[#0066FF]">Top-Rated Coaching Courses</span>
-          </h2>
+          </h3>
           <p className="text-slate-600 text-xs sm:text-base leading-relaxed font-medium">
             From foundational school classes to advanced DCA diplomas and fluent English speaking.
           </p>

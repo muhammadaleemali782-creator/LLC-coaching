@@ -47,14 +47,30 @@ const MainContent: React.FC = () => {
         <main className={activeView !== 'admin-panel' ? 'pb-32 xl:pb-16' : ''}>
           {activeView === 'home' && (
             <>
+              {/* 1. MGKVP University Style Photo Slider & Quick Links Portal */}
               <Hero />
-              <WhatWeDoSection />
-              <MethodologySection />
-              <GuaranteeSection />
+
+              {/* 2. About L.C.C. Coaching Institute & Founder Aman Arora Card */}
               <AboutSection />
+
+              {/* 3. Mission & Educational Pedagogy / What We Do */}
+              <MethodologySection />
+
+              {/* 4. Choosing the right coaching course for growth Offer Banner */}
+              <AdBanner placement="hero_top" />
+
+              {/* 5. Explore Top-Rated Coaching Courses */}
               <CourseSection />
-              <AdBanner placement="between_sections" />
+
+              {/* 6. High-Impact Live Batches */}
               <PaidBatchesSection />
+
+              {/* 7. Pedagogy, Trust & Rainbow Learning Arch */}
+              <GuaranteeSection />
+              <WhatWeDoSection />
+              <AdBanner placement="between_sections" />
+
+              {/* 8. Academics, Media & Community */}
               <StudyMaterialSection />
               <SyllabusSection />
               <YouTubeSection />

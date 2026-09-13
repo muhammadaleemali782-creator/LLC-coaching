@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Sparkles, CheckCircle2, ChevronDown, ChevronUp, BookOpen, Brain, ShieldCheck } from 'lucide-react';
 
 export const MethodologySection: React.FC = () => {
@@ -55,18 +55,28 @@ export const MethodologySection: React.FC = () => {
     <section id="methodology-section" className="py-16 sm:py-20 bg-white relative overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-[#0066FF] border border-blue-200 text-xs font-black uppercase tracking-wider shadow-xs">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Pedagogy & Teaching Philosophy</span>
-          </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            We teach with <span className="text-[#0066FF]">proven methodology</span> for your child's success
+        {/* Section Header with Mission Block Matching Reference */}
+        <div className="text-center max-w-3xl mx-auto space-y-4">
+          <h2 className="text-3xl sm:text-5xl font-black text-[#0B3B95] tracking-tight">
+            Mission
           </h2>
-          <p className="text-slate-600 text-xs sm:text-base leading-relaxed font-medium">
-            Tap each card to view our structured 3-stage learning cycle that eliminates cramming.
+          <p className="text-base sm:text-xl font-extrabold text-slate-800 leading-snug">
+            Empowering students with deep conceptual clarity, board exam excellence, and modern digital career skills.
           </p>
+
+          <div className="flex items-center justify-center gap-2 pt-1">
+            <span className="px-3.5 py-1 rounded-md bg-[#0066FF] text-white text-xs font-black uppercase tracking-wider shadow-xs">
+              Purpose
+            </span>
+            <span className="text-slate-300 font-bold">|</span>
+            <span className="px-3.5 py-1 rounded-md bg-blue-50 text-[#0066FF] text-xs font-black uppercase tracking-wider border border-blue-200">
+              Vision
+            </span>
+            <span className="text-slate-300 font-bold">|</span>
+            <span className="px-3.5 py-1 rounded-md bg-blue-50 text-[#0066FF] text-xs font-black uppercase tracking-wider border border-blue-200">
+              Value
+            </span>
+          </div>
         </div>
 
         {/* In-Place Expandable / Collapsible Accordion Cards */}
