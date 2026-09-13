@@ -880,6 +880,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Gallery Management
   const addGalleryItem = (item: Omit<GalleryItem, 'id' | 'date'>) => {
+    api.gallery.create(item).catch(() => {});
     const newG: GalleryItem = {
       ...item,
       id: `g-${Date.now()}`,
@@ -894,6 +895,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteGalleryItem = (id: string) => {
+    api.gallery.delete(id).catch(() => {});
     setGalleryItems(prev => {
       const updated = prev.filter(g => g.id !== id);
       saveItem('lcc_gallery', updated);

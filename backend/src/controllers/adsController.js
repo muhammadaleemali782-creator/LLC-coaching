@@ -1,37 +1,44 @@
-﻿import { getDB, saveDB } from '../config/db.js';
+import { getDB, saveDB, AdModel } from '../config/db.js';
+import mongoose from 'mongoose';
 
 // Get all active ads (Public) or all ads with filter (Admin)
-export const getAds = (req, res) => {
+export const getAds = async (req, res) => {
   const { placement, all } = req.query;
-  const db = getDB();
 
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const query = {};
+      if (placement) query.placement = placement;
+      if (!all) query.isActive = true;
+      const results = await AdModel.find(query).sort({ priority: 1 });
+      if (results && results.length > 0) {
+        return res.json({ success: true, count: results.length, data: results });
+      }
+    }
+  } catch (err) {}
+
+  const db = getDB();
   let results = db.ads || [];
 
-  // Filter by placement if specified
   if (placement) {
     results = results.filter(ad => ad.placement === placement);
   }
-
-  // Filter out inactive ads for normal visitors
   if (!all) {
     results = results.filter(ad => ad.isActive);
   }
-
-  // Sort by priority ascending (1 highest)
   results.sort((a, b) => (a.priority || 99) - (b.priority || 99));
 
   res.json({ success: true, count: results.length, data: results });
 };
 
 // Create Ad (Admin)
-export const createAd = (req, res) => {
+export const createAd = async (req, res) => {
   const { title, description, imageUrl, destinationUrl, placement, badge, priority, startDate, endDate } = req.body;
 
   if (!title || !destinationUrl) {
     return res.status(400).json({ success: false, message: 'Ad title and destination URL are required.' });
   }
 
-  const db = getDB();
   const newAd = {
     id: `ad-${Date.now()}`,
     title: title.trim(),
@@ -48,6 +55,15 @@ export const createAd = (req, res) => {
     createdAt: new Date().toISOString()
   };
 
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const created = await AdModel.create(newAd);
+      return res.status(201).json({ success: true, message: 'Advertisement banner created successfully!', data: created });
+    }
+  } catch (err) {}
+
+  const db = getDB();
+  if (!db.ads) db.ads = [];
   db.ads.unshift(newAd);
   saveDB(db);
 
@@ -55,10 +71,20 @@ export const createAd = (req, res) => {
 };
 
 // Update Ad (Admin)
-export const updateAd = (req, res) => {
+export const updateAd = async (req, res) => {
   const { id } = req.params;
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const updated = await AdModel.findOneAndUpdate({ id }, req.body, { new: true });
+      if (updated) {
+        return res.json({ success: true, message: 'Advertisement updated successfully!', data: updated });
+      }
+    }
+  } catch (err) {}
+
   const db = getDB();
-  const index = db.ads.findIndex(a => a.id === id);
+  const index = (db.ads || []).findIndex(a => a.id === id);
 
   if (index === -1) {
     return res.status(404).json({ success: false, message: 'Advertisement not found.' });
@@ -71,10 +97,22 @@ export const updateAd = (req, res) => {
 };
 
 // Toggle Ad Active Status (Admin)
-export const toggleAdStatus = (req, res) => {
+export const toggleAdStatus = async (req, res) => {
   const { id } = req.params;
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const ad = await AdModel.findOne({ id });
+      if (ad) {
+        ad.isActive = !ad.isActive;
+        await ad.save();
+        return res.json({ success: true, message: `Ad ${ad.isActive ? 'activated' : 'deactivated'} successfully!`, data: ad });
+      }
+    }
+  } catch (err) {}
+
   const db = getDB();
-  const ad = db.ads.find(a => a.id === id);
+  const ad = (db.ads || []).find(a => a.id === id);
 
   if (!ad) {
     return res.status(404).json({ success: false, message: 'Advertisement not found.' });
@@ -87,21 +125,36 @@ export const toggleAdStatus = (req, res) => {
 };
 
 // Delete Ad (Admin)
-export const deleteAd = (req, res) => {
+export const deleteAd = async (req, res) => {
   const { id } = req.params;
-  const db = getDB();
 
-  db.ads = db.ads.filter(a => a.id !== id);
+  try {
+    if (mongoose.connection.readyState === 1) {
+      await AdModel.deleteOne({ id });
+      return res.json({ success: true, message: 'Advertisement deleted successfully.' });
+    }
+  } catch (err) {}
+
+  const db = getDB();
+  db.ads = (db.ads || []).filter(a => a.id !== id);
   saveDB(db);
 
   res.json({ success: true, message: 'Advertisement deleted successfully.' });
 };
 
 // Track Ad Click (Public)
-export const trackAdClick = (req, res) => {
+export const trackAdClick = async (req, res) => {
   const { id } = req.params;
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      await AdModel.updateOne({ id }, { $inc: { clicks: 1 } });
+      return res.json({ success: true });
+    }
+  } catch (err) {}
+
   const db = getDB();
-  const ad = db.ads.find(a => a.id === id);
+  const ad = (db.ads || []).find(a => a.id === id);
 
   if (ad) {
     ad.clicks = (ad.clicks || 0) + 1;

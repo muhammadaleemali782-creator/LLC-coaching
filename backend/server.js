@@ -27,9 +27,13 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Initialize Storage & Online Cloud MongoDB Atlas
-getDB();
-connectOnlineMongoDB();
+// Middleware to ensure database connection on serverless invocations
+app.use(async (req, res, next) => {
+  try {
+    await connectOnlineMongoDB();
+  } catch (e) {}
+  next();
+});
 
 // Security & Middleware
 app.use(cors({

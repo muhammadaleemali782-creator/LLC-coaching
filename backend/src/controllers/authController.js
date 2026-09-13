@@ -1,6 +1,7 @@
-﻿import bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { getDB, saveDB } from '../config/db.js';
+import { getDB, saveDB, UserModel } from '../config/db.js';
+import mongoose from 'mongoose';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'lcc_super_secret_jwt_key_2026_production_safe';
 
@@ -20,15 +21,46 @@ const normalizePhone = (phone) => {
 };
 
 // 1. Student Registration
-export const register = (req, res) => {
+export const register = async (req, res) => {
   const { name, email, phone, password, targetClass } = req.body;
 
   if (!name || !email || !phone || !password) {
     return res.status(400).json({ success: false, message: 'All required fields (Name, Email, Phone, Password) must be provided.' });
   }
 
+  const cleanEmail = email.toLowerCase().trim();
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const existing = await UserModel.findOne({ email: cleanEmail });
+      if (existing) {
+        return res.status(400).json({ success: false, message: 'An account with this email address already exists.' });
+      }
+
+      const newUser = await UserModel.create({
+        id: `usr-${Date.now()}`,
+        name: name.trim(),
+        email: cleanEmail,
+        phone: phone.trim(),
+        passwordHash: bcrypt.hashSync(password, 10),
+        role: 'student',
+        targetClass: targetClass || 'Class 10',
+        createdAt: new Date(),
+        isActive: true
+      });
+
+      const token = generateToken(newUser);
+      return res.status(201).json({
+        success: true,
+        message: 'Student account created successfully!',
+        token,
+        user: { id: newUser.id, name: newUser.name, email: newUser.email, phone: newUser.phone, role: newUser.role, targetClass: newUser.targetClass }
+      });
+    }
+  } catch (err) {}
+
   const db = getDB();
-  const existingUser = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  const existingUser = (db.users || []).find(u => u.email.toLowerCase() === cleanEmail);
   if (existingUser) {
     return res.status(400).json({ success: false, message: 'An account with this email address already exists.' });
   }
@@ -36,7 +68,7 @@ export const register = (req, res) => {
   const newUser = {
     id: `usr-${Date.now()}`,
     name: name.trim(),
-    email: email.toLowerCase().trim(),
+    email: cleanEmail,
     phone: phone.trim(),
     passwordHash: bcrypt.hashSync(password, 10),
     role: 'student',
@@ -45,6 +77,7 @@ export const register = (req, res) => {
     isActive: true
   };
 
+  if (!db.users) db.users = [];
   db.users.push(newUser);
   saveDB(db);
 
@@ -60,15 +93,35 @@ export const register = (req, res) => {
 };
 
 // 2. Student Login
-export const login = (req, res) => {
+export const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ success: false, message: 'Please provide both email and password.' });
   }
 
+  const cleanEmail = email.toLowerCase().trim();
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const user = await UserModel.findOne({ email: cleanEmail });
+      if (user && user.isActive) {
+        const isMatch = bcrypt.compareSync(password, user.passwordHash);
+        if (isMatch) {
+          const token = generateToken(user);
+          return res.json({
+            success: true,
+            message: `Welcome back, ${user.name}!`,
+            token,
+            user: { id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role, targetClass: user.targetClass, enrolledCourses: user.enrolledCourses }
+          });
+        }
+      }
+    }
+  } catch (err) {}
+
   const db = getDB();
-  const user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase().trim());
+  const user = (db.users || []).find(u => u.email.toLowerCase() === cleanEmail);
 
   if (!user || !user.isActive) {
     return res.status(401).json({ success: false, message: 'Invalid email address or password.' });
@@ -91,16 +144,39 @@ export const login = (req, res) => {
 };
 
 // 3. Admin Login
-export const adminLogin = (req, res) => {
+export const adminLogin = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ success: false, message: 'Admin email and password are required.' });
   }
 
+  const cleanEmail = email.toLowerCase().trim();
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const admin = await UserModel.findOne({
+        $or: [{ email: cleanEmail }, { email: 'admin@lcc.edu' }],
+        role: 'admin'
+      });
+      if (admin) {
+        const isMatch = bcrypt.compareSync(password, admin.passwordHash);
+        if (isMatch) {
+          const token = generateToken(admin);
+          return res.json({
+            success: true,
+            message: 'Admin authorization successful.',
+            token,
+            admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role }
+          });
+        }
+      }
+    }
+  } catch (err) {}
+
   const db = getDB();
-  const admin = db.users.find(
-    u => (u.email.toLowerCase() === email.toLowerCase().trim() || u.email === 'admin@lcc.edu') && u.role === 'admin'
+  const admin = (db.users || []).find(
+    u => (u.email.toLowerCase() === cleanEmail || u.email === 'admin@lcc.edu') && u.role === 'admin'
   );
 
   if (!admin) {
@@ -262,17 +338,46 @@ export const resetPassword = (req, res) => {
 };
 
 // 7. Get All Users (Admin Only)
-export const getUsers = (req, res) => {
+export const getUsers = async (req, res) => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const users = await UserModel.find().select('-passwordHash');
+      if (users && users.length > 0) {
+        return res.json({ success: true, data: users });
+      }
+    }
+  } catch (err) {}
+
   const db = getDB();
-  const safeUsers = db.users.map(({ passwordHash, ...u }) => u);
+  const safeUsers = (db.users || []).map(({ passwordHash, ...u }) => u);
   res.json({ success: true, data: safeUsers });
 };
 
 // 8. Toggle User Active Status (Admin Only)
-export const toggleUserStatus = (req, res) => {
+export const toggleUserStatus = async (req, res) => {
   const { id } = req.params;
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const user = await UserModel.findOne({ id });
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found.' });
+      }
+      if (user.role === 'admin') {
+        return res.status(400).json({ success: false, message: 'Cannot deactivate master admin account.' });
+      }
+      user.isActive = !user.isActive;
+      await user.save();
+      return res.json({
+        success: true,
+        message: `User status changed to ${user.isActive ? 'Active' : 'Inactive'}.`,
+        user: { id: user.id, isActive: user.isActive }
+      });
+    }
+  } catch (err) {}
+
   const db = getDB();
-  const user = db.users.find(u => u.id === id);
+  const user = (db.users || []).find(u => u.id === id);
 
   if (!user) {
     return res.status(404).json({ success: false, message: 'User not found.' });

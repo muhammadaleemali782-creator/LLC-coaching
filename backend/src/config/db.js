@@ -4,9 +4,16 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 
+import os from 'os';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DB_FILE = path.join(__dirname, '../data/store.json');
+// In Vercel serverless (AWS Lambda), /var/task is read-only; use /tmp which is writable
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NODE_ENV === 'production');
+const DB_FILE = isServerless 
+  ? path.join(os.tmpdir(), 'lcc_store.json')
+  : path.join(__dirname, '../data/store.json');
+const DEFAULT_SEED_FILE = path.join(__dirname, '../data/store.json');
 
 // Mongoose Models Schemas
 const UserSchema = new mongoose.Schema({
@@ -636,58 +643,112 @@ const defaultData = {
   inquiries: []
 };
 
-// Initialize DB file fallback
-if (!fs.existsSync(DB_FILE)) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(defaultData, null, 2), 'utf8');
-}
+// In-memory cache fallback for serverless execution
+let memoryDB = null;
 
-// Connect to Online MongoDB Atlas if MONGODB_URI provided
+// Initialize DB file fallback safely without throwing on read-only environments
+export const initStorage = () => {
+  try {
+    if (fs.existsSync(DB_FILE)) {
+      const raw = fs.readFileSync(DB_FILE, 'utf8');
+      memoryDB = JSON.parse(raw);
+      return;
+    }
+    // Check if default seed file exists
+    if (fs.existsSync(DEFAULT_SEED_FILE)) {
+      const raw = fs.readFileSync(DEFAULT_SEED_FILE, 'utf8');
+      memoryDB = JSON.parse(raw);
+    } else {
+      memoryDB = { ...defaultData };
+    }
+    fs.writeFileSync(DB_FILE, JSON.stringify(memoryDB, null, 2), 'utf8');
+  } catch (err) {
+    // If filesystem write fails, keep memory cache safe
+    if (!memoryDB) memoryDB = { ...defaultData };
+  }
+};
+
+initStorage();
+
+const DEFAULT_ATLAS_URI = 'mongodb+srv://rebelrebel766_db_user:TeJziU1lXTZS3nru@cluster0.n6izs7f.mongodb.net/lcc_coaching?retryWrites=true&w=majority';
+
+// Cached Mongoose connection promise for serverless functions (Vercel)
+let cachedPromise = null;
+
+// Connect to Online MongoDB Atlas with cached connection for Serverless
 export const connectOnlineMongoDB = async () => {
-  const mongoUri = process.env.MONGODB_URI;
-  if (!mongoUri) {
-    console.log('ℹ️ [DATABASE] MONGODB_URI not provided. Operating on persistent local JSON engine.');
-    return false;
+  if (mongoose.connection.readyState === 1) {
+    return true;
+  }
+
+  const mongoUri = process.env.MONGODB_URI || DEFAULT_ATLAS_URI;
+
+  if (!cachedPromise) {
+    const opts = {
+      serverSelectionTimeoutMS: 4000,
+      connectTimeoutMS: 5000,
+      bufferCommands: false
+    };
+
+    cachedPromise = mongoose.connect(mongoUri, opts)
+      .then(async (m) => {
+        console.log('🍃 [ONLINE CLOUD MONGODB] Connected successfully to MongoDB Atlas Cloud Database!');
+        // Seed admin if not present
+        try {
+          const adminCount = await UserModel.countDocuments({ role: 'admin' });
+          if (adminCount === 0) {
+            console.log('🌱 Seeding initial admin and collections to MongoDB Atlas...');
+            await UserModel.insertMany(defaultData.users);
+            await CourseModel.insertMany(defaultData.courses);
+            await StudyMaterialModel.insertMany(defaultData.studyMaterials);
+            await VideoModel.insertMany(defaultData.videos);
+            await NoticeModel.insertMany(defaultData.notices);
+            await GalleryModel.insertMany(defaultData.gallery);
+            await InstagramModel.insertMany(defaultData.instagramPosts);
+            await SyllabusModel.insertMany(defaultData.syllabus);
+            await AdModel.insertMany(defaultData.ads);
+            await ReviewModel.insertMany(defaultData.reviews);
+            await SocialLinkModel.insertMany(defaultData.socialLinks);
+            await SettingModel.create(defaultData.settings);
+            console.log('✅ MongoDB Atlas seeded successfully!');
+          }
+        } catch (seedErr) {
+          console.warn('⚠️ Seed check error:', seedErr.message);
+        }
+        return m;
+      })
+      .catch((err) => {
+        cachedPromise = null;
+        console.warn('⚠️ [ONLINE MONGODB] Could not connect to MongoDB Atlas:', err.message);
+        return null;
+      });
   }
 
   try {
-    await mongoose.connect(mongoUri);
-    console.log('🍃 [ONLINE CLOUD MONGODB] Connected successfully to MongoDB Atlas Cloud Database!');
-    
-    // Seed admin if not present
-    const adminCount = await UserModel.countDocuments({ role: 'admin' });
-    if (adminCount === 0) {
-      console.log('🌱 Seeding initial admin and all collections to MongoDB Atlas...');
-      await UserModel.insertMany(defaultData.users);
-      await CourseModel.insertMany(defaultData.courses);
-      await StudyMaterialModel.insertMany(defaultData.studyMaterials);
-      await VideoModel.insertMany(defaultData.videos);
-      await NoticeModel.insertMany(defaultData.notices);
-      await GalleryModel.insertMany(defaultData.gallery);
-      await InstagramModel.insertMany(defaultData.instagramPosts);
-      await SyllabusModel.insertMany(defaultData.syllabus);
-      await AdModel.insertMany(defaultData.ads);
-      await ReviewModel.insertMany(defaultData.reviews);
-      await SocialLinkModel.insertMany(defaultData.socialLinks);
-      await SettingModel.create(defaultData.settings);
-      console.log('✅ MongoDB Atlas seeded successfully with all collections!');
-    }
-    return true;
+    const conn = await cachedPromise;
+    return Boolean(conn && mongoose.connection.readyState === 1);
   } catch (err) {
-    console.warn('⚠️ [ONLINE MONGODB] Could not connect to MongoDB Atlas:', err.message);
-    console.log('ℹ️ Falling back to persistent local storage engine.');
+    cachedPromise = null;
     return false;
   }
 };
 
 export const getDB = () => {
   try {
-    const raw = fs.readFileSync(DB_FILE, 'utf8');
-    return JSON.parse(raw);
-  } catch (err) {
-    return defaultData;
-  }
+    if (fs.existsSync(DB_FILE)) {
+      const raw = fs.readFileSync(DB_FILE, 'utf8');
+      memoryDB = JSON.parse(raw);
+      return memoryDB;
+    }
+  } catch (err) {}
+  return memoryDB || defaultData;
 };
 
 export const saveDB = (data) => {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
+  memoryDB = data;
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch (err) {
+    // Gracefully handle read-only filesystems in serverless without crashing
+  }
 };
