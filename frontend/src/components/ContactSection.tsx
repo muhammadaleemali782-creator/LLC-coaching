@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { MapPin, Phone, Mail, Clock, MessageSquare, Send, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Youtube, Instagram } from './SocialIcons';
@@ -48,7 +48,7 @@ export const ContactSection: React.FC = () => {
               <div>
                 <h4 className="text-sm font-black text-slate-900 mb-1">Campus Location</h4>
                 <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                  L.C.C. Education Campus, Civil Lines, Main Market Road, Near Central Bank, Education Zone.
+                  L.C.C. Education Campus, Main Market Road, Near City Central, Varanasi, Uttar Pradesh 221001.
                 </p>
               </div>
             </div>

@@ -115,7 +115,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Copyright Strip */}
         <div className="pt-8 border-t border-slate-100 text-center space-y-2">
           <p className="text-xs text-slate-500 font-medium leading-relaxed">
-            © 2016 – 2026 <strong>{websiteSettings?.instituteName || 'Learning Coaching Center (L.C.C.)'}</strong>. Directed by <strong>{websiteSettings?.directorName || 'Aman Arora'}</strong>.
+            © 2016 – 2026 <strong>{websiteSettings?.instituteName || 'Learning Coaching Center (L.C.C.)'}</strong>, Varanasi, Uttar Pradesh. Directed by <strong>{websiteSettings?.directorName || 'Aman Arora'}</strong>.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 text-[11px] text-slate-400 font-medium">
             <span>ISO 9001:2015 Certified Coaching Center</span>
