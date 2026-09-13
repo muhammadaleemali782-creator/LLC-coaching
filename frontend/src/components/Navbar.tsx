@@ -111,26 +111,30 @@ export const Navbar: React.FC = () => {
             onClick={() => navigateTo('home')}
             className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none group shrink-0"
           >
-            <img
-              src={websiteSettings?.logoUrl || '/logo.jpg'}
-              alt={websiteSettings?.instituteName || 'L.C.C. Learning Coaching Center'}
-              className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl object-contain shadow-sm border border-slate-200/50 dark:border-slate-800 bg-white"
-              onError={(e: any) => {
-                e.target.src = '/logo.jpg';
-              }}
-            />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-amber-400 p-0.5 bg-white shadow-sm flex items-center justify-center shrink-0">
+              <img
+                src={websiteSettings?.logoUrl || '/logo.jpg'}
+                alt={websiteSettings?.instituteName || 'L.C.C. Learning Coaching Center'}
+                className="w-full h-full object-contain rounded-full"
+                onError={(e: any) => {
+                  e.target.src = '/logo.jpg';
+                }}
+              />
+            </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-1">
-                <span className="font-black text-base sm:text-lg tracking-tight text-slate-900 dark:text-white leading-none">
-                  {websiteSettings?.shortName || 'L.C.C.'}
-                </span>
-                <span className="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider hidden sm:inline-block">
-                  Coaching
+              <div className="flex items-center gap-1.5">
+                <span className="font-black text-sm sm:text-base tracking-tight text-[#0B3B95] dark:text-white leading-none">
+                  {websiteSettings?.instituteName || 'LEARNING COACHING CENTER'}
                 </span>
               </div>
-              <span className="text-[10px] sm:text-[11px] font-bold text-[#0066FF] tracking-wide leading-tight">
-                {websiteSettings?.instituteTagline || 'Learning Coaching Center'}
-              </span>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-[11px] sm:text-xs font-black text-[#D32F2F] leading-tight">
+                  लर्निंग कोचिंग सेंटर, वाराणसी
+                </span>
+                <span className="px-1 py-0.2 rounded bg-amber-400 text-slate-950 text-[8px] font-black uppercase tracking-wider hidden sm:inline-block">
+                  ESTD. 2016
+                </span>
+              </div>
             </div>
           </div>
 
