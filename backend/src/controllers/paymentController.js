@@ -221,3 +221,97 @@ export const getTransactions = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+export const handleRazorpayWebhook = async (req, res) => {
+  try {
+    const signature = req.headers['x-razorpay-signature'];
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_KEY_SECRET;
+
+    if (webhookSecret && signature) {
+      const shasum = crypto.createHmac('sha256', webhookSecret);
+      shasum.update(JSON.stringify(req.body));
+      const digest = shasum.digest('hex');
+      if (digest !== signature) {
+        return res.status(400).json({ success: false, message: 'Invalid webhook signature' });
+      }
+    }
+
+    const event = req.body?.event;
+    const payment = req.body?.payload?.payment?.entity;
+
+    if ((event === 'payment.captured' || event === 'order.paid') && payment) {
+      const paymentId = payment.id;
+      const notes = payment.notes || {};
+      const courseId = notes.courseId;
+      const studentEmail = notes.studentEmail || payment.email;
+      const studentPhone = notes.studentPhone || payment.contact;
+      const studentName = notes.studentName || 'Student';
+      const amount = (payment.amount || 0) / 100;
+
+      if (courseId && studentEmail) {
+        if (mongoose.connection.readyState === 1) {
+          await UserModel.updateOne(
+            { email: studentEmail.toLowerCase() },
+            { $addToSet: { enrolledCourses: courseId } }
+          );
+
+          const existingTxn = await TransactionModel.findOne({ razorpayPaymentId: paymentId });
+          if (!existingTxn) {
+            await TransactionModel.create({
+              id: `txn-hook-${Date.now()}`,
+              studentName,
+              studentEmail,
+              studentPhone,
+              courseId,
+              courseName: notes.courseTitle || 'Academic Course',
+              amount,
+              paymentMethod: 'Razorpay (Webhook Captured)',
+              date: new Date().toISOString().split('T')[0],
+              status: 'Completed',
+              utrNumber: paymentId,
+              razorpayPaymentId: paymentId,
+              isVerified: true,
+              verifiedAt: new Date().toISOString()
+            });
+          }
+        } else {
+          const db = getDB();
+          if (db.users) {
+            const user = db.users.find(u => u.email?.toLowerCase() === studentEmail.toLowerCase());
+            if (user) {
+              if (!user.enrolledCourses) user.enrolledCourses = [];
+              if (!user.enrolledCourses.includes(courseId)) {
+                user.enrolledCourses.push(courseId);
+              }
+            }
+          }
+          if (!db.transactions) db.transactions = [];
+          if (!db.transactions.some(t => t.razorpayPaymentId === paymentId)) {
+            db.transactions.unshift({
+              id: `txn-hook-${Date.now()}`,
+              studentName,
+              studentEmail,
+              studentPhone,
+              courseId,
+              courseName: notes.courseTitle || 'Academic Course',
+              amount,
+              paymentMethod: 'Razorpay (Webhook Captured)',
+              date: new Date().toISOString().split('T')[0],
+              status: 'Completed',
+              utrNumber: paymentId,
+              razorpayPaymentId: paymentId,
+              isVerified: true,
+              verifiedAt: new Date().toISOString()
+            });
+          }
+          saveDB(db);
+        }
+      }
+    }
+
+    return res.status(200).json({ status: 'ok' });
+  } catch (err) {
+    console.error('Webhook error:', err);
+    return res.status(500).json({ error: err.message });
+  }
+};

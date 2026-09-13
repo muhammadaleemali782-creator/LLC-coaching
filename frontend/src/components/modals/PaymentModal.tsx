@@ -189,6 +189,13 @@ export const PaymentModal: React.FC = () => {
         email: currentStudent.email,
         contact: currentStudent.phone
       },
+      notes: {
+        courseId: selectedCourseForPayment.id,
+        courseTitle: selectedCourseForPayment.title,
+        studentEmail: currentStudent.email,
+        studentPhone: currentStudent.phone,
+        studentName: currentStudent.name
+      },
       theme: { color: '#0066FF' },
       modal: {
         ondismiss: function () {
