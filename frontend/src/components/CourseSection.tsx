@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export const CourseSection: React.FC = () => {
-  const { courses, updateCourse, isAdminAuthenticated, navigateTo, showToast } = useApp();
+  const { courses, updateCourse, isAdminAuthenticated, navigateTo, showToast, startEnrollment } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -54,6 +54,10 @@ export const CourseSection: React.FC = () => {
   });
 
   const handleEnroll = (course: Course) => {
+    if (course.isPaid) {
+      startEnrollment(course);
+      return;
+    }
     showToast(`Opening admission desk for ${course.title}`, 'info');
     navigateTo('admission', 'admission-section');
   };

@@ -1,9 +1,9 @@
-﻿import React from 'react';
+import React from 'react';
 import { useApp } from '../context/AppContext';
 import { Layers, Sparkles, CheckCircle2, Clock, Users, ArrowRight, ShieldCheck, Zap, Lock } from 'lucide-react';
 
 export const PaidBatchesSection: React.FC = () => {
-  const { courses, setSelectedCourseForPayment, currentStudent, navigateTo } = useApp();
+  const { courses, startEnrollment, currentStudent, navigateTo } = useApp();
 
   const paidCourses = courses.filter(c => c.isPaid);
 
@@ -120,7 +120,7 @@ export const PaidBatchesSection: React.FC = () => {
                     </button>
                   ) : (
                     <button
-                      onClick={() => setSelectedCourseForPayment(course)}
+                      onClick={() => startEnrollment(course)}
                       className={`w-full py-4 rounded-full font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 ${
                         isFeatured
                           ? 'bg-[#0066FF] hover:bg-blue-700 text-white shadow-blue-500/25'

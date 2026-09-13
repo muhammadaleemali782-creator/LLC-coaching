@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   GraduationCap,
@@ -17,8 +17,11 @@ import {
   LogOut,
   User,
   AlertCircle,
-  HelpCircle
+  HelpCircle,
+  MessageSquare,
+  ExternalLink
 } from 'lucide-react';
+import { Youtube } from '../SocialIcons';
 import confetti from 'canvas-confetti';
 
 export const StudentDashboard: React.FC = () => {
@@ -33,7 +36,8 @@ export const StudentDashboard: React.FC = () => {
     setSelectedDocForPreview,
     setSelectedVideoForPlayer,
     showToast,
-    navigateTo
+    navigateTo,
+    websiteSettings
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'tests' | 'vault' | 'certificate'>('overview');
@@ -258,13 +262,41 @@ export const StudentDashboard: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Direct Batch Access: WhatsApp & Private Video Playlist */}
+                  <div className="pt-2 flex flex-wrap gap-2">
+                    {(course.whatsappRedirectUrl || websiteSettings?.defaultWhatsappRedirectUrl) && (
+                      <a
+                        href={course.whatsappRedirectUrl || websiteSettings?.defaultWhatsappRedirectUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[11px] flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5 fill-current" />
+                        <span>Join WhatsApp Group</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                    {(course.privatePlaylistUrl || websiteSettings?.defaultPlaylistRedirectUrl) && (
+                      <a
+                        href={course.privatePlaylistUrl || websiteSettings?.defaultPlaylistRedirectUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-[11px] flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                      >
+                        <Youtube className="w-3.5 h-3.5 fill-current" />
+                        <span>Private Video Playlist</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+
                   <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                     <span className="text-xs text-slate-500 font-medium">Instructor: {course.instructor}</span>
                     <button
                       onClick={() => {
                         if (videos.length > 0) setSelectedVideoForPlayer(videos[0]);
                       }}
-                      className="px-4 py-2 rounded-full bg-[#0066FF] text-white text-xs font-bold shadow-sm"
+                      className="px-4 py-2 rounded-full bg-[#0066FF] text-white text-xs font-bold shadow-sm cursor-pointer"
                     >
                       Watch Lecture
                     </button>

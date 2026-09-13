@@ -108,6 +108,7 @@ export interface AppContextType {
   logoutAdmin: () => void;
 
   enrollInCourse: (courseId: string, paymentMethod: string) => Promise<boolean>;
+  startEnrollment: (course: Course) => void;
   submitAdmissionInquiry: (inquiry: Omit<AdmissionInquiry, 'id' | 'date' | 'status'>) => void;
   
   // Ads Actions
@@ -268,6 +269,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [websiteSettings, setWebsiteSettings] = useState<WebsiteSettings>(INITIAL_SETTINGS);
 
   const [selectedCourseForPayment, setSelectedCourseForPayment] = useState<Course | null>(null);
+  const [pendingCourseForEnrollment, setPendingCourseForEnrollment] = useState<Course | null>(() => {
+    const saved = localStorage.getItem('lcc_pending_enroll_course');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [selectedDocForPreview, setSelectedDocForPreview] = useState<StudyMaterial | null>(null);
   const [selectedVideoForPlayer, setSelectedVideoForPlayer] = useState<VideoLecture | null>(null);
   const [isStudentAuthModalOpen, setIsStudentAuthModalOpen] = useState(false);
@@ -413,6 +418,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         quizScores: { 'test-1': 88 },
         dateJoined: res.user.createdAt || '2026-08-01'
       });
+      if (handlePostAuthResume(res.user.name)) {
+        return true;
+      }
       showToast(res.message || `Welcome back, ${res.user.name}!`, 'success');
       navigateTo('student-portal');
       return true;
@@ -421,6 +429,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (localMatch) {
         setCurrentStudent(localMatch);
         localStorage.setItem('lcc_student_session', JSON.stringify(localMatch));
+        if (handlePostAuthResume(localMatch.name)) {
+          return true;
+        }
         showToast(`Welcome back, ${localMatch.name}!`, 'success');
         navigateTo('student-portal');
         return true;
@@ -444,12 +455,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
       setStudents(prev => [newStudent, ...prev]);
       setCurrentStudent(newStudent);
+      if (handlePostAuthResume(newStudent.name)) {
+        return true;
+      }
       showToast(res.message || 'Account created successfully!', 'success');
+      navigateTo('student-portal');
       return true;
     } catch (err: any) {
       showToast(err.message || 'Registration failed. Please check your details.', 'error');
       return false;
     }
+  };
+
+  const handlePostAuthResume = (studentName?: string) => {
+    const saved = localStorage.getItem('lcc_pending_enroll_course');
+    const target = pendingCourseForEnrollment || (saved ? JSON.parse(saved) : null);
+    if (target) {
+      setPendingCourseForEnrollment(null);
+      localStorage.removeItem('lcc_pending_enroll_course');
+      setIsStudentAuthModalOpen(false);
+      setSelectedCourseForPayment(target);
+      showToast(`Welcome ${studentName || ''}! Resuming checkout for "${target.title}"`, 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const startEnrollment = (course: Course) => {
+    if (!currentStudent) {
+      setPendingCourseForEnrollment(course);
+      localStorage.setItem('lcc_pending_enroll_course', JSON.stringify(course));
+      setIsStudentAuthModalOpen(true);
+      showToast(`Please login first to enroll in "${course.title}".`, 'info');
+      return;
+    }
+    setSelectedCourseForPayment(course);
   };
 
   const logoutStudent = () => {
@@ -844,6 +884,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loginAdmin,
         logoutAdmin,
         enrollInCourse,
+        startEnrollment,
         submitAdmissionInquiry,
         addAd,
         updateAd,
