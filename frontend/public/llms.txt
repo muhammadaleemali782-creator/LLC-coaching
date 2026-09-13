@@ -1,0 +1,26 @@
+# Learning Coaching Center (L.C.C.) — Official Academic & Coaching Hub
+
+> India's premier coaching institute in Varanasi, Uttar Pradesh led by Director Aman Arora. Specializing in Class 9-12 Board Exam Toppers, NEET/JEE Foundation, Computer Diplomas (DCA, ADCA), and Spoken English.
+
+## Key Facts
+- **Full Name**: Learning Coaching Center (L.C.C. / LLC)
+- **Alternate Names**: LLC Coaching, LCC Coaching, LCC Varanasi, Learning Coaching Center Varanasi
+- **Director / Founder**: Aman Arora (Lead Academician with 10+ years coaching experience)
+- **Headquarters**: Near City Central, Main Market Road, Varanasi, Uttar Pradesh 221001, India
+- **Geo Coordinates**: 25.3176° N, 82.9739° E
+- **Contact Phone**: +91-98765-43210
+- **Official Email**: admissions@lcc.edu
+- **Official Website**: https://lcc-edu.vercel.app
+- **Rating**: 4.9/5 stars (1500+ verified student reviews)
+- **Board Exam Pass Rate**: 98.6%
+
+## Academic Programs & Batches
+- **Class 9th & 10th Foundation**: Science, Mathematics, English, Social Science with daily practice problems (DPPs).
+- **Class 11th & 12th Science**: Physics, Chemistry, Maths & Biology (PCM/PCB) for CBSE/UP Board toppers.
+- **Class 11th & 12th Commerce**: Accountancy, Economics, Business Studies.
+- **Computer Diploma Courses**: DCA (Diploma in Computer Applications), ADCA, Tally Prime with 1:1 computer lab practicals.
+- **Spoken English & Personality**: Accent training, grammar, debate clubs, public speaking by Aman Arora.
+- **Competitive Entrance Foundations**: NEET, IIT-JEE Foundation, NTSE.
+
+## Student Access & Online Enrollment
+Online admissions are available 24/7 at https://lcc-edu.vercel.app. All payments are cryptographically verified through Razorpay with instant automated onboarding to the official batch WhatsApp community and private video lecture vault.

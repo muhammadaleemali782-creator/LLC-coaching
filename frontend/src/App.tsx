@@ -18,6 +18,7 @@ import { GallerySection } from './components/GallerySection';
 import { AppDownloadSection } from './components/AppDownloadSection';
 import { AdmissionSection } from './components/AdmissionSection';
 import { ContactSection } from './components/ContactSection';
+import { FaqSection } from './components/FaqSection';
 import { Footer } from './components/Footer';
 import { AdBanner } from './components/ads/AdBanner';
 
@@ -62,6 +63,7 @@ const MainContent: React.FC = () => {
               <GallerySection />
               <AppDownloadSection />
               <AdmissionSection />
+              <FaqSection />
               <ContactSection />
             </>
           )}
