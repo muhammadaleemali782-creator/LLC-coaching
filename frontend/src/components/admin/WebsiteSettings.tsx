@@ -24,7 +24,8 @@ export const WebsiteSettings: React.FC = () => {
     razorpayKeyId: websiteSettings.razorpayKeyId || '',
     defaultWhatsappRedirectUrl: websiteSettings.defaultWhatsappRedirectUrl || '',
     defaultPlaylistRedirectUrl: websiteSettings.defaultPlaylistRedirectUrl || '',
-    heroPosterUrl: websiteSettings.heroPosterUrl || ''
+    heroPosterUrl: websiteSettings.heroPosterUrl || '',
+    directorPhotoUrl: websiteSettings.directorPhotoUrl || ''
   });
 
   useEffect(() => {
@@ -46,7 +47,8 @@ export const WebsiteSettings: React.FC = () => {
       razorpayKeyId: websiteSettings.razorpayKeyId || '',
       defaultWhatsappRedirectUrl: websiteSettings.defaultWhatsappRedirectUrl || '',
       defaultPlaylistRedirectUrl: websiteSettings.defaultPlaylistRedirectUrl || '',
-      heroPosterUrl: websiteSettings.heroPosterUrl || ''
+      heroPosterUrl: websiteSettings.heroPosterUrl || '',
+      directorPhotoUrl: websiteSettings.directorPhotoUrl || ''
     });
   }, [websiteSettings]);
 
@@ -150,6 +152,13 @@ export const WebsiteSettings: React.FC = () => {
                 value={form.heroPosterUrl}
                 onChange={url => setForm({ ...form, heroPosterUrl: url })}
                 placeholder="Upload master hero banner image file or paste URL..."
+              />
+
+              <ImageUploaderInput
+                label="Director / Founder Official Photo (File Upload or URL)"
+                value={form.directorPhotoUrl}
+                onChange={url => setForm({ ...form, directorPhotoUrl: url })}
+                placeholder="Upload Director Aman Arora photo or paste URL..."
               />
             </div>
 

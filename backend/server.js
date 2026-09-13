@@ -133,8 +133,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: 'Internal server error occurred.' });
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`🚀 L.C.C. Production Backend API active on port ${PORT}`);
-  console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
-});
+// Start Server if run directly
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 L.C.C. Production Backend API active on port ${PORT}`);
+    console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
+  });
+}
+
+export default app;

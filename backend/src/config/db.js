@@ -172,7 +172,12 @@ const SettingSchema = new mongoose.Schema({
   noticeTickerSpeed: String,
   heroBadgeText: String,
   allowStudentReviews: Boolean,
-  maintenanceMode: Boolean
+  maintenanceMode: Boolean,
+  razorpayKeyId: String,
+  defaultWhatsappRedirectUrl: String,
+  defaultPlaylistRedirectUrl: String,
+  heroPosterUrl: String,
+  directorPhotoUrl: String
 });
 
 const InquirySchema = new mongoose.Schema({

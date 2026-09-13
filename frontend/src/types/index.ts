@@ -240,4 +240,5 @@ export interface WebsiteSettings {
   defaultWhatsappRedirectUrl?: string;
   defaultPlaylistRedirectUrl?: string;
   heroPosterUrl?: string;
+  directorPhotoUrl?: string;
 }

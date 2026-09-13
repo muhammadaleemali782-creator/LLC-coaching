@@ -1,11 +1,16 @@
-﻿import React from 'react';
+import React from 'react';
 import { Award, BookOpen, Clock, HeartHandshake, Sparkles, Target, Users, CheckCircle2, ShieldCheck, ArrowRight, Flag, Rocket, Trophy, Monitor, Laptop } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
 export const AboutSection: React.FC = () => {
+  const { websiteSettings } = useApp();
+  const director = websiteSettings?.directorName || 'Aman Arora';
+  const institute = websiteSettings?.instituteName || 'Learning Coaching Center (L.C.C.)';
+
   const milestones = [
     {
       year: '2016',
-      title: 'Founded by Aman Arora',
+      title: `Founded by ${director}`,
       icon: Flag,
       color: 'text-blue-600 bg-blue-50 border-blue-200',
       desc: 'Started with a passionate mission to eliminate rote cramming and provide conceptual education to every student.'
@@ -51,10 +56,10 @@ export const AboutSection: React.FC = () => {
             <span>Legacy of Educational Excellence</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mb-4">
-            About <span className="text-[#0066FF]">L.C.C. Coaching Institute</span>
+            About <span className="text-[#0066FF]">{institute}</span>
           </h2>
           <p className="text-slate-600 text-xs sm:text-base leading-relaxed font-medium">
-            Directed and founded by <strong className="text-slate-900 font-extrabold">Aman Arora</strong>, L.C.C. (Learning Coaching Center) is recognized as a premier educational haven for academic excellence and computer skills.
+            Directed and founded by <strong className="text-slate-900 font-extrabold">{director}</strong>, {institute} is recognized as a premier educational haven for academic excellence and computer skills.
           </p>
         </div>
 
@@ -69,8 +74,8 @@ export const AboutSection: React.FC = () => {
                 <div className="relative shrink-0">
                   <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl overflow-hidden border-4 border-[#0066FF] shadow-lg shadow-blue-500/25 bg-slate-900">
                     <img
-                      src="/assets/founder.png"
-                      alt="Aman Arora - Founder & Director"
+                      src={websiteSettings?.directorPhotoUrl || "/assets/founder.png"}
+                      alt={`${director} - Founder & Director`}
                       className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-300"
                     />
                   </div>
@@ -83,9 +88,9 @@ export const AboutSection: React.FC = () => {
                   <span className="px-3 py-1 rounded-full bg-[#0066FF] text-white font-black text-[10px] uppercase tracking-wider">
                     FOUNDER & MANAGING DIRECTOR
                   </span>
-                  <h3 className="text-2xl font-black text-slate-900">Aman Arora</h3>
+                  <h3 className="text-2xl font-black text-slate-900">{director}</h3>
                   <p className="text-xs text-[#0066FF] font-bold">
-                    Lead Educator & Academic Mentor • Learning Coaching Center
+                    Lead Educator & Academic Mentor • {institute}
                   </p>
                 </div>
               </div>
@@ -120,7 +125,7 @@ export const AboutSection: React.FC = () => {
                 <span className="text-[#0066FF]">confidence and modern skills</span>
               </h3>
               <p className="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
-                At <strong className="text-slate-900 font-extrabold">Learning Coaching Center (L.C.C.)</strong>, education is beyond exams. We emphasize strong logical foundations in mathematics and science, practical computer literacy, and stage-speaking charisma.
+                At <strong className="text-slate-900 font-extrabold">{institute}</strong>, education is beyond exams. We emphasize strong logical foundations in mathematics and science, practical computer literacy, and stage-speaking charisma.
               </p>
             </div>
 

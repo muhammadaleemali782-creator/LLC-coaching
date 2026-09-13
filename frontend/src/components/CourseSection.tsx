@@ -33,9 +33,8 @@ export const CourseSection: React.FC = () => {
     { id: 'spoken', label: 'Spoken English', icon: '🗣️' }
   ];
 
-  // Guaranteed authentic images
   const enrichedCourses = courses.map(c => {
-    if (c.id === 'c-english-fluency' || c.category === 'spoken' || c.title.toLowerCase().includes('spoken') || c.image.includes('forest') || c.image.includes('moss')) {
+    if (!c.image) {
       return {
         ...c,
         image: '/assets/debate.jpg'
@@ -209,7 +208,7 @@ export const CourseSection: React.FC = () => {
               {/* Card Body */}
               <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
                 <div>
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white group-hover:text-[#0066FF] transition-colors leading-snug line-clamp-1">
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white group-hover:text-[#0066FF] transition-colors leading-snug line-clamp-2">
                     {course.title}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium mt-1.5 line-clamp-2">

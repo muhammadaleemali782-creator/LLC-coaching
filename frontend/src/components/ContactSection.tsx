@@ -4,9 +4,14 @@ import { MapPin, Phone, Mail, Clock, MessageSquare, Send, Sparkles, CheckCircle2
 import { Youtube, Instagram } from './SocialIcons';
 
 export const ContactSection: React.FC = () => {
-  const { showToast } = useApp();
+  const { showToast, websiteSettings } = useApp();
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [sent, setSent] = useState(false);
+
+  const director = websiteSettings?.directorName || 'Aman Arora';
+  const phone = websiteSettings?.contactPhone || '+91 98765 43210';
+  const email = websiteSettings?.contactEmail || 'admissions@lcc.edu';
+  const address = websiteSettings?.contactAddress || 'L.C.C. Education Campus, Main Market Road, Near City Central, Varanasi, Uttar Pradesh 221001.';
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,7 +20,7 @@ export const ContactSection: React.FC = () => {
       return;
     }
     setSent(true);
-    showToast('Your message has been sent to Aman Arora & L.C.C. counseling desk.', 'success');
+    showToast(`Your message has been sent to ${director} & counseling desk.`, 'success');
   };
 
   return (
@@ -29,7 +34,7 @@ export const ContactSection: React.FC = () => {
             <span>Campus & Help Desk</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-4">
-            Get in Touch with <span className="text-[#0066FF]">L.C.C. Mentors</span>
+            Get in Touch with <span className="text-[#0066FF]">{websiteSettings?.shortName || 'L.C.C.'} Mentors</span>
           </h2>
           <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-medium">
             Have questions about course fees, class timings, study material, or computer diplomas? Visit our campus or reach out directly.
@@ -48,7 +53,7 @@ export const ContactSection: React.FC = () => {
               <div>
                 <h4 className="text-sm font-black text-slate-900 mb-1">Campus Location</h4>
                 <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                  L.C.C. Education Campus, Main Market Road, Near City Central, Varanasi, Uttar Pradesh 221001.
+                  {address}
                 </p>
               </div>
             </div>
@@ -60,10 +65,10 @@ export const ContactSection: React.FC = () => {
               <div>
                 <h4 className="text-sm font-black text-slate-900 mb-1">Helpline Phone</h4>
                 <p className="text-xs text-slate-600 font-medium">
-                  +91 98765 43210 / 0562-284901
+                  {phone}
                 </p>
                 <span className="text-[11px] text-emerald-600 font-bold block mt-1">
-                  Director: Aman Arora
+                  Director: {director}
                 </span>
               </div>
             </div>

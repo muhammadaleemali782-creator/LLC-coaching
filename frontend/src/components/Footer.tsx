@@ -49,7 +49,7 @@ export const Footer: React.FC = () => {
           </div>
 
           <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto leading-relaxed font-medium">
-            <strong>Learning Coaching Center (L.C.C.)</strong> — Premier coaching institute for Academic Excellence (Classes 1–12), Computer Certification (DCA/ADCA/Tally), and Fluent Spoken English under the mentorship of <strong>Aman Arora</strong>.
+            <strong>{websiteSettings?.instituteName || 'Learning Coaching Center (L.C.C.)'}</strong> — Premier coaching institute for Academic Excellence (Classes 1–12), Computer Certification (DCA/ADCA/Tally), and Fluent Spoken English under the mentorship of <strong>{websiteSettings?.directorName || 'Aman Arora'}</strong>.
           </p>
 
           {/* Quick Links Navigation */}
