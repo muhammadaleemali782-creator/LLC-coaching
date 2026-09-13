@@ -69,85 +69,112 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs transition-colors">
-        
-        {/* Top Emergency & Admission Helpline Bar */}
-        <div className="bg-[#0066FF] text-white py-1 px-3 sm:px-6 text-xs transition-colors">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-            
-            <div className="flex items-center gap-2 overflow-hidden">
-              <span className="bg-amber-400 text-slate-950 font-black text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
-                BATCH 2026–27
-              </span>
-              <span className="hidden md:inline font-bold text-[11px] truncate">
-                Admissions Open for Classes 1–12, Computer DCA & Spoken English
-              </span>
-            </div>
+      {/* 1. TOP HELPLINE BAR */}
+      <div className="bg-[#0066FF] text-white py-1 px-3 sm:px-6 text-xs transition-colors">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          
+          <div className="flex items-center gap-2 overflow-hidden">
+            <span className="bg-amber-400 text-slate-950 font-black text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
+              BATCH 2026–27
+            </span>
+            <span className="hidden md:inline font-bold text-[11px] truncate">
+              Admissions Open for Classes 1–12, Computer DCA & Spoken English
+            </span>
+          </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 text-[10px] sm:text-[11px] font-bold">
-              <a href="tel:+919876543210" className="hover:text-amber-300 flex items-center gap-1 whitespace-nowrap bg-white/10 px-2 py-0.5 rounded-full">
-                <Phone className="w-3 h-3 shrink-0" />
-                <span className="hidden xs:inline">+91 98765 43210</span>
-                <span className="xs:hidden">Call</span>
-              </a>
-              <a
-                href="https://wa.me/919876543210"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors whitespace-nowrap"
-              >
-                <MessageSquare className="w-3 h-3 shrink-0" />
-                <span>WhatsApp</span>
-              </a>
-            </div>
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 text-[10px] sm:text-[11px] font-bold">
+            <a href="tel:+919876543210" className="hover:text-amber-300 flex items-center gap-1 whitespace-nowrap bg-white/10 px-2 py-0.5 rounded-full">
+              <Phone className="w-3 h-3 shrink-0" />
+              <span className="hidden xs:inline">+91 98765 43210</span>
+              <span className="xs:hidden">Call</span>
+            </a>
+            <a
+              href="https://wa.me/919876543210"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors whitespace-nowrap"
+            >
+              <MessageSquare className="w-3 h-3 shrink-0" />
+              <span>WhatsApp</span>
+            </a>
           </div>
         </div>
+      </div>
 
-        {/* Main Navbar */}
-        <nav className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-1.5 sm:gap-4">
+      {/* 2. MGKVP-STYLE DUAL-LANGUAGE INSTITUTIONAL HEADER (ABOVE NAVBAR) */}
+      <div className="bg-white border-b-2 border-red-600/30 py-3 sm:py-4 px-3 sm:px-6 shadow-xs">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-6">
           
-          {/* L.C.C. Official Brand Logo */}
+          {/* Left Seal / Coaching Logo */}
           <div
             onClick={() => navigateTo('home')}
-            className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none group shrink-0"
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer shrink-0"
           >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-amber-400 p-0.5 bg-white shadow-sm flex items-center justify-center shrink-0">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full border-2 border-amber-400 p-0.5 sm:p-1 bg-white shadow-md flex items-center justify-center shrink-0">
               <img
                 src={websiteSettings?.logoUrl || '/logo.jpg'}
-                alt={websiteSettings?.instituteName || 'L.C.C. Learning Coaching Center'}
+                alt={websiteSettings?.instituteName || 'L.C.C. Official Seal'}
                 className="w-full h-full object-contain rounded-full"
-                onError={(e: any) => {
-                  e.target.src = '/logo.jpg';
-                }}
+                onError={(e: any) => { e.target.src = '/logo.jpg'; }}
               />
             </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="font-black text-sm sm:text-base tracking-tight text-[#0B3B95] dark:text-white leading-none">
-                  {websiteSettings?.instituteName || 'LEARNING COACHING CENTER'}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-[11px] sm:text-xs font-black text-[#D32F2F] leading-tight">
-                  लर्निंग कोचिंग सेंटर, वाराणसी
-                </span>
-                <span className="px-1 py-0.2 rounded bg-amber-400 text-slate-950 text-[8px] font-black uppercase tracking-wider hidden sm:inline-block">
-                  ESTD. 2016
-                </span>
-              </div>
+          </div>
+
+          {/* Center MGKVP Dual-Language Title Block */}
+          <div
+            onClick={() => navigateTo('home')}
+            className="text-center flex-1 cursor-pointer select-none space-y-0.5 sm:space-y-1"
+          >
+            <h1 className="text-base sm:text-2xl lg:text-3xl font-black text-[#0B3B95] tracking-tight uppercase leading-snug">
+              {websiteSettings?.instituteName || 'LEARNING COACHING CENTER (L.C.C.)'}
+            </h1>
+            <h2 className="text-sm sm:text-xl lg:text-2xl font-black text-[#D32F2F] tracking-wide leading-tight">
+              लर्निंग कोचिंग सेंटर (एल.सी.सी.) वाराणसी
+            </h2>
+            <p className="text-[10px] sm:text-xs font-bold text-slate-600 hidden sm:block">
+              (A Premier Coaching Institute for School Academics, Computer DCA & Spoken English)
+            </p>
+          </div>
+
+          {/* Right Trust / A++ Rating Badge */}
+          <div className="shrink-0 flex items-center gap-2">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-amber-500 bg-amber-50 flex flex-col items-center justify-center shadow-xs">
+              <span className="text-[8px] sm:text-[9px] font-bold text-amber-900 leading-none">RATED</span>
+              <span className="text-xs sm:text-base font-black text-amber-600 leading-none">A++</span>
+              <span className="text-[7px] sm:text-[8px] font-bold text-amber-900 leading-none">TOP #1</span>
             </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* 3. MAIN NAVBAR (BELOW INSTITUTIONAL BANNER) */}
+      <header className="sticky top-0 z-40 bg-[#0B3B95] text-white shadow-md transition-colors">
+        <nav className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-2 sm:gap-4">
+          
+          {/* Left Brand Badge for compact view */}
+          <div
+            onClick={() => navigateTo('home')}
+            className="flex items-center gap-2 cursor-pointer select-none py-1"
+          >
+            <span className="bg-amber-400 text-slate-950 font-black text-xs px-2 py-0.5 rounded uppercase tracking-wider">
+              L.C.C.
+            </span>
+            <span className="font-extrabold text-sm sm:text-base text-white tracking-tight hidden md:inline">
+              Campus Portal
+            </span>
           </div>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden xl:flex items-center gap-3 text-xs font-bold text-slate-600 dark:text-slate-300">
+          <div className="hidden xl:flex items-center gap-1 text-xs font-bold text-white/90">
             {navItems.map(item => {
               const isActive = activeView === 'home' ? scrollSection === item.view : activeView === item.view;
               return (
                 <button
                   key={item.label}
                   onClick={() => navigateTo(item.view, item.anchor)}
-                  className={`transition-all py-1.5 px-3 rounded-full relative hover:text-[#0066FF] cursor-pointer ${
-                    isActive ? 'text-[#0066FF] bg-blue-50 dark:bg-blue-950/60 font-extrabold' : ''
+                  className={`transition-all py-1.5 px-3 rounded-full relative hover:text-amber-300 hover:bg-white/10 cursor-pointer ${
+                    isActive ? 'text-slate-950 bg-amber-400 font-extrabold shadow-xs' : ''
                   }`}
                 >
                   {item.label}

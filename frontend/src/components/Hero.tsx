@@ -90,47 +90,7 @@ export const Hero: React.FC = () => {
     <section className="bg-slate-100/70 border-b border-slate-200/90 pb-8 sm:pb-12 pt-3 sm:pt-4 px-2 sm:px-4 lg:px-6">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
 
-        {/* 1. MGKVP-STYLE GRAND INSTITUTIONAL HEADER BANNER */}
-        <div className="bg-white rounded-2xl border-2 border-slate-200/90 shadow-sm p-3 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
-          
-          {/* Left Seal / Coaching Logo */}
-          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-amber-400 p-1 bg-gradient-to-tr from-amber-50 to-white shadow-md flex items-center justify-center shrink-0">
-              <img
-                src={websiteSettings?.logoUrl || '/logo.jpg'}
-                alt="L.C.C. Official Seal"
-                className="w-full h-full object-contain rounded-full"
-                onError={(e: any) => { e.target.src = '/logo.jpg'; }}
-              />
-            </div>
-          </div>
-
-          {/* Center: MGKVP-Style Dual-Language Header (English Blue Bold + Hindi Red Bold) */}
-          <div className="text-center flex-1 space-y-1">
-            <h1 className="text-lg sm:text-2xl lg:text-3xl font-black text-[#0B3B95] tracking-tight uppercase leading-snug">
-              {instituteFullName}
-            </h1>
-            <h2 className="text-base sm:text-xl lg:text-2xl font-black text-[#D32F2F] tracking-wide leading-tight">
-              लर्निंग कोचिंग सेंटर (एल.सी.सी.) वाराणसी
-            </h2>
-            <p className="text-[11px] sm:text-xs font-bold text-slate-600">
-              (A Premier Coaching Institute for School Academics, Computer DCA & Spoken English)
-            </p>
-          </div>
-
-          {/* Right Badge: NAAC/ISO Top Rated Trust Badge */}
-          <div className="hidden lg:flex flex-col items-center justify-center shrink-0 border-l border-slate-200 pl-5">
-            <div className="w-14 h-14 rounded-full border-2 border-amber-500 bg-amber-50 flex flex-col items-center justify-center shadow-xs">
-              <span className="text-[9px] font-bold text-amber-900 leading-none">RATED</span>
-              <span className="text-sm font-black text-amber-600 leading-none">A++</span>
-              <span className="text-[8px] font-bold text-amber-900 leading-none">TOP #1</span>
-            </div>
-            <span className="text-[9px] font-black text-slate-600 uppercase tracking-wider mt-1">BEST COACHING</span>
-          </div>
-
-        </div>
-
-        {/* 2. UNIVERSITY SLIDER + QUICK LINKS + DIRECTOR SIDEBAR GRID */}
+        {/* UNIVERSITY SLIDER + QUICK LINKS + DIRECTOR SIDEBAR GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 items-stretch">
           
           {/* Left Column: Quick Links (Like University Portal) */}
