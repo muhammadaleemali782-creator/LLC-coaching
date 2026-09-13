@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
 const getAuthHeader = (): Record<string, string> => {
   const token = localStorage.getItem('lcc_auth_token') || localStorage.getItem('lcc_admin_token');

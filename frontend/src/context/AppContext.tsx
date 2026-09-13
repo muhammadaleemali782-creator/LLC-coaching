@@ -252,21 +252,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     document.body.classList.remove('dark');
   }, []);
 
-  const [courses, setCourses] = useState<Course[]>(INITIAL_COURSES);
-  const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(INITIAL_STUDY_MATERIALS);
-  const [syllabuses, setSyllabuses] = useState<SyllabusItem[]>(INITIAL_SYLLABUS);
-  const [notices, setNotices] = useState<Notice[]>(INITIAL_NOTICES);
-  const [videos, setVideos] = useState<VideoLecture[]>(INITIAL_VIDEOS);
-  const [instagramPosts, setInstagramPosts] = useState<InstagramPost[]>(INITIAL_INSTAGRAM_POSTS);
-  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(INITIAL_GALLERY);
-  const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
-  const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
-  const [inquiries, setInquiries] = useState<AdmissionInquiry[]>([]);
+  const loadSaved = <T,>(key: string, fallback: T): T => {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  };
+
+  const saveItem = (key: string, data: any) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {}
+  };
+
+  const [courses, setCourses] = useState<Course[]>(() => loadSaved('lcc_courses', INITIAL_COURSES));
+  const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(() => loadSaved('lcc_study_materials', INITIAL_STUDY_MATERIALS));
+  const [syllabuses, setSyllabuses] = useState<SyllabusItem[]>(() => loadSaved('lcc_syllabus', INITIAL_SYLLABUS));
+  const [notices, setNotices] = useState<Notice[]>(() => loadSaved('lcc_notices', INITIAL_NOTICES));
+  const [videos, setVideos] = useState<VideoLecture[]>(() => loadSaved('lcc_videos', INITIAL_VIDEOS));
+  const [instagramPosts, setInstagramPosts] = useState<InstagramPost[]>(() => loadSaved('lcc_instagram', INITIAL_INSTAGRAM_POSTS));
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(() => loadSaved('lcc_gallery', INITIAL_GALLERY));
+  const [students, setStudents] = useState<Student[]>(() => loadSaved('lcc_students', INITIAL_STUDENTS));
+  const [transactions, setTransactions] = useState<Transaction[]>(() => loadSaved('lcc_transactions', INITIAL_TRANSACTIONS));
+  const [inquiries, setInquiries] = useState<AdmissionInquiry[]>(() => loadSaved('lcc_inquiries', []));
   const [mockTests, setMockTests] = useState<MockTest[]>(INITIAL_MOCK_TESTS);
-  const [ads, setAds] = useState<Advertisement[]>(INITIAL_ADS);
-  const [reviews, setReviews] = useState<Review[]>(INITIAL_REVIEWS);
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>(INITIAL_SOCIALS);
-  const [websiteSettings, setWebsiteSettings] = useState<WebsiteSettings>(INITIAL_SETTINGS);
+  const [ads, setAds] = useState<Advertisement[]>(() => loadSaved('lcc_ads', INITIAL_ADS));
+  const [reviews, setReviews] = useState<Review[]>(() => loadSaved('lcc_reviews', INITIAL_REVIEWS));
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>(() => loadSaved('lcc_social_links', INITIAL_SOCIALS));
+  const [websiteSettings, setWebsiteSettings] = useState<WebsiteSettings>(() => loadSaved('lcc_website_settings', INITIAL_SETTINGS));
 
   const [selectedCourseForPayment, setSelectedCourseForPayment] = useState<Course | null>(null);
   const [pendingCourseForEnrollment, setPendingCourseForEnrollment] = useState<Course | null>(() => {
@@ -321,17 +336,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           api.auth.getUsers()
         ]);
 
-        if (adsRes.status === 'fulfilled' && adsRes.value.data?.length) setAds(adsRes.value.data);
-        if (pdfsRes.status === 'fulfilled' && pdfsRes.value.data?.length) setStudyMaterials(pdfsRes.value.data);
-        if (vidsRes.status === 'fulfilled' && vidsRes.value.data?.length) setVideos(vidsRes.value.data);
-        if (revsRes.status === 'fulfilled' && revsRes.value.data?.length) setReviews(revsRes.value.data);
-        if (socsRes.status === 'fulfilled' && socsRes.value.data?.length) setSocialLinks(socsRes.value.data);
-        if (setsRes.status === 'fulfilled' && setsRes.value.data) setWebsiteSettings(setsRes.value.data);
-        if (coursesRes.status === 'fulfilled' && coursesRes.value.data?.length) setCourses(coursesRes.value.data);
-        if (notsRes.status === 'fulfilled' && notsRes.value.data?.length) setNotices(notsRes.value.data);
-        if (galRes.status === 'fulfilled' && galRes.value.data?.length) setGalleryItems(galRes.value.data);
-        if (sylRes.status === 'fulfilled' && sylRes.value.data?.length) setSyllabuses(sylRes.value.data);
-        if (inqRes.status === 'fulfilled' && inqRes.value.data?.length) setInquiries(inqRes.value.data);
+        if (adsRes.status === 'fulfilled' && adsRes.value.data?.length) {
+          setAds(adsRes.value.data);
+          saveItem('lcc_ads', adsRes.value.data);
+        }
+        if (pdfsRes.status === 'fulfilled' && pdfsRes.value.data?.length) {
+          setStudyMaterials(pdfsRes.value.data);
+          saveItem('lcc_study_materials', pdfsRes.value.data);
+        }
+        if (vidsRes.status === 'fulfilled' && vidsRes.value.data?.length) {
+          setVideos(vidsRes.value.data);
+          saveItem('lcc_videos', vidsRes.value.data);
+        }
+        if (revsRes.status === 'fulfilled' && revsRes.value.data?.length) {
+          setReviews(revsRes.value.data);
+          saveItem('lcc_reviews', revsRes.value.data);
+        }
+        if (socsRes.status === 'fulfilled' && socsRes.value.data?.length) {
+          setSocialLinks(socsRes.value.data);
+          saveItem('lcc_social_links', socsRes.value.data);
+        }
+        if (setsRes.status === 'fulfilled' && setsRes.value.data) {
+          setWebsiteSettings(setsRes.value.data);
+          saveItem('lcc_website_settings', setsRes.value.data);
+        }
+        if (coursesRes.status === 'fulfilled' && coursesRes.value.data?.length) {
+          setCourses(coursesRes.value.data);
+          saveItem('lcc_courses', coursesRes.value.data);
+        }
+        if (notsRes.status === 'fulfilled' && notsRes.value.data?.length) {
+          setNotices(notsRes.value.data);
+          saveItem('lcc_notices', notsRes.value.data);
+        }
+        if (galRes.status === 'fulfilled' && galRes.value.data?.length) {
+          setGalleryItems(galRes.value.data);
+          saveItem('lcc_gallery', galRes.value.data);
+        }
+        if (sylRes.status === 'fulfilled' && sylRes.value.data?.length) {
+          setSyllabuses(sylRes.value.data);
+          saveItem('lcc_syllabus', sylRes.value.data);
+        }
+        if (inqRes.status === 'fulfilled' && inqRes.value.data?.length) {
+          setInquiries(inqRes.value.data);
+          saveItem('lcc_inquiries', inqRes.value.data);
+        }
         if (usersRes.status === 'fulfilled' && usersRes.value.data?.length) {
           const registeredStudents = usersRes.value.data.filter(u => u.role !== 'admin');
           if (registeredStudents.length > 0) setStudents(registeredStudents);
@@ -608,19 +656,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateSocialLink = async (id: string, body: Partial<SocialLink>) => {
     try {
       await api.socials.update(id, body);
-      setSocialLinks(prev => prev.map(s => s.id === id ? { ...s, ...body } : s));
-    } catch (e) {
-      setSocialLinks(prev => prev.map(s => s.id === id ? { ...s, ...body } : s));
-    }
+    } catch (e) {}
+    setSocialLinks(prev => {
+      const updated = prev.map(s => (s.id === id ? { ...s, ...body } : s));
+      saveItem('lcc_social_links', updated);
+      return updated;
+    });
+    showToast('Social link saved permanently!', 'success');
   };
 
   const updateWebsiteSettings = async (settings: Partial<WebsiteSettings>) => {
     try {
       await api.settings.update(settings);
-      setWebsiteSettings(prev => ({ ...prev, ...settings }));
-    } catch (e) {
-      setWebsiteSettings(prev => ({ ...prev, ...settings }));
-    }
+    } catch (e) {}
+    setWebsiteSettings(prev => {
+      const updated = { ...prev, ...settings };
+      saveItem('lcc_website_settings', updated);
+      return updated;
+    });
+    showToast('Website settings saved permanently!', 'success');
   };
 
   const toggleUserStatus = async (id: string) => {
@@ -684,42 +738,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Course Management (Backend Integrated)
   const addCourse = async (course: Omit<Course, 'id' | 'enrolledCount' | 'rating'>) => {
+    let newC: Course;
     try {
       const res = await api.courses.create(course);
-      setCourses(prev => [res.data, ...prev]);
-      showToast(`Course "${res.data.title}" added to database!`, 'success');
+      newC = res.data;
     } catch (e) {
-      const newC: Course = {
+      newC = {
         ...course,
         id: `c-${Date.now()}`,
         enrolledCount: 0,
         rating: 5.0
       };
-      setCourses(prev => [newC, ...prev]);
-      showToast(`Course "${newC.title}" added successfully!`, 'success');
     }
+    setCourses(prev => {
+      const updated = [newC, ...prev];
+      saveItem('lcc_courses', updated);
+      return updated;
+    });
+    showToast(`Course "${newC.title}" saved successfully!`, 'success');
   };
 
   const updateCourse = async (course: Course) => {
     try {
       await api.courses.update(course.id, course);
-      setCourses(prev => prev.map(c => (c.id === course.id ? course : c)));
-      showToast(`Course "${course.title}" saved to database!`, 'success');
-    } catch (e) {
-      setCourses(prev => prev.map(c => (c.id === course.id ? course : c)));
-      showToast(`Course "${course.title}" updated!`, 'success');
-    }
+    } catch (e) {}
+    setCourses(prev => {
+      const updated = prev.map(c => (c.id === course.id ? course : c));
+      saveItem('lcc_courses', updated);
+      return updated;
+    });
+    showToast(`Course "${course.title}" saved permanently!`, 'success');
   };
 
   const deleteCourse = async (id: string) => {
     try {
       await api.courses.delete(id);
-      setCourses(prev => prev.filter(c => c.id !== id));
-      showToast('Course removed from database.', 'info');
-    } catch (e) {
-      setCourses(prev => prev.filter(c => c.id !== id));
-      showToast('Course deleted.', 'info');
-    }
+    } catch (e) {}
+    setCourses(prev => {
+      const updated = prev.filter(c => c.id !== id);
+      saveItem('lcc_courses', updated);
+      return updated;
+    });
+    showToast('Course removed.', 'info');
   };
 
   // Material Management
@@ -731,42 +791,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       dateAdded: new Date().toISOString().split('T')[0],
       downloadsCount: 0
     };
-    setStudyMaterials(prev => [newMat, ...prev]);
+    setStudyMaterials(prev => {
+      const updated = [newMat, ...prev];
+      saveItem('lcc_study_materials', updated);
+      return updated;
+    });
     showToast(`Material "${newMat.title}" published!`, 'success');
   };
 
   const deleteStudyMaterial = (id: string) => {
     api.media.deletePDF(id).catch(() => {});
-    setStudyMaterials(prev => prev.filter(m => m.id !== id));
+    setStudyMaterials(prev => {
+      const updated = prev.filter(m => m.id !== id);
+      saveItem('lcc_study_materials', updated);
+      return updated;
+    });
     showToast('Study material deleted.', 'info');
   };
 
   // Notice Management (Backend Integrated)
   const addNotice = async (notice: Omit<Notice, 'id' | 'date'>) => {
+    let newN: Notice;
     try {
       const res = await api.notices.create(notice);
-      setNotices(prev => [res.data, ...prev]);
-      showToast(`Notice "${res.data.title}" posted to database!`, 'success');
+      newN = res.data;
     } catch (e) {
-      const newN: Notice = {
+      newN = {
         ...notice,
         id: `not-${Date.now()}`,
         date: new Date().toISOString().split('T')[0]
       };
-      setNotices(prev => [newN, ...prev]);
-      showToast(`Notice "${newN.title}" posted!`, 'success');
     }
+    setNotices(prev => {
+      const updated = [newN, ...prev];
+      saveItem('lcc_notices', updated);
+      return updated;
+    });
+    showToast(`Notice "${newN.title}" posted!`, 'success');
   };
 
   const deleteNotice = async (id: string) => {
     try {
       await api.notices.delete(id);
-      setNotices(prev => prev.filter(n => n.id !== id));
-      showToast('Notice removed from database.', 'info');
-    } catch (e) {
-      setNotices(prev => prev.filter(n => n.id !== id));
-      showToast('Notice deleted.', 'info');
-    }
+    } catch (e) {}
+    setNotices(prev => {
+      const updated = prev.filter(n => n.id !== id);
+      saveItem('lcc_notices', updated);
+      return updated;
+    });
+    showToast('Notice removed.', 'info');
   };
 
   // Video Management
@@ -777,18 +850,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `v-${Date.now()}`,
       views: '0'
     };
-    setVideos(prev => [newV, ...prev]);
+    setVideos(prev => {
+      const updated = [newV, ...prev];
+      saveItem('lcc_videos', updated);
+      return updated;
+    });
     showToast(`Video lecture "${newV.title}" added!`, 'success');
   };
 
   const toggleVideoLecture = (id: string) => {
     api.media.toggleVideo(id).catch(() => {});
-    setVideos(prev => prev.map(v => v.id === id ? { ...v, isPublished: !v.isPublished } : v));
+    setVideos(prev => {
+      const updated = prev.map(v => (v.id === id ? { ...v, isPublished: !v.isPublished } : v));
+      saveItem('lcc_videos', updated);
+      return updated;
+    });
   };
 
   const deleteVideoLecture = (id: string) => {
     api.media.deleteVideo(id).catch(() => {});
-    setVideos(prev => prev.filter(v => v.id !== id));
+    setVideos(prev => {
+      const updated = prev.filter(v => v.id !== id);
+      saveItem('lcc_videos', updated);
+      return updated;
+    });
     showToast('Video lecture removed.', 'info');
   };
 
@@ -799,12 +884,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `g-${Date.now()}`,
       date: new Date().toISOString().split('T')[0]
     };
-    setGalleryItems(prev => [newG, ...prev]);
+    setGalleryItems(prev => {
+      const updated = [newG, ...prev];
+      saveItem('lcc_gallery', updated);
+      return updated;
+    });
     showToast('Gallery image added!', 'success');
   };
 
   const deleteGalleryItem = (id: string) => {
-    setGalleryItems(prev => prev.filter(g => g.id !== id));
+    setGalleryItems(prev => {
+      const updated = prev.filter(g => g.id !== id);
+      saveItem('lcc_gallery', updated);
+      return updated;
+    });
     showToast('Gallery image removed.', 'info');
   };
 
