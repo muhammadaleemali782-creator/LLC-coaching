@@ -67,12 +67,13 @@ export const verifyRazorpayPayment = async (req, res) => {
     }
 
     // 4. Fetch Course Details
+    let course = null;
     let courseTitle = 'Academic Course';
     let targetWhatsapp = '';
     let targetPlaylist = '';
 
     if (mongoose.connection.readyState === 1) {
-      const course = await CourseModel.findOne({ id: courseId });
+      course = await CourseModel.findOne({ id: courseId });
       if (course) {
         courseTitle = course.title;
         targetWhatsapp = course.whatsappRedirectUrl || '';
@@ -85,7 +86,7 @@ export const verifyRazorpayPayment = async (req, res) => {
       }
     } else {
       const db = getDB();
-      const course = (db.courses || []).find(c => c.id === courseId);
+      course = (db.courses || []).find(c => c.id === courseId);
       if (course) {
         courseTitle = course.title;
         targetWhatsapp = course.whatsappRedirectUrl || '';
@@ -95,6 +96,15 @@ export const verifyRazorpayPayment = async (req, res) => {
         if (!targetWhatsapp) targetWhatsapp = db.settings.defaultWhatsappRedirectUrl || '';
         if (!targetPlaylist) targetPlaylist = db.settings.defaultPlaylistRedirectUrl || '';
       }
+    }
+
+    // Strict Server-side Price Integrity Check (Anti-Burp Suite price tampering)
+    const expectedFee = course ? Number(course.discountFee ?? course.fee ?? 0) : 0;
+    if (expectedFee > 0 && Number(amount) < expectedFee) {
+      return res.status(400).json({
+        success: false,
+        message: 'Security Alert: Tampering detected! Paid amount does not match course fee.'
+      });
     }
 
     // 5. Generate Tamper-Proof Cryptographic Verification Token
