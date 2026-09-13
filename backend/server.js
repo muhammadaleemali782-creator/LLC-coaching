@@ -49,11 +49,13 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Health Check
 app.get('/api/health', (req, res) => {
+  const isMongoConnected = mongoose.connection.readyState === 1;
   res.json({
     status: 'OK',
     institute: 'Learning Coaching Center (L.C.C.)',
     version: '2.0.0-production',
-    database: process.env.MONGODB_URI ? 'MongoDB Atlas (Online Cloud)' : 'Persistent JSON Engine',
+    database: isMongoConnected ? 'MongoDB Atlas (Online Cloud Database)' : 'Serverless Fallback Engine',
+    databaseConnected: isMongoConnected,
     timestamp: new Date().toISOString()
   });
 });
