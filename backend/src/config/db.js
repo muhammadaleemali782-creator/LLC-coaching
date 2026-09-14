@@ -184,7 +184,9 @@ const SettingSchema = new mongoose.Schema({
   defaultWhatsappRedirectUrl: String,
   defaultPlaylistRedirectUrl: String,
   heroPosterUrl: String,
-  directorPhotoUrl: String
+  directorPhotoUrl: String,
+  visualOverrides: { type: mongoose.Schema.Types.Mixed, default: {} },
+  sectionOrder: { type: [String], default: [] }
 });
 
 const InquirySchema = new mongoose.Schema({

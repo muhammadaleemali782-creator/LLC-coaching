@@ -23,6 +23,9 @@ export const updateSettings = async (req, res) => {
         settings = await SettingModel.create(req.body);
       } else {
         Object.assign(settings, req.body);
+        if (req.body.visualOverrides) {
+          settings.markModified('visualOverrides');
+        }
         await settings.save();
       }
       return res.json({ success: true, message: 'Website branding & settings updated successfully in Cloud MongoDB!', data: settings });

@@ -220,6 +220,13 @@ export interface SocialLink {
   isEnabled: boolean;
 }
 
+export interface VisualOverrideItem {
+  selector: string;
+  type: 'text' | 'image';
+  originalValue: string;
+  value: string;
+}
+
 // Website Global Settings
 export interface WebsiteSettings {
   instituteName: string;
@@ -241,4 +248,6 @@ export interface WebsiteSettings {
   defaultPlaylistRedirectUrl?: string;
   heroPosterUrl?: string;
   directorPhotoUrl?: string;
+  visualOverrides?: Record<string, VisualOverrideItem>;
+  sectionOrder?: string[];
 }

@@ -19,6 +19,127 @@ import {
   Type
 } from 'lucide-react';
 
+import { VisualOverrideItem } from '../../types';
+
+export const DEFAULT_SECTION_ORDER = [
+  'hero',
+  'about',
+  'methodology',
+  'ad_top',
+  'courses',
+  'batches',
+  'guarantee',
+  'what_we_do',
+  'ad_middle',
+  'study-material',
+  'syllabus',
+  'videos',
+  'reviews',
+  'instagram',
+  'gallery',
+  'app_download',
+  'admission',
+  'faq',
+  'contact'
+];
+
+export const SECTION_LABELS: Record<string, string> = {
+  hero: 'Photo Slider & Quick Links Portal (Top)',
+  about: 'About Institute & Director Aman Arora Card',
+  methodology: 'Mission & Pedagogy (What We Do)',
+  ad_top: 'Top Offer Banner',
+  courses: 'Coaching Courses Grid',
+  batches: 'High-Impact Live Batches',
+  guarantee: 'Pedagogy, Trust & Rainbow Learning Arch',
+  what_we_do: 'Features & Benefits',
+  ad_middle: 'Middle Sponsored Banner',
+  'study-material': 'Study Vault & PDFs',
+  syllabus: 'Syllabus Tracker',
+  videos: 'YouTube Lectures',
+  reviews: 'Student Reviews & Testimonials',
+  instagram: 'Instagram Reels & Posts',
+  gallery: 'Campus Life & Lab Gallery',
+  app_download: 'Mobile App Download Banner',
+  admission: 'Admission Inquiry Form',
+  faq: 'Frequently Asked Questions',
+  contact: 'Contact & Map Location'
+};
+
+export const getDomPath = (el: HTMLElement): string => {
+  if (el.id) return `#${el.id}`;
+  const path: string[] = [];
+  let current: HTMLElement | null = el;
+  while (current && current.nodeType === Node.ELEMENT_NODE && current !== document.body && current !== document.documentElement) {
+    let selector = current.tagName.toLowerCase();
+    if (current.id) {
+      selector += `#${current.id}`;
+      path.unshift(selector);
+      break;
+    } else {
+      let sibling = current;
+      let nth = 1;
+      while (sibling.previousElementSibling) {
+        sibling = sibling.previousElementSibling as HTMLElement;
+        if (sibling.tagName === current.tagName) nth++;
+      }
+      selector += `:nth-of-type(${nth})`;
+    }
+    path.unshift(selector);
+    current = current.parentElement;
+  }
+  return path.join(' > ');
+};
+
+export const applyVisualOverrides = (overrides?: Record<string, VisualOverrideItem | any>) => {
+  if (!overrides || typeof overrides !== 'object') return;
+
+  Object.values(overrides).forEach((item: any) => {
+    if (!item || !item.value) return;
+
+    let targetEl: HTMLElement | null = null;
+    if (item.selector) {
+      try {
+        targetEl = document.querySelector(item.selector);
+      } catch (e) {}
+    }
+
+    // Fallback: match by originalValue if selector did not match
+    if (!targetEl && item.originalValue) {
+      if (item.type === 'image') {
+        const imgs = document.querySelectorAll('img');
+        for (const img of Array.from(imgs)) {
+          if (img.src === item.originalValue || img.getAttribute('src') === item.originalValue) {
+            targetEl = img;
+            break;
+          }
+        }
+      } else {
+        const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, button, li');
+        for (const el of Array.from(elements)) {
+          const htmlEl = el as HTMLElement;
+          if (htmlEl.innerText?.trim() === item.originalValue.trim()) {
+            targetEl = htmlEl;
+            break;
+          }
+        }
+      }
+    }
+
+    if (targetEl) {
+      if (item.type === 'image') {
+        const img = targetEl as HTMLImageElement;
+        if (img.src !== item.value) {
+          img.src = item.value;
+        }
+      } else {
+        if (targetEl.innerText !== item.value) {
+          targetEl.innerText = item.value;
+        }
+      }
+    }
+  });
+};
+
 interface HistorySnapshot {
   websiteSettings: any;
   courses: any[];
@@ -53,17 +174,18 @@ export const LiveVisualEditor: React.FC = () => {
   const [historyPointer, setHistoryPointer] = useState<number>(-1);
 
   // Section Ordering State for Homepage
-  const [sectionOrder, setSectionOrder] = useState<string[]>([
-    'hero',
-    'courses',
-    'study-material',
-    'methodology',
-    'batches',
-    'reviews',
-    'videos',
-    'gallery',
-    'about'
-  ]);
+  const [sectionOrder, setSectionOrder] = useState<string[]>(() => {
+    if (websiteSettings.sectionOrder && websiteSettings.sectionOrder.length > 0) {
+      return websiteSettings.sectionOrder;
+    }
+    return DEFAULT_SECTION_ORDER;
+  });
+
+  useEffect(() => {
+    if (websiteSettings.sectionOrder && websiteSettings.sectionOrder.length > 0) {
+      setSectionOrder(websiteSettings.sectionOrder);
+    }
+  }, [websiteSettings.sectionOrder]);
 
   // Push initial state
   useEffect(() => {
@@ -178,18 +300,64 @@ export const LiveVisualEditor: React.FC = () => {
     }
   };
 
-  // Apply Point & Click Edit Live to DOM & Database
-  const handleApplyClickEdit = () => {
-    if (!clickedTarget) return;
+  // Apply Point & Click Edit Live to DOM & Database Permanently
+  const handleApplyClickEdit = async () => {
+    if (!clickedTarget || !clickedTarget.elementRef) return;
 
-    if (clickedTarget.type === 'image' && clickedTarget.elementRef) {
+    const selector = getDomPath(clickedTarget.elementRef);
+
+    // 1. Immediately apply to the live DOM
+    if (clickedTarget.type === 'image') {
       (clickedTarget.elementRef as HTMLImageElement).src = clickedTarget.newValue;
-      showToast('Image updated live on page!', 'success');
-      pushSnapshot(websiteSettings, courses, 'Updated image source');
-    } else if (clickedTarget.type === 'text' && clickedTarget.elementRef) {
+    } else {
       clickedTarget.elementRef.innerText = clickedTarget.newValue;
-      showToast('Text updated live on page!', 'success');
-      pushSnapshot(websiteSettings, courses, `Updated text: "${clickedTarget.newValue.slice(0, 20)}..."`);
+    }
+
+    // 2. Build persistent override object
+    const newOverride: VisualOverrideItem = {
+      selector,
+      type: clickedTarget.type,
+      originalValue: clickedTarget.originalValue,
+      value: clickedTarget.newValue
+    };
+
+    const updatedOverrides = {
+      ...(websiteSettings.visualOverrides || {}),
+      [selector]: newOverride
+    };
+
+    // 3. Check for top-level websiteSettings sync
+    const updatedSettings: any = {
+      ...websiteSettings,
+      visualOverrides: updatedOverrides
+    };
+
+    if (clickedTarget.type === 'text') {
+      const val = clickedTarget.newValue.trim();
+      const orig = clickedTarget.originalValue.trim();
+      if (orig === websiteSettings.instituteName?.trim()) updatedSettings.instituteName = val;
+      if (orig === websiteSettings.directorName?.trim()) updatedSettings.directorName = val;
+      if (orig === websiteSettings.contactPhone?.trim()) updatedSettings.contactPhone = val;
+      if (orig === websiteSettings.contactEmail?.trim()) updatedSettings.contactEmail = val;
+      if (orig === websiteSettings.contactAddress?.trim()) updatedSettings.contactAddress = val;
+      if (orig === websiteSettings.emergencyAlertText?.trim()) updatedSettings.emergencyAlertText = val;
+      if (orig === websiteSettings.heroBadgeText?.trim()) updatedSettings.heroBadgeText = val;
+      if (orig === websiteSettings.instituteTagline?.trim()) updatedSettings.instituteTagline = val;
+    } else if (clickedTarget.type === 'image') {
+      if (clickedTarget.originalValue === websiteSettings.directorPhotoUrl) updatedSettings.directorPhotoUrl = clickedTarget.newValue;
+      if (clickedTarget.originalValue === websiteSettings.logoUrl) updatedSettings.logoUrl = clickedTarget.newValue;
+      if (clickedTarget.originalValue === websiteSettings.heroPosterUrl) updatedSettings.heroPosterUrl = clickedTarget.newValue;
+    }
+
+    // 4. Save to AppContext & localStorage & backend immediately
+    try {
+      localStorage.setItem('lcc_visual_overrides', JSON.stringify(updatedOverrides));
+      await updateWebsiteSettings(updatedSettings);
+      pushSnapshot(updatedSettings, courses, `Updated ${clickedTarget.type}: "${clickedTarget.newValue.slice(0, 20)}..."`);
+      setHasUnsavedChanges(false);
+      showToast('Live changes saved permanently! It will remain even after page reload.', 'success');
+    } catch (err: any) {
+      showToast('Saved to local browser storage!', 'info');
     }
 
     setClickedTarget(null);
@@ -203,8 +371,10 @@ export const LiveVisualEditor: React.FC = () => {
     updated[idx - 1] = updated[idx];
     updated[idx] = temp;
     setSectionOrder(updated);
-    pushSnapshot(websiteSettings, courses, `Moved ${updated[idx - 1]} section up`);
-    showToast('Section order updated!', 'info');
+    const newSettings = { ...websiteSettings, sectionOrder: updated };
+    updateWebsiteSettings(newSettings);
+    pushSnapshot(newSettings, courses, `Moved ${SECTION_LABELS[updated[idx - 1]] || updated[idx - 1]} up`);
+    showToast('Section order updated and saved live!', 'info');
   };
 
   // Move Section Down
@@ -215,13 +385,20 @@ export const LiveVisualEditor: React.FC = () => {
     updated[idx + 1] = updated[idx];
     updated[idx] = temp;
     setSectionOrder(updated);
-    pushSnapshot(websiteSettings, courses, `Moved ${updated[idx + 1]} section down`);
-    showToast('Section order updated!', 'info');
+    const newSettings = { ...websiteSettings, sectionOrder: updated };
+    updateWebsiteSettings(newSettings);
+    pushSnapshot(newSettings, courses, `Moved ${SECTION_LABELS[updated[idx + 1]] || updated[idx + 1]} down`);
+    showToast('Section order updated and saved live!', 'info');
   };
 
-  const handleSaveAll = () => {
-    setHasUnsavedChanges(false);
-    showToast('All live changes saved permanently to cloud database!', 'success');
+  const handleSaveAll = async () => {
+    try {
+      await updateWebsiteSettings(websiteSettings);
+      setHasUnsavedChanges(false);
+      showToast('All live changes saved permanently to cloud database and browser!', 'success');
+    } catch (e: any) {
+      showToast('Saved to browser storage!', 'info');
+    }
   };
 
   return (
@@ -444,8 +621,8 @@ export const LiveVisualEditor: React.FC = () => {
                     <span className="w-6 h-6 rounded-full bg-slate-800 text-slate-400 text-xs font-mono font-bold flex items-center justify-center">
                       {idx + 1}
                     </span>
-                    <span className="text-xs font-bold text-white capitalize">
-                      {sec.replace('-', ' ')} Section
+                    <span className="text-xs font-bold text-white">
+                      {SECTION_LABELS[sec] || `${sec.replace(/[-_]/g, ' ')} Section`}
                     </span>
                   </div>
 

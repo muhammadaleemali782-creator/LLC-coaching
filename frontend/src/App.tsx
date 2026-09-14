@@ -30,11 +30,64 @@ import { StudentAuthModal } from './components/modals/StudentAuthModal';
 import { AdminAuthModal } from './components/modals/AdminAuthModal';
 import { StudentDashboard } from './components/student/StudentDashboard';
 import { AdminPanel } from './components/admin/AdminPanel';
-import { LiveVisualEditor } from './components/admin/LiveVisualEditor';
+import { LiveVisualEditor, applyVisualOverrides, DEFAULT_SECTION_ORDER } from './components/admin/LiveVisualEditor';
 import { ToastContainer } from './components/Toast';
 
 const MainContent: React.FC = () => {
-  const { activeView, isAdminAuthenticated, theme } = useApp();
+  const { activeView, isAdminAuthenticated, theme, websiteSettings } = useApp();
+
+  // Apply visual overrides across page reloads and dynamic renders permanently
+  React.useEffect(() => {
+    const overrides = websiteSettings?.visualOverrides;
+    if (!overrides || Object.keys(overrides).length === 0) return;
+
+    applyVisualOverrides(overrides);
+
+    let rafId: number | null = null;
+    const debouncedApply = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        applyVisualOverrides(overrides);
+      });
+    };
+
+    const observer = new MutationObserver(() => {
+      debouncedApply();
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      observer.disconnect();
+    };
+  }, [websiteSettings?.visualOverrides, activeView]);
+
+  const sectionMap: Record<string, React.ReactNode> = {
+    hero: <Hero key="hero" />,
+    about: <AboutSection key="about" />,
+    methodology: <MethodologySection key="methodology" />,
+    ad_top: <AdBanner key="ad_top" placement="hero_top" />,
+    courses: <CourseSection key="courses" />,
+    batches: <PaidBatchesSection key="batches" />,
+    guarantee: <GuaranteeSection key="guarantee" />,
+    what_we_do: <WhatWeDoSection key="what_we_do" />,
+    ad_middle: <AdBanner key="ad_middle" placement="between_sections" />,
+    'study-material': <StudyMaterialSection key="study-material" />,
+    syllabus: <SyllabusSection key="syllabus" />,
+    videos: <YouTubeSection key="videos" />,
+    reviews: <ReviewsSection key="reviews" />,
+    instagram: <InstagramSection key="instagram" />,
+    gallery: <GallerySection key="gallery" />,
+    app_download: <AppDownloadSection key="app_download" />,
+    admission: <AdmissionSection key="admission" />,
+    faq: <FaqSection key="faq" />,
+    contact: <ContactSection key="contact" />
+  };
+
+  const currentSectionOrder = (websiteSettings.sectionOrder && websiteSettings.sectionOrder.length > 0)
+    ? websiteSettings.sectionOrder
+    : DEFAULT_SECTION_ORDER;
 
   return (
     <div className={`min-h-screen flex flex-col justify-between transition-colors duration-200 ${
@@ -47,40 +100,7 @@ const MainContent: React.FC = () => {
         <main className={activeView !== 'admin-panel' ? 'pb-32 xl:pb-16' : ''}>
           {activeView === 'home' && (
             <>
-              {/* 1. MGKVP University Style Photo Slider & Quick Links Portal */}
-              <Hero />
-
-              {/* 2. About L.C.C. Coaching Institute & Founder Aman Arora Card */}
-              <AboutSection />
-
-              {/* 3. Mission & Educational Pedagogy / What We Do */}
-              <MethodologySection />
-
-              {/* 4. Choosing the right coaching course for growth Offer Banner */}
-              <AdBanner placement="hero_top" />
-
-              {/* 5. Explore Top-Rated Coaching Courses */}
-              <CourseSection />
-
-              {/* 6. High-Impact Live Batches */}
-              <PaidBatchesSection />
-
-              {/* 7. Pedagogy, Trust & Rainbow Learning Arch */}
-              <GuaranteeSection />
-              <WhatWeDoSection />
-              <AdBanner placement="between_sections" />
-
-              {/* 8. Academics, Media & Community */}
-              <StudyMaterialSection />
-              <SyllabusSection />
-              <YouTubeSection />
-              <ReviewsSection />
-              <InstagramSection />
-              <GallerySection />
-              <AppDownloadSection />
-              <AdmissionSection />
-              <FaqSection />
-              <ContactSection />
+              {currentSectionOrder.map(secKey => sectionMap[secKey] || null)}
             </>
           )}
 

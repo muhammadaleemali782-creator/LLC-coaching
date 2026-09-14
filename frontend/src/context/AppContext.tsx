@@ -237,7 +237,9 @@ const INITIAL_SETTINGS: WebsiteSettings = {
   noticeTickerSpeed: 'normal',
   heroBadgeText: "INDIA'S TOP RATED COACHING & EDTECH",
   allowStudentReviews: true,
-  maintenanceMode: false
+  maintenanceMode: false,
+  visualOverrides: {},
+  sectionOrder: []
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -281,7 +283,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [ads, setAds] = useState<Advertisement[]>(() => loadSaved('lcc_ads', INITIAL_ADS));
   const [reviews, setReviews] = useState<Review[]>(() => loadSaved('lcc_reviews', INITIAL_REVIEWS));
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(() => loadSaved('lcc_social_links', INITIAL_SOCIALS));
-  const [websiteSettings, setWebsiteSettings] = useState<WebsiteSettings>(() => loadSaved('lcc_website_settings', INITIAL_SETTINGS));
+  const [websiteSettings, setWebsiteSettings] = useState<WebsiteSettings>(() => {
+    const saved = loadSaved<WebsiteSettings>('lcc_website_settings', INITIAL_SETTINGS);
+    const overrides = loadSaved<Record<string, any>>('lcc_visual_overrides', {});
+    if (overrides && Object.keys(overrides).length > 0) {
+      saved.visualOverrides = { ...(saved.visualOverrides || {}), ...overrides };
+    }
+    return saved;
+  });
 
   const [selectedCourseForPayment, setSelectedCourseForPayment] = useState<Course | null>(null);
   const [pendingCourseForEnrollment, setPendingCourseForEnrollment] = useState<Course | null>(() => {
@@ -357,8 +366,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           saveItem('lcc_social_links', socsRes.value.data);
         }
         if (setsRes.status === 'fulfilled' && setsRes.value.data) {
-          setWebsiteSettings(setsRes.value.data);
-          saveItem('lcc_website_settings', setsRes.value.data);
+          const cloudSets = setsRes.value.data;
+          const localOverrides = loadSaved<Record<string, any>>('lcc_visual_overrides', {});
+          if (localOverrides && Object.keys(localOverrides).length > 0) {
+            cloudSets.visualOverrides = { ...localOverrides, ...(cloudSets.visualOverrides || {}) };
+          }
+          setWebsiteSettings(cloudSets);
+          saveItem('lcc_website_settings', cloudSets);
         }
         if (coursesRes.status === 'fulfilled' && coursesRes.value.data?.length) {
           setCourses(coursesRes.value.data);
@@ -673,6 +687,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setWebsiteSettings(prev => {
       const updated = { ...prev, ...settings };
       saveItem('lcc_website_settings', updated);
+      if (updated.visualOverrides) {
+        saveItem('lcc_visual_overrides', updated.visualOverrides);
+      }
       return updated;
     });
     showToast('Website settings saved permanently!', 'success');
