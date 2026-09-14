@@ -186,7 +186,9 @@ const SettingSchema = new mongoose.Schema({
   heroPosterUrl: String,
   directorPhotoUrl: String,
   visualOverrides: { type: mongoose.Schema.Types.Mixed, default: {} },
-  sectionOrder: { type: [String], default: [] }
+  sectionOrder: { type: [String], default: [] },
+  heroColumnsOrder: { type: [String], default: [] },
+  headerOrder: { type: [String], default: [] }
 });
 
 const InquirySchema = new mongoose.Schema({

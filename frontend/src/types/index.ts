@@ -222,9 +222,11 @@ export interface SocialLink {
 
 export interface VisualOverrideItem {
   selector: string;
-  type: 'text' | 'image';
-  originalValue: string;
-  value: string;
+  type: 'text' | 'image' | 'element';
+  originalValue?: string;
+  value?: string;
+  backgroundColor?: string;
+  textColor?: string;
 }
 
 // Website Global Settings
@@ -250,4 +252,6 @@ export interface WebsiteSettings {
   directorPhotoUrl?: string;
   visualOverrides?: Record<string, VisualOverrideItem>;
   sectionOrder?: string[];
+  heroColumnsOrder?: string[];
+  headerOrder?: string[];
 }

@@ -95,7 +95,6 @@ const MainContent: React.FC = () => {
     }`}>
       <div>
         <Navbar />
-        <NoticeTicker />
 
         <main className={activeView !== 'admin-panel' ? 'pb-32 xl:pb-16' : ''}>
           {activeView === 'home' && (

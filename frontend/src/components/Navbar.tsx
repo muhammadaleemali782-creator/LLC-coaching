@@ -20,6 +20,7 @@ import {
   Moon
 } from 'lucide-react';
 import { ColorTheme } from '../types';
+import { NoticeTicker } from './NoticeTicker';
 
 export const Navbar: React.FC = () => {
   const {
@@ -67,196 +68,195 @@ export const Navbar: React.FC = () => {
     { label: 'Contact', view: 'contact' as const, anchor: 'contact-section' }
   ];
 
-  return (
-    <>
-      {/* 1. TOP HELPLINE BAR */}
-      <div className="bg-[#0066FF] text-white py-1 px-3 sm:px-6 text-xs transition-colors">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-          
-          <div className="flex items-center gap-2 overflow-hidden">
-            <span className="bg-amber-400 text-slate-950 font-black text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
-              BATCH 2026–27
-            </span>
-            <span className="hidden md:inline font-bold text-[11px] truncate">
-              Admissions Open for Classes 1–12, Computer DCA & Spoken English
-            </span>
-          </div>
+  const headerOrder = (websiteSettings?.headerOrder && websiteSettings.headerOrder.length > 0)
+    ? websiteSettings.headerOrder
+    : ['top-bar', 'brand-header', 'navbar', 'notice-ticker'];
 
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 text-[10px] sm:text-[11px] font-bold">
-            <a href="tel:+919876543210" className="hover:text-amber-300 flex items-center gap-1 whitespace-nowrap bg-white/10 px-2 py-0.5 rounded-full">
-              <Phone className="w-3 h-3 shrink-0" />
-              <span className="hidden xs:inline">+91 98765 43210</span>
-              <span className="xs:hidden">Call</span>
-            </a>
-            <a
-              href="https://wa.me/919876543210"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors whitespace-nowrap"
-            >
-              <MessageSquare className="w-3 h-3 shrink-0" />
-              <span>WhatsApp</span>
-            </a>
+  const renderTopBar = () => (
+    <div key="top-bar" id="header-top-bar" className="bg-[#0066FF] text-white py-1 px-3 sm:px-6 text-xs transition-colors">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 overflow-hidden">
+          <span className="bg-amber-400 text-slate-950 font-black text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
+            BATCH 2026–27
+          </span>
+          <span className="hidden md:inline font-bold text-[11px] truncate">
+            Admissions Open for Classes 1–12, Computer DCA & Spoken English
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 text-[10px] sm:text-[11px] font-bold">
+          <a href="tel:+919876543210" className="hover:text-amber-300 flex items-center gap-1 whitespace-nowrap bg-white/10 px-2 py-0.5 rounded-full">
+            <Phone className="w-3 h-3 shrink-0" />
+            <span className="hidden xs:inline">+91 98765 43210</span>
+            <span className="xs:hidden">Call</span>
+          </a>
+          <a
+            href="https://wa.me/919876543210"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors whitespace-nowrap"
+          >
+            <MessageSquare className="w-3 h-3 shrink-0" />
+            <span>WhatsApp</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderBrandHeader = () => (
+    <div key="brand-header" id="header-brand-banner" className="bg-white border-b-2 border-red-600/30 py-3 sm:py-4 px-3 sm:px-6 shadow-xs transition-colors">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-6">
+        <div
+          onClick={() => navigateTo('home')}
+          className="flex items-center gap-2 sm:gap-3 cursor-pointer shrink-0"
+        >
+          <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full border-2 border-amber-400 p-0.5 sm:p-1 bg-white shadow-md flex items-center justify-center shrink-0">
+            <img
+              src={websiteSettings?.logoUrl || '/logo.jpg'}
+              alt={websiteSettings?.instituteName || 'L.C.C. Official Seal'}
+              className="w-full h-full object-contain rounded-full"
+              onError={(e: any) => { e.target.src = '/logo.jpg'; }}
+            />
+          </div>
+        </div>
+
+        <div
+          onClick={() => navigateTo('home')}
+          className="text-center flex-1 cursor-pointer select-none space-y-0.5 sm:space-y-1"
+        >
+          <h1 className="text-base sm:text-2xl lg:text-3xl font-black text-[#0B3B95] tracking-tight uppercase leading-snug">
+            {websiteSettings?.instituteName || 'LEARNING COACHING CENTER (L.C.C.)'}
+          </h1>
+          <h2 className="text-sm sm:text-xl lg:text-2xl font-black text-[#D32F2F] tracking-wide leading-tight">
+            लर्निंग कोचिंग सेंटर (एल.सी.सी.) वाराणसी
+          </h2>
+          <p className="text-[10px] sm:text-xs font-bold text-slate-600 hidden sm:block">
+            (A Premier Coaching Institute for School Academics, Computer DCA & Spoken English)
+          </p>
+        </div>
+
+        <div className="shrink-0 flex items-center gap-2">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-amber-500 bg-amber-50 flex flex-col items-center justify-center shadow-xs">
+            <span className="text-[8px] sm:text-[9px] font-bold text-amber-900 leading-none">RATED</span>
+            <span className="text-xs sm:text-base font-black text-amber-600 leading-none">A++</span>
+            <span className="text-[7px] sm:text-[8px] font-bold text-amber-900 leading-none">TOP #1</span>
           </div>
         </div>
       </div>
+    </div>
+  );
 
-      {/* 2. MGKVP-STYLE DUAL-LANGUAGE INSTITUTIONAL HEADER (ABOVE NAVBAR) */}
-      <div className="bg-white border-b-2 border-red-600/30 py-3 sm:py-4 px-3 sm:px-6 shadow-xs">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-6">
-          
-          {/* Left Seal / Coaching Logo */}
-          <div
-            onClick={() => navigateTo('home')}
-            className="flex items-center gap-2 sm:gap-3 cursor-pointer shrink-0"
-          >
-            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full border-2 border-amber-400 p-0.5 sm:p-1 bg-white shadow-md flex items-center justify-center shrink-0">
-              <img
-                src={websiteSettings?.logoUrl || '/logo.jpg'}
-                alt={websiteSettings?.instituteName || 'L.C.C. Official Seal'}
-                className="w-full h-full object-contain rounded-full"
-                onError={(e: any) => { e.target.src = '/logo.jpg'; }}
-              />
-            </div>
-          </div>
-
-          {/* Center MGKVP Dual-Language Title Block */}
-          <div
-            onClick={() => navigateTo('home')}
-            className="text-center flex-1 cursor-pointer select-none space-y-0.5 sm:space-y-1"
-          >
-            <h1 className="text-base sm:text-2xl lg:text-3xl font-black text-[#0B3B95] tracking-tight uppercase leading-snug">
-              {websiteSettings?.instituteName || 'LEARNING COACHING CENTER (L.C.C.)'}
-            </h1>
-            <h2 className="text-sm sm:text-xl lg:text-2xl font-black text-[#D32F2F] tracking-wide leading-tight">
-              लर्निंग कोचिंग सेंटर (एल.सी.सी.) वाराणसी
-            </h2>
-            <p className="text-[10px] sm:text-xs font-bold text-slate-600 hidden sm:block">
-              (A Premier Coaching Institute for School Academics, Computer DCA & Spoken English)
-            </p>
-          </div>
-
-          {/* Right Trust / A++ Rating Badge */}
-          <div className="shrink-0 flex items-center gap-2">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-amber-500 bg-amber-50 flex flex-col items-center justify-center shadow-xs">
-              <span className="text-[8px] sm:text-[9px] font-bold text-amber-900 leading-none">RATED</span>
-              <span className="text-xs sm:text-base font-black text-amber-600 leading-none">A++</span>
-              <span className="text-[7px] sm:text-[8px] font-bold text-amber-900 leading-none">TOP #1</span>
-            </div>
-          </div>
-
+  const renderMainNavbar = () => (
+    <header key="navbar" id="header-main-navbar" className="sticky top-0 z-40 bg-[#0B3B95] text-white shadow-md transition-colors">
+      <nav className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-2 sm:gap-4">
+        {/* Left Brand Badge for compact view */}
+        <div
+          onClick={() => navigateTo('home')}
+          className="flex items-center gap-2 cursor-pointer select-none py-1"
+        >
+          <span className="bg-amber-400 text-slate-950 font-black text-xs px-2 py-0.5 rounded uppercase tracking-wider">
+            L.C.C.
+          </span>
+          <span className="font-extrabold text-sm sm:text-base text-white tracking-tight hidden md:inline">
+            Campus Portal
+          </span>
         </div>
-      </div>
 
-      {/* 3. MAIN NAVBAR (BELOW INSTITUTIONAL BANNER) */}
-      <header className="sticky top-0 z-40 bg-[#0B3B95] text-white shadow-md transition-colors">
-        <nav className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-2 sm:gap-4">
-          
-          {/* Left Brand Badge for compact view */}
-          <div
-            onClick={() => navigateTo('home')}
-            className="flex items-center gap-2 cursor-pointer select-none py-1"
-          >
-            <span className="bg-amber-400 text-slate-950 font-black text-xs px-2 py-0.5 rounded uppercase tracking-wider">
-              L.C.C.
-            </span>
-            <span className="font-extrabold text-sm sm:text-base text-white tracking-tight hidden md:inline">
-              Campus Portal
-            </span>
-          </div>
-
-          {/* Desktop Navigation Links */}
-          <div className="hidden xl:flex items-center gap-1 text-xs font-bold text-white/90">
-            {navItems.map(item => {
-              const isActive = activeView === 'home' ? scrollSection === item.view : activeView === item.view;
-              return (
-                <button
-                  key={item.label}
-                  onClick={() => navigateTo(item.view, item.anchor)}
-                  className={`transition-all py-1.5 px-3 rounded-full relative hover:text-amber-300 hover:bg-white/10 cursor-pointer ${
-                    isActive ? 'text-slate-950 bg-amber-400 font-extrabold shadow-xs' : ''
-                  }`}
-                >
-                  {item.label}
-                  {item.view === 'notices' && importantNoticesCount > 0 && (
-                    <span className="inline-block w-2 h-2 rounded-full bg-amber-400 ml-1 align-middle animate-pulse" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Right Action Buttons */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
-
-            {/* Authenticated Director Quick Hub Access */}
-            {isAdminAuthenticated && (
+        {/* Desktop Navigation Links */}
+        <div className="hidden xl:flex items-center gap-1 text-xs font-bold text-white/90">
+          {navItems.map(item => {
+            const isActive = activeView === 'home' ? scrollSection === item.view : activeView === item.view;
+            return (
               <button
-                onClick={() => navigateTo('admin-panel')}
-                className="px-2.5 sm:px-3.5 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm flex items-center gap-1 cursor-pointer animate-in fade-in"
-                title="Director Desk"
+                key={item.label}
+                onClick={() => navigateTo(item.view, item.anchor)}
+                className={`transition-all py-1.5 px-3 rounded-full relative hover:text-amber-300 hover:bg-white/10 cursor-pointer ${
+                  isActive ? 'text-slate-950 bg-amber-400 font-extrabold shadow-xs' : ''
+                }`}
               >
-                <Shield className="w-3.5 h-3.5 text-slate-950" />
-                <span className="hidden sm:inline">Director Desk</span>
+                {item.label}
+                {item.view === 'notices' && importantNoticesCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border-2 border-[#0B3B95]" />
+                )}
               </button>
+            );
+          })}
+        </div>
+
+        {/* Right Action Icons & Controls */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Quick Notice Bell */}
+          <button
+            onClick={() => navigateTo('notices', 'notices-section')}
+            className="p-1.5 sm:p-2 rounded-full hover:bg-white/10 text-white transition-colors relative cursor-pointer"
+            title="Notice Board"
+          >
+            <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
+            {importantNoticesCount > 0 && (
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             )}
+          </button>
 
-            {/* Unified Single Login Portal Button */}
-            {currentStudent ? (
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => navigateTo('student-portal')}
-                  className="px-2.5 sm:px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[11px] sm:text-xs font-bold flex items-center gap-1 hover:bg-emerald-100 transition-all cursor-pointer"
-                >
-                  <User className="w-3 h-3" />
-                  <span className="truncate max-w-[60px] sm:max-w-[100px]">{currentStudent.name.split(' ')[0]}</span>
-                </button>
-                <button
-                  onClick={logoutStudent}
-                  className="p-1.5 text-slate-400 hover:text-red-500 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                  title="Logout"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ) : !isAdminAuthenticated ? (
+          {/* Student / Admin Auth Trigger Button */}
+          {currentStudent ? (
+            <div className="flex items-center gap-1 sm:gap-2">
               <button
-                onClick={() => setIsStudentAuthModalOpen(true)}
-                className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+                onClick={() => navigateTo('student-portal')}
+                className="flex items-center gap-1.5 sm:gap-2 bg-white/10 hover:bg-white/20 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-white/20 transition-all cursor-pointer"
               >
-                <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                <span className="whitespace-nowrap">Login</span>
+                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400 text-slate-950 font-bold text-[10px] sm:text-xs flex items-center justify-center">
+                  {currentStudent.name.charAt(0)}
+                </div>
+                <span className="text-[11px] sm:text-xs font-bold text-white hidden sm:inline truncate max-w-[100px]">
+                  {currentStudent.name.split(' ')[0]}
+                </span>
               </button>
-            ) : null}
-
-            {/* Mobile Hamburger Toggle */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="xl:hidden p-1.5 sm:p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer"
-            >
-              {isMobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
-            </button>
-
-          </div>
-        </nav>
-
-        {/* Mobile Navigation Drawer */}
-        {isMobileMenuOpen && (
-          <div className="xl:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-4 space-y-4 shadow-2xl animate-in slide-in-from-top-4 duration-200 max-h-[calc(100vh-120px)] overflow-y-auto pb-36">
-            <div className="grid grid-cols-2 gap-2">
-              {navItems.map(item => (
-                <button
-                  key={item.label}
-                  onClick={() => {
-                    navigateTo(item.view, item.anchor);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="py-2.5 px-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 text-left flex items-center justify-between cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:text-[#0066FF]"
-                >
-                  <span>{item.label}</span>
-                </button>
-              ))}
+              <button
+                onClick={logoutStudent}
+                className="p-1.5 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
+                title="Log Out"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             </div>
+          ) : !isAdminAuthenticated ? (
+            <button
+              onClick={() => setIsStudentAuthModalOpen(true)}
+              className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+            >
+              <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <span className="whitespace-nowrap">Login</span>
+            </button>
+          ) : null}
+
+          {/* Mobile Hamburger Toggle */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="xl:hidden p-1.5 sm:p-2 rounded-xl text-white hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile Navigation Drawer */}
+      {isMobileMenuOpen && (
+        <div className="xl:hidden border-t border-blue-800 bg-[#0B3B95] px-4 py-4 space-y-4 shadow-2xl animate-in slide-in-from-top-4 duration-200 max-h-[calc(100vh-120px)] overflow-y-auto pb-36 text-white">
+          <div className="grid grid-cols-2 gap-2">
+            {navItems.map(item => (
+              <button
+                key={item.label}
+                onClick={() => {
+                  navigateTo(item.view, item.anchor);
+                  setIsMobileMenuOpen(false);
+                }}
+                className="flex items-center gap-2 p-2.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-amber-400 hover:text-slate-950 transition-all text-left"
+              >
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </div>
 
             <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
               {isAdminAuthenticated && (
@@ -290,8 +290,18 @@ export const Navbar: React.FC = () => {
         )}
 
       </header>
+    );
 
-      {/* Sticky Bottom 5-Tab Bar (Only on public view, never block admin panel) */}
+    const headerPartsMap: Record<string, React.ReactNode> = {
+      'top-bar': renderTopBar(),
+      'brand-header': renderBrandHeader(),
+      'navbar': renderMainNavbar(),
+      'notice-ticker': <NoticeTicker key="notice-ticker" />
+    };
+
+    return (
+      <>
+        {headerOrder.map(partKey => headerPartsMap[partKey] || null)}
       {activeView !== 'admin-panel' && (
         <div className="xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 border-t border-slate-200/80 dark:border-slate-800 py-2 px-3 backdrop-blur-xl flex items-center justify-around shadow-2xl transition-colors">
           <button

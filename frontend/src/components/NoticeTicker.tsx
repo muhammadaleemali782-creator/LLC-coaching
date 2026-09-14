@@ -13,11 +13,11 @@ export const NoticeTicker: React.FC = () => {
 
   return (
     <>
-      <div className="bg-blue-50/95 border-b border-blue-100 py-1 sm:py-1.5 px-2 sm:px-4 relative overflow-hidden">
+      <div id="header-notice-ticker" className="bg-blue-50/95 border-b border-blue-100 py-1 sm:py-1.5 px-2 sm:px-4 relative overflow-hidden transition-colors">
         <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-3">
           
           {/* Responsive Compact Label Badge */}
-          <div className="flex items-center gap-1.5 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[#0066FF] text-white text-[10px] sm:text-[11px] font-black tracking-wider uppercase shrink-0 shadow-xs z-10">
+          <div id="header-live-alert-badge" className="flex items-center gap-1.5 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[#0066FF] text-white text-[10px] sm:text-[11px] font-black tracking-wider uppercase shrink-0 shadow-xs z-10 transition-colors">
             <span className="w-2 h-2 rounded-full bg-red-400 animate-ping shrink-0" />
             <span className="hidden sm:inline whitespace-nowrap">L.C.C. LIVE ALERT</span>
             <span className="sm:hidden whitespace-nowrap">ALERT</span>
