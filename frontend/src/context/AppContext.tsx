@@ -357,7 +357,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           api.gallery.get(),
           api.syllabus.get(),
           api.inquiries.get(),
-          api.auth.getUsers()
+          localStorage.getItem('lcc_admin_token') ? api.auth.getUsers() : Promise.resolve({ success: true, data: [] } as any)
         ]);
 
         if (adsRes.status === 'fulfilled' && adsRes.value.data?.length) {
@@ -409,8 +409,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setInquiries(inqRes.value.data);
           saveItem('lcc_inquiries', inqRes.value.data);
         }
-        if (usersRes.status === 'fulfilled' && usersRes.value.data?.length) {
-          const registeredStudents = usersRes.value.data.filter(u => u.role !== 'admin');
+        if (usersRes.status === 'fulfilled' && (usersRes.value as any)?.data?.length) {
+          const registeredStudents = (usersRes.value as any).data.filter((u: any) => u.role !== 'admin');
           if (registeredStudents.length > 0) setStudents(registeredStudents);
         }
       } catch (e) {

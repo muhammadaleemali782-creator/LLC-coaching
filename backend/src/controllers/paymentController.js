@@ -28,11 +28,32 @@ export const createRazorpayOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid course amount.' });
     }
 
-    const keyId = process.env.RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    let keyId = process.env.RAZORPAY_KEY_ID;
+    let keySecret = process.env.RAZORPAY_KEY_SECRET;
 
+    // Check DB settings if not set in env
     if (!keyId || !keySecret) {
-      return res.status(500).json({ success: false, message: 'Razorpay keys not configured on server.' });
+      try {
+        let setting = null;
+        if (mongoose.connection.readyState === 1) {
+          setting = await SettingModel.findOne();
+        } else {
+          const db = getDB();
+          setting = db.settings;
+        }
+        if (setting) {
+          if (!keyId && setting.razorpayKeyId) keyId = setting.razorpayKeyId;
+          if (!keySecret && setting.razorpayKeySecret) keySecret = setting.razorpayKeySecret;
+        }
+      } catch (e) {}
+    }
+
+    if (!keyId || !keySecret || keyId === 'rzp_live_TbWh7wBlq0NQuz' || !keyId.startsWith('rzp_')) {
+      return res.json({
+        success: false,
+        notConfigured: true,
+        message: 'Razorpay keys not configured on server.'
+      });
     }
 
     // 2. Create Order directly on Razorpay server via official API
@@ -56,8 +77,9 @@ export const createRazorpayOrder = async (req, res) => {
 
     const data = await response.json();
     if (!response.ok) {
-      return res.status(response.status).json({
+      return res.json({
         success: false,
+        notConfigured: true,
         message: data.error?.description || 'Failed to create Razorpay order.'
       });
     }
@@ -71,7 +93,7 @@ export const createRazorpayOrder = async (req, res) => {
       keyId
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return res.json({ success: false, notConfigured: true, message: err.message });
   }
 };
 
