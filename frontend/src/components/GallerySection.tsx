@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { GalleryItem } from '../types';
 import { Image, Award, Sparkles, Filter, Calendar, Users, Layers, ArrowRight } from 'lucide-react';
@@ -15,9 +15,9 @@ export const GallerySection: React.FC = () => {
     { id: 'students', label: 'Student Activities & Debates' }
   ];
 
-  // Guaranteed authentic coaching & debate images
   const verifiedGalleryItems: GalleryItem[] = galleryItems.map(item => {
-    if (item.category === 'students' || item.id === 'gal-5' || item.title.includes('Debate') || item.imageUrl.includes('moss') || item.imageUrl.includes('forest')) {
+    if (!item) return item;
+    if (item.category === 'students' || item.id === 'gal-5' || item.title?.includes('Debate') || item.imageUrl?.includes('moss') || item.imageUrl?.includes('forest')) {
       return {
         ...item,
         title: 'Inter-School Stage Debate & Speech Competition',

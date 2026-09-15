@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useApp } from '../context/AppContext';
 import { Heart, MessageCircle, ExternalLink, Sparkles, Play } from 'lucide-react';
 import { Instagram } from './SocialIcons';
@@ -9,7 +9,8 @@ export const InstagramSection: React.FC = () => {
   const igUrl = socialLinks.find(s => s.platform === 'instagram')?.url || 'https://instagram.com';
 
   const enrichedPosts = instagramPosts.map(post => {
-    if (post.id === 'insta-3' || (post.title || '').toLowerCase().includes('debate') || post.imageUrl.includes('moss') || post.imageUrl.includes('forest')) {
+    if (!post) return post;
+    if (post.id === 'insta-3' || (post.title || '').toLowerCase().includes('debate') || post.imageUrl?.includes('moss') || post.imageUrl?.includes('forest')) {
       return {
         ...post,
         imageUrl: '/assets/debate.jpg'

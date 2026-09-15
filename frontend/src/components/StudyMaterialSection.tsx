@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { StudyMaterial, MaterialCategory } from '../types';
 import {
@@ -36,12 +36,15 @@ export const StudyMaterialSection: React.FC = () => {
   const classFilters = ['all', 'Class 8', 'Class 9', 'Class 10', 'Class 12', 'Computer / DCA', 'English Speaking'];
 
   const filteredMaterials = studyMaterials.filter(mat => {
+    if (!mat) return false;
     const matchesCat = selectedCategory === 'all' || mat.category === selectedCategory;
-    const matchesClass = selectedClass === 'all' || mat.targetClass.toLowerCase().includes(selectedClass.toLowerCase());
-    const matchesSearch =
-      mat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      mat.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      mat.chapter.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesClass = selectedClass === 'all' || (mat.targetClass || '').toLowerCase().includes(selectedClass.toLowerCase());
+    const q = (searchQuery || '').toLowerCase();
+    const matchesSearch = !q || (
+      (mat.title || '').toLowerCase().includes(q) ||
+      (mat.subject || '').toLowerCase().includes(q) ||
+      (mat.chapter || '').toLowerCase().includes(q)
+    );
     return matchesCat && matchesClass && matchesSearch;
   });
 

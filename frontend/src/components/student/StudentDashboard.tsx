@@ -68,7 +68,7 @@ export const StudentDashboard: React.FC = () => {
     );
   }
 
-  const enrolledCourseList = courses.filter(c => currentStudent.enrolledCourses.includes(c.id));
+  const enrolledCourseList = courses.filter(c => (currentStudent.enrolledCourses || []).includes(c.id));
   const activeCourse = enrolledCourseList[0] || courses[0];
 
   const handleSelectAnswer = (qId: number, optionIdx: number) => {

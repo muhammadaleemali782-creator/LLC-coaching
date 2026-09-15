@@ -28,7 +28,7 @@ export const PaidBatchesSection: React.FC = () => {
         {/* Paid Batches Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {paidCourses.slice(0, 3).map((course, idx) => {
-            const isEnrolled = currentStudent?.enrolledCourses.includes(course.id);
+            const isEnrolled = !!currentStudent?.enrolledCourses?.includes(course.id);
             const isFeatured = idx === 1; // Highlight middle card
 
             return (
@@ -86,7 +86,7 @@ export const PaidBatchesSection: React.FC = () => {
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
                       Included in Batch:
                     </span>
-                    {course.features.map((feat, i) => (
+                    {(course.features || []).map((feat, i) => (
                       <div key={i} className="flex items-start gap-2.5 text-xs text-slate-700 font-medium">
                         <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                         <span>{feat}</span>

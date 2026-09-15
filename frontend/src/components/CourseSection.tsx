@@ -44,11 +44,14 @@ export const CourseSection: React.FC = () => {
   });
 
   const filteredCourses = enrichedCourses.filter(course => {
+    if (!course) return false;
     const matchesCategory = selectedCategory === 'all' || course.category === selectedCategory;
-    const matchesSearch =
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.targetClass.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = (searchQuery || '').toLowerCase();
+    const matchesSearch = !q || (
+      (course.title || '').toLowerCase().includes(q) ||
+      (course.targetClass || '').toLowerCase().includes(q) ||
+      (course.description || '').toLowerCase().includes(q)
+    );
     return matchesCategory && matchesSearch;
   });
 
@@ -270,7 +273,7 @@ export const CourseSection: React.FC = () => {
 
                 {/* Features List */}
                 <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  {course.features.slice(0, 3).map((feat, i) => (
+                  {(course.features || []).slice(0, 3).map((feat, i) => (
                     <div key={i} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 font-medium">
                       <CheckCircle2 className="w-3.5 h-3.5 text-[#0066FF] shrink-0" />
                       <span className="truncate">{feat}</span>

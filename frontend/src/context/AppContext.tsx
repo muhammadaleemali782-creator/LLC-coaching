@@ -303,8 +303,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
 
   const [currentStudent, setCurrentStudent] = useState<Student | null>(() => {
-    const saved = localStorage.getItem('lcc_student_session');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('lcc_student_session');
+      if (!saved) return null;
+      const parsed = JSON.parse(saved);
+      if (parsed && !Array.isArray(parsed.enrolledCourses)) {
+        parsed.enrolledCourses = [];
+      }
+      return parsed;
+    } catch {
+      return null;
+    }
   });
 
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
