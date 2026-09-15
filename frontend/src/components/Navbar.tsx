@@ -215,10 +215,10 @@ export const Navbar: React.FC = () => {
                 className="flex items-center gap-1.5 sm:gap-2 bg-white/10 hover:bg-white/20 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-white/20 transition-all cursor-pointer"
               >
                 <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400 text-slate-950 font-bold text-[10px] sm:text-xs flex items-center justify-center">
-                  {currentStudent.name.charAt(0)}
+                  {(currentStudent.name || 'S').charAt(0).toUpperCase()}
                 </div>
                 <span className="text-[11px] sm:text-xs font-bold text-white hidden sm:inline truncate max-w-[100px]">
-                  {currentStudent.name.split(' ')[0]}
+                  {(currentStudent.name || 'Student').split(' ')[0]}
                 </span>
               </button>
               <button

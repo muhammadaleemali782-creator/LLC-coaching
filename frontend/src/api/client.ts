@@ -67,7 +67,17 @@ export const api = {
     }),
     deleteUser: (id: string) => request<{ success: boolean; message: string }>(`/auth/users/${id}`, {
       method: 'DELETE'
-    })
+    }),
+    adminResetPassword: (id: string, tempPassword?: string) =>
+      request<{ success: boolean; message: string; tempPassword: string; user?: any }>(`/auth/users/${id}/reset-password`, {
+        method: 'POST',
+        body: JSON.stringify({ tempPassword })
+      }),
+    updatePassword: (body: { email: string; currentPassword?: string; newPassword: string }) =>
+      request<{ success: boolean; message: string }>('/auth/update-password', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      })
   },
 
   // Courses API

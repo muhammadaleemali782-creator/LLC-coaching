@@ -19,7 +19,12 @@ import {
   AlertCircle,
   HelpCircle,
   MessageSquare,
-  ExternalLink
+  ExternalLink,
+  Lock,
+  KeyRound,
+  X,
+  Check,
+  Loader2
 } from 'lucide-react';
 import { Youtube } from '../SocialIcons';
 import confetti from 'canvas-confetti';
@@ -37,7 +42,8 @@ export const StudentDashboard: React.FC = () => {
     setSelectedVideoForPlayer,
     showToast,
     navigateTo,
-    websiteSettings
+    websiteSettings,
+    updateStudentPassword
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'tests' | 'vault' | 'certificate'>('overview');
@@ -47,6 +53,13 @@ export const StudentDashboard: React.FC = () => {
   const [userAnswers, setUserAnswers] = useState<{ [qId: number]: number }>({});
   const [testSubmitted, setTestSubmitted] = useState(false);
   const [testScore, setTestScore] = useState(0);
+
+  // Change Password State
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [currentPassInput, setCurrentPassInput] = useState('');
+  const [newPassInput, setNewPassInput] = useState('');
+  const [confirmPassInput, setConfirmPassInput] = useState('');
+  const [isUpdatingPass, setIsUpdatingPass] = useState(false);
 
   if (!currentStudent) {
     return (
@@ -60,7 +73,7 @@ export const StudentDashboard: React.FC = () => {
         </p>
         <button
           onClick={() => navigateTo('home')}
-          className="px-6 py-3 rounded-full bg-[#0066FF] text-white font-bold text-xs shadow-md shadow-blue-500/20"
+          className="px-6 py-3 rounded-full bg-[#0066FF] text-white font-bold text-xs shadow-md shadow-blue-500/20 cursor-pointer"
         >
           Return to Home & Login
         </button>
@@ -68,8 +81,26 @@ export const StudentDashboard: React.FC = () => {
     );
   }
 
-  const enrolledCourseList = courses.filter(c => (currentStudent.enrolledCourses || []).includes(c.id));
-  const activeCourse = enrolledCourseList[0] || courses[0];
+  const enrolledCourseList = courses.filter(c => (currentStudent?.enrolledCourses || []).includes(c.id));
+  const fallbackCourse = {
+    id: 'batch-foundation',
+    title: 'Comprehensive Board & Academic Coaching',
+    category: 'secondary' as const,
+    targetClass: currentStudent?.targetClass || currentStudent?.classEnrolled || 'Class 10',
+    duration: 'Full Academic Session',
+    fee: 3999,
+    discountFee: 2999,
+    rating: 5,
+    enrolledCount: 150,
+    instructor: 'Director Aman Arora',
+    image: '/logo.jpg',
+    badge: 'Premier',
+    features: ['Daily Live Classes', 'Notes PDF Vault', 'Weekly Tests'],
+    description: 'Premier curriculum batch designed for academic excellence.',
+    syllabusHighlights: ['Complete NCERT & State Board syllabus', 'PYQ Mastery'],
+    isPaid: true
+  };
+  const activeCourse = enrolledCourseList[0] || courses[0] || fallbackCourse;
 
   const handleSelectAnswer = (qId: number, optionIdx: number) => {
     if (testSubmitted) return;
@@ -101,23 +132,65 @@ export const StudentDashboard: React.FC = () => {
   const handlePrintCertificate = () => {
     window.print();
   };
+
+  const handleChangePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassInput.length < 6) {
+      showToast('New password must be at least 6 characters long.', 'warning');
+      return;
+    }
+    if (newPassInput !== confirmPassInput) {
+      showToast('New password and confirm password do not match.', 'error');
+      return;
+    }
+    setIsUpdatingPass(true);
+    const success = await updateStudentPassword(currentPassInput, newPassInput);
+    setIsUpdatingPass(false);
+    if (success) {
+      setIsChangePasswordOpen(false);
+      setCurrentPassInput('');
+      setNewPassInput('');
+      setConfirmPassInput('');
+    }
+  };
   return (
     <div className="min-h-screen bg-[#F8FAFC] py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         
+        {/* Temporary Password Alert Banner if flagged */}
+        {currentStudent.mustChangePassword && (
+          <div className="p-4 rounded-3xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <KeyRound className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-black text-amber-950">Temporary Password Active</h4>
+                <p className="text-[11px] text-amber-800 font-medium">Your password was reset by Admin. Set your own password to secure your account.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsChangePasswordOpen(true)}
+              className="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-colors shrink-0 shadow-xs cursor-pointer"
+            >
+              Set New Password
+            </button>
+          </div>
+        )}
+
         {/* Welcome Header Card */}
         <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-card-clean flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-4 text-center md:text-left">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#0066FF] to-blue-400 text-white flex items-center justify-center font-black text-2xl shadow-md shadow-blue-500/25 shrink-0">
-              {currentStudent.name.charAt(0)}
+              {(currentStudent.name || 'S').charAt(0).toUpperCase()}
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-2xl font-black text-slate-900">
-                  Welcome Back, {currentStudent.name}!
+                  Welcome Back, {currentStudent.name || 'Student'}!
                 </h2>
                 <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-[#0066FF] font-bold text-xs">
-                  {currentStudent.classEnrolled}
+                  {currentStudent.targetClass || currentStudent.classEnrolled || 'Class 10'}
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium mt-1">
@@ -126,17 +199,25 @@ export const StudentDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap justify-center">
+            <button
+              onClick={() => setIsChangePasswordOpen(true)}
+              className="px-3.5 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+              title="Change Password"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              <span>Change Password</span>
+            </button>
             <button
               onClick={() => setActiveTab('certificate')}
-              className="px-4 py-2 rounded-full bg-blue-50 hover:bg-blue-100 text-[#0066FF] border border-blue-200 text-xs font-bold transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 rounded-full bg-blue-50 hover:bg-blue-100 text-[#0066FF] border border-blue-200 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <Award className="w-4 h-4" />
               <span>My Certificate</span>
             </button>
             <button
               onClick={logoutStudent}
-              className="px-4 py-2 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Logout</span>
@@ -156,7 +237,7 @@ export const StudentDashboard: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all cursor-pointer ${
                 activeTab === tab.id
                   ? 'bg-[#0066FF] text-white shadow-md shadow-blue-500/20'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -180,12 +261,12 @@ export const StudentDashboard: React.FC = () => {
               <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-card-clean">
                 <span className="text-xs text-slate-500 font-bold block mb-1">Overall Curriculum Completed</span>
                 <span className="text-3xl font-black text-emerald-600">
-                  {currentStudent.courseProgress[activeCourse.id] || 35}%
+                  {(currentStudent.courseProgress || {})[activeCourse.id] || 35}%
                 </span>
                 <div className="w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden">
                   <div
                     className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${currentStudent.courseProgress[activeCourse.id] || 35}%` }}
+                    style={{ width: `${(currentStudent.courseProgress || {})[activeCourse.id] || 35}%` }}
                   />
                 </div>
               </div>
@@ -255,10 +336,10 @@ export const StudentDashboard: React.FC = () => {
                   <div className="pt-2">
                     <div className="flex justify-between text-xs text-slate-600 mb-1 font-bold">
                       <span>Batch Progress</span>
-                      <span>{currentStudent.courseProgress[course.id] || 35}%</span>
+                      <span>{(currentStudent.courseProgress || {})[course.id] || 35}%</span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                      <div className="bg-[#0066FF] h-full rounded-full" style={{ width: `${currentStudent.courseProgress[course.id] || 35}%` }} />
+                      <div className="bg-[#0066FF] h-full rounded-full" style={{ width: `${(currentStudent.courseProgress || {})[course.id] || 35}%` }} />
                     </div>
                   </div>
 
@@ -500,6 +581,94 @@ export const StudentDashboard: React.FC = () => {
                   <span className="font-bold text-[11px] text-slate-500">Director, Learning Coaching Center</span>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Change Password Modal */}
+        {isChangePasswordOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+            <div className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 border border-slate-200">
+              <button
+                onClick={() => setIsChangePasswordOpen(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-blue-100 text-[#0066FF] flex items-center justify-center shrink-0">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Change Your Password</h3>
+                  <p className="text-xs text-slate-500">Set a new secret password for your student portal.</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleChangePasswordSubmit} className="space-y-4">
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                    Current / Temporary Password
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="Enter current or temporary password"
+                    value={currentPassInput}
+                    onChange={e => setCurrentPassInput(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                    New Password * (Min 6 characters)
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Enter new strong password"
+                    value={newPassInput}
+                    onChange={e => setNewPassInput(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                    Confirm New Password *
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Confirm new password"
+                    value={confirmPassInput}
+                    onChange={e => setConfirmPassInput(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsChangePasswordOpen(false)}
+                    className="flex-1 py-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isUpdatingPass}
+                    className="flex-1 py-3 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white text-xs font-bold transition-colors shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    {isUpdatingPass ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <span>Update Password</span>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

@@ -106,14 +106,23 @@ export const login = async (req, res) => {
     if (mongoose.connection.readyState === 1) {
       const user = await UserModel.findOne({ email: cleanEmail });
       if (user && user.isActive) {
-        const isMatch = bcrypt.compareSync(password, user.passwordHash);
+        const isMatch = bcrypt.compareSync(password, user.passwordHash) || (user.tempPassword && password === user.tempPassword);
         if (isMatch) {
           const token = generateToken(user);
           return res.json({
             success: true,
             message: `Welcome back, ${user.name}!`,
             token,
-            user: { id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role, targetClass: user.targetClass, enrolledCourses: user.enrolledCourses }
+            user: {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              phone: user.phone,
+              role: user.role,
+              targetClass: user.targetClass,
+              enrolledCourses: user.enrolledCourses || [],
+              mustChangePassword: Boolean(user.mustChangePassword)
+            }
           });
         }
       }
@@ -127,7 +136,7 @@ export const login = async (req, res) => {
     return res.status(401).json({ success: false, message: 'Invalid email address or password.' });
   }
 
-  const isMatch = bcrypt.compareSync(password, user.passwordHash);
+  const isMatch = bcrypt.compareSync(password, user.passwordHash) || (user.tempPassword && password === user.tempPassword);
   if (!isMatch) {
     return res.status(401).json({ success: false, message: 'Invalid email address or password.' });
   }
@@ -139,7 +148,11 @@ export const login = async (req, res) => {
     success: true,
     message: `Welcome back, ${user.name}!`,
     token,
-    user: safeUser
+    user: {
+      ...safeUser,
+      enrolledCourses: safeUser.enrolledCourses || [],
+      mustChangePassword: Boolean(safeUser.mustChangePassword)
+    }
   });
 };
 
@@ -395,4 +408,93 @@ export const toggleUserStatus = async (req, res) => {
     message: `User status changed to ${user.isActive ? 'Active' : 'Inactive'}.`,
     user: { id: user.id, isActive: user.isActive }
   });
+};
+
+// 9. Admin Reset Password for any Student
+export const adminResetPassword = async (req, res) => {
+  const { id } = req.params;
+  const customPass = req.body?.tempPassword;
+
+  // Generate crisp, clean temporary password
+  const tempPassword = customPass && customPass.trim().length >= 6
+    ? customPass.trim()
+    : `LCC@${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const hashed = bcrypt.hashSync(tempPassword, 10);
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const user = await UserModel.findOne({ id });
+      if (user) {
+        user.passwordHash = hashed;
+        user.mustChangePassword = true;
+        user.tempPassword = tempPassword;
+        await user.save();
+        return res.json({
+          success: true,
+          message: `Temporary password generated for ${user.name}`,
+          tempPassword,
+          user: { id: user.id, name: user.name, email: user.email, phone: user.phone }
+        });
+      }
+    }
+  } catch (e) {}
+
+  const db = getDB();
+  const user = (db.users || []).find(u => u.id === id);
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'Student account not found.' });
+  }
+
+  user.passwordHash = hashed;
+  user.mustChangePassword = true;
+  user.tempPassword = tempPassword;
+  saveDB(db);
+
+  return res.json({
+    success: true,
+    message: `Temporary password generated for ${user.name}`,
+    tempPassword,
+    user: { id: user.id, name: user.name, email: user.email, phone: user.phone }
+  });
+};
+
+// 10. Student Update Password (after login with temporary password or from profile)
+export const updatePassword = async (req, res) => {
+  const { email, currentPassword, newPassword } = req.body;
+  if (!email || !newPassword || newPassword.length < 6) {
+    return res.status(400).json({ success: false, message: 'New password must be at least 6 characters.' });
+  }
+  const cleanEmail = email.toLowerCase().trim();
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const user = await UserModel.findOne({ email: cleanEmail });
+      if (user) {
+        if (currentPassword && !bcrypt.compareSync(currentPassword, user.passwordHash) && currentPassword !== user.tempPassword) {
+          return res.status(400).json({ success: false, message: 'Current/temporary password does not match.' });
+        }
+        user.passwordHash = bcrypt.hashSync(newPassword, 10);
+        user.mustChangePassword = false;
+        user.tempPassword = '';
+        await user.save();
+        return res.json({ success: true, message: 'Password updated successfully! You can now log in.' });
+      }
+    }
+  } catch (e) {}
+
+  const db = getDB();
+  const user = (db.users || []).find(u => u.email.toLowerCase() === cleanEmail);
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'Student account not found.' });
+  }
+  if (currentPassword && !bcrypt.compareSync(currentPassword, user.passwordHash) && currentPassword !== user.tempPassword) {
+    return res.status(400).json({ success: false, message: 'Current/temporary password does not match.' });
+  }
+  user.passwordHash = bcrypt.hashSync(newPassword, 10);
+  user.mustChangePassword = false;
+  user.tempPassword = '';
+  saveDB(db);
+
+  return res.json({ success: true, message: 'Password updated successfully! You can now log in.' });
 };

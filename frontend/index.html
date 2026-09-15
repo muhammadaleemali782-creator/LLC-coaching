@@ -123,6 +123,46 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Instant Zero-Flash Pre-render Visual Overrides -->
+    <script>
+      (function() {
+        try {
+          var rawOverrides = localStorage.getItem('lcc_visual_overrides');
+          var overrides = rawOverrides ? JSON.parse(rawOverrides) : null;
+          if (!overrides || Object.keys(overrides).length === 0) {
+            var rawSets = localStorage.getItem('lcc_website_settings');
+            if (rawSets) {
+              var sets = JSON.parse(rawSets);
+              overrides = sets.visualOverrides || null;
+            }
+          }
+          if (overrides && typeof overrides === 'object') {
+            var css = '';
+            for (var key in overrides) {
+              var item = overrides[key];
+              if (!item) continue;
+              var sel = item.selector || (key.indexOf('#') === 0 || key.indexOf('.') === 0 ? key : '');
+              var rules = '';
+              if (item.backgroundColor) {
+                rules += 'background-color: ' + item.backgroundColor + ' !important; ';
+              }
+              if (item.textColor) {
+                rules += 'color: ' + item.textColor + ' !important; ';
+              }
+              if (sel && rules) {
+                css += sel + ' { ' + rules + ' }\n';
+              }
+            }
+            if (css) {
+              var style = document.createElement('style');
+              style.id = 'lcc-instant-theme-css';
+              style.textContent = css;
+              document.head.appendChild(style);
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body class="bg-white text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
     <div id="root"></div>

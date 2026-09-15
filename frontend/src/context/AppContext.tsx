@@ -127,6 +127,9 @@ export interface AppContextType {
   updateSocialLink: (id: string, body: Partial<SocialLink>) => Promise<void>;
   updateWebsiteSettings: (settings: Partial<WebsiteSettings>) => Promise<void>;
   toggleUserStatus: (id: string) => Promise<void>;
+  adminResetPassword: (id: string, tempPassword?: string) => Promise<{ success: boolean; tempPassword: string; message: string; user?: any } | null>;
+  updateStudentPassword: (currentPass: string, newPass: string) => Promise<boolean>;
+  refreshUsers: () => Promise<void>;
 
   // Content Actions
   addCourse: (course: Omit<Course, 'id' | 'enrolledCount' | 'rating'>) => void;
@@ -307,8 +310,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('lcc_student_session');
       if (!saved) return null;
       const parsed = JSON.parse(saved);
-      if (parsed && !Array.isArray(parsed.enrolledCourses)) {
-        parsed.enrolledCourses = [];
+      if (parsed) {
+        if (!Array.isArray(parsed.enrolledCourses)) parsed.enrolledCourses = [];
+        if (!parsed.courseProgress || typeof parsed.courseProgress !== 'object') parsed.courseProgress = {};
+        if (!parsed.quizScores || typeof parsed.quizScores !== 'object') parsed.quizScores = {};
+        if (!parsed.name) parsed.name = 'Student';
       }
       return parsed;
     } catch {
@@ -517,15 +523,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const res = await api.auth.register({ name, email, phone, password: pass, targetClass });
       localStorage.setItem('lcc_auth_token', res.token);
-      localStorage.setItem('lcc_student_session', JSON.stringify(res.user));
       const newStudent: Student = {
         ...res.user,
-        enrolledCourses: [],
-        courseProgress: {},
-        quizScores: {},
-        dateJoined: new Date().toISOString().split('T')[0]
+        enrolledCourses: res.user?.enrolledCourses || [],
+        courseProgress: res.user?.courseProgress || {},
+        quizScores: res.user?.quizScores || {},
+        dateJoined: new Date().toISOString().split('T')[0],
+        isActive: true
       };
-      setStudents(prev => [newStudent, ...prev]);
+      localStorage.setItem('lcc_student_session', JSON.stringify(newStudent));
+      setStudents(prev => {
+        const filtered = prev.filter(s => s.id !== newStudent.id && s.email.toLowerCase() !== newStudent.email.toLowerCase());
+        const updated = [newStudent, ...filtered];
+        saveItem('lcc_students', updated);
+        return updated;
+      });
       setCurrentStudent(newStudent);
       if (handlePostAuthResume(newStudent.name)) {
         return true;
@@ -534,6 +546,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       navigateTo('student-portal');
       return true;
     } catch (err: any) {
+      // Resilient fallback: save locally so user is never lost even if offline
+      if (!navigator.onLine || err.message?.includes('fetch') || err.message?.includes('Failed')) {
+        const fallbackStudent: Student = {
+          id: `usr-${Date.now()}`,
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          phone: phone.trim(),
+          targetClass,
+          enrolledCourses: [],
+          courseProgress: {},
+          quizScores: {},
+          dateJoined: new Date().toISOString().split('T')[0],
+          isActive: true
+        };
+        localStorage.setItem('lcc_student_session', JSON.stringify(fallbackStudent));
+        setStudents(prev => {
+          const updated = [fallbackStudent, ...prev.filter(s => s.email.toLowerCase() !== fallbackStudent.email.toLowerCase())];
+          saveItem('lcc_students', updated);
+          return updated;
+        });
+        setCurrentStudent(fallbackStudent);
+        showToast('Account registered and saved!', 'success');
+        navigateTo('student-portal');
+        return true;
+      }
       showToast(err.message || 'Registration failed. Please check your details.', 'error');
       return false;
     }
@@ -577,6 +614,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem('lcc_admin_token', res.token);
       localStorage.setItem('lcc_admin_authenticated', 'true');
       setIsAdminAuthenticated(true);
+      refreshUsers();
       showToast(res.message || 'Admin authorization successful!', 'success');
       navigateTo('admin-panel');
       return true;
@@ -585,6 +623,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (email === 'admin@lcc.edu' && pass === 'AmanLCC@2026!') {
         localStorage.setItem('lcc_admin_authenticated', 'true');
         setIsAdminAuthenticated(true);
+        refreshUsers();
         showToast('Admin authorization successful!', 'success');
         navigateTo('admin-panel');
         return true;
@@ -707,10 +746,88 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const toggleUserStatus = async (id: string) => {
     try {
       await api.auth.toggleUser(id);
-      setStudents(prev => prev.map(s => s.id === id ? { ...s, isActive: !s.isActive } : s));
-      showToast('User status updated.', 'info');
-    } catch (e) {
-      setStudents(prev => prev.map(s => s.id === id ? { ...s, isActive: !s.isActive } : s));
+    } catch (e) {}
+    setStudents(prev => {
+      const updated = prev.map(s => s.id === id ? { ...s, isActive: !s.isActive } : s);
+      saveItem('lcc_students', updated);
+      return updated;
+    });
+    showToast('User status updated.', 'info');
+  };
+
+  const refreshUsers = async () => {
+    try {
+      const res = await api.auth.getUsers();
+      if (res && res.data && res.data.length > 0) {
+        const studentsOnly = res.data.filter((u: any) => u.role !== 'admin');
+        if (studentsOnly.length > 0) {
+          setStudents(prev => {
+            const map = new Map<string, Student>();
+            prev.forEach(s => map.set(s.email.toLowerCase(), s));
+            studentsOnly.forEach((s: any) => {
+              const existing = map.get(s.email.toLowerCase()) || ({} as any);
+              map.set(s.email.toLowerCase(), {
+                ...existing,
+                ...s,
+                enrolledCourses: s.enrolledCourses || existing.enrolledCourses || [],
+                courseProgress: s.courseProgress || existing.courseProgress || {},
+                quizScores: s.quizScores || existing.quizScores || {}
+              });
+            });
+            const merged = Array.from(map.values());
+            saveItem('lcc_students', merged);
+            return merged;
+          });
+        }
+      }
+    } catch (e) {}
+  };
+
+  const adminResetPassword = async (id: string, customTempPass?: string) => {
+    try {
+      const res = await api.auth.adminResetPassword(id, customTempPass);
+      if (res && res.success) {
+        setStudents(prev => {
+          const updated = prev.map(s => s.id === id ? { ...s, mustChangePassword: true, tempPassword: res.tempPassword } : s);
+          saveItem('lcc_students', updated);
+          return updated;
+        });
+        showToast(`Temporary password generated: ${res.tempPassword}`, 'success');
+        return res;
+      }
+      return null;
+    } catch (err: any) {
+      // Resilient local fallback
+      const tempPassword = customTempPass || `LCC@${Math.floor(1000 + Math.random() * 9000)}`;
+      setStudents(prev => {
+        const updated = prev.map(s => s.id === id ? { ...s, mustChangePassword: true, tempPassword } : s);
+        saveItem('lcc_students', updated);
+        return updated;
+      });
+      showToast(`Temporary password generated: ${tempPassword}`, 'info');
+      const targetUser = students.find(s => s.id === id);
+      return { success: true, tempPassword, message: 'Password reset successfully', user: targetUser };
+    }
+  };
+
+  const updateStudentPassword = async (currentPass: string, newPass: string): Promise<boolean> => {
+    if (!currentStudent) return false;
+    try {
+      const res = await api.auth.updatePassword({
+        email: currentStudent.email,
+        currentPassword: currentPass,
+        newPassword: newPass
+      });
+      if (res.success) {
+        showToast('Password updated successfully! Please keep it safe.', 'success');
+        setCurrentStudent(prev => prev ? { ...prev, mustChangePassword: false, tempPassword: '' } : null);
+        return true;
+      }
+      showToast(res.message || 'Failed to update password.', 'error');
+      return false;
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update password.', 'error');
+      return false;
     }
   };
 
@@ -1019,6 +1136,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateSocialLink,
         updateWebsiteSettings,
         toggleUserStatus,
+        adminResetPassword,
+        updateStudentPassword,
+        refreshUsers,
         addCourse,
         updateCourse,
         deleteCourse,

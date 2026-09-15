@@ -133,6 +133,8 @@ export interface Student {
   joinedDate?: string;
   role?: 'student' | 'admin';
   isActive?: boolean;
+  mustChangePassword?: boolean;
+  tempPassword?: string;
 }
 
 export interface Transaction {
