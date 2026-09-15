@@ -198,57 +198,24 @@ export const Navbar: React.FC = () => {
             )}
           </button>
 
-          {/* Student Auth Trigger Button */}
-          {currentStudent ? (
-            <div className="flex items-center gap-1 sm:gap-2">
-              <button
-                onClick={() => navigateTo('student-portal')}
-                className="flex items-center gap-1.5 sm:gap-2 bg-white/10 hover:bg-white/20 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-white/20 transition-all cursor-pointer"
-              >
-                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400 text-slate-950 font-bold text-[10px] sm:text-xs flex items-center justify-center">
-                  {currentStudent.name.charAt(0)}
-                </div>
-                <span className="text-[11px] sm:text-xs font-bold text-white hidden sm:inline truncate max-w-[100px]">
-                  {currentStudent.name.split(' ')[0]}
-                </span>
-              </button>
-              <button
-                onClick={logoutStudent}
-                className="p-1.5 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
-                title="Log Out"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setIsStudentAuthModalOpen(true)}
-              className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
-              title="Student Portal Login"
-            >
-              <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-950" />
-              <span className="whitespace-nowrap font-black">Student Portal</span>
-            </button>
-          )}
-
           {/* Admin / Director Desk Access Button */}
           {isAdminAuthenticated ? (
             <button
               onClick={() => navigateTo('admin-panel')}
-              className="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
               title="Open Director Admin Panel"
             >
               <Shield className="w-3.5 h-3.5" />
-              <span className="hidden md:inline whitespace-nowrap">Admin Desk</span>
+              <span className="whitespace-nowrap">Admin Desk</span>
             </button>
           ) : (
             <button
               onClick={() => setIsAdminAuthModalOpen(true)}
-              className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-[11px] sm:text-xs font-bold border border-white/20 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
               title="Director / Admin Login"
             >
-              <Shield className="w-3.5 h-3.5 text-amber-300" />
-              <span className="hidden md:inline whitespace-nowrap">Admin</span>
+              <Shield className="w-3.5 h-3.5 text-slate-950" />
+              <span className="whitespace-nowrap">Admin</span>
             </button>
           )}
 
