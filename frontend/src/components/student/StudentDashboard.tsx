@@ -135,6 +135,10 @@ export const StudentDashboard: React.FC = () => {
 
   const handleChangePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentStudent.mustChangePassword && !currentPassInput) {
+      showToast('Please enter your current password.', 'warning');
+      return;
+    }
     if (newPassInput.length < 6) {
       showToast('New password must be at least 6 characters long.', 'warning');
       return;
@@ -144,7 +148,8 @@ export const StudentDashboard: React.FC = () => {
       return;
     }
     setIsUpdatingPass(true);
-    const success = await updateStudentPassword(currentPassInput, newPassInput);
+    const passToSend = currentPassInput || currentStudent.tempPassword || '';
+    const success = await updateStudentPassword(passToSend, newPassInput);
     setIsUpdatingPass(false);
     if (success) {
       setIsChangePasswordOpen(false);
@@ -607,18 +612,20 @@ export const StudentDashboard: React.FC = () => {
               </div>
 
               <form onSubmit={handleChangePasswordSubmit} className="space-y-4">
-                <div>
-                  <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                    Current / Temporary Password
-                  </label>
-                  <input
-                    type="password"
-                    placeholder="Enter current or temporary password"
-                    value={currentPassInput}
-                    onChange={e => setCurrentPassInput(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#0066FF]"
-                  />
-                </div>
+                {!currentStudent.mustChangePassword && (
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                      Current Password *
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="Enter current password"
+                      value={currentPassInput}
+                      onChange={e => setCurrentPassInput(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#0066FF]"
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label className="text-[11px] font-bold text-slate-700 block mb-1">

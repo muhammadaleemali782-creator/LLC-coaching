@@ -128,7 +128,7 @@ export interface AppContextType {
   updateWebsiteSettings: (settings: Partial<WebsiteSettings>) => Promise<void>;
   toggleUserStatus: (id: string) => Promise<void>;
   adminResetPassword: (id: string, tempPassword?: string) => Promise<{ success: boolean; tempPassword: string; message: string; user?: any } | null>;
-  updateStudentPassword: (currentPass: string, newPass: string) => Promise<boolean>;
+  updateStudentPassword: (currentPass: string, newPass: string, targetEmail?: string) => Promise<boolean>;
   refreshUsers: () => Promise<void>;
 
   // Content Actions
@@ -241,6 +241,7 @@ const INITIAL_SETTINGS: WebsiteSettings = {
   heroBadgeText: "INDIA'S TOP RATED COACHING & EDTECH",
   allowStudentReviews: true,
   maintenanceMode: false,
+  razorpayKeyId: 'rzp_live_TbWh7wBlq0NQuz',
   visualOverrides: {},
   sectionOrder: []
 };
@@ -810,17 +811,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const updateStudentPassword = async (currentPass: string, newPass: string): Promise<boolean> => {
-    if (!currentStudent) return false;
+  const updateStudentPassword = async (currentPass: string, newPass: string, targetEmail?: string): Promise<boolean> => {
+    const emailToUse = targetEmail || currentStudent?.email;
+    if (!emailToUse) return false;
     try {
       const res = await api.auth.updatePassword({
-        email: currentStudent.email,
+        email: emailToUse,
         currentPassword: currentPass,
         newPassword: newPass
       });
       if (res.success) {
         showToast('Password updated successfully! Please keep it safe.', 'success');
-        setCurrentStudent(prev => prev ? { ...prev, mustChangePassword: false, tempPassword: '' } : null);
+        setCurrentStudent(prev => {
+          if (!prev) return null;
+          const updated = { ...prev, mustChangePassword: false, tempPassword: '' };
+          saveItem('lcc_student_session', updated);
+          return updated;
+        });
+        setStudents(prev => {
+          const updated = prev.map(s => s.email.toLowerCase() === emailToUse.toLowerCase() ? { ...s, mustChangePassword: false, tempPassword: '' } : s);
+          saveItem('lcc_students', updated);
+          return updated;
+        });
         return true;
       }
       showToast(res.message || 'Failed to update password.', 'error');

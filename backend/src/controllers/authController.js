@@ -471,7 +471,7 @@ export const updatePassword = async (req, res) => {
     if (mongoose.connection.readyState === 1) {
       const user = await UserModel.findOne({ email: cleanEmail });
       if (user) {
-        if (currentPassword && !bcrypt.compareSync(currentPassword, user.passwordHash) && currentPassword !== user.tempPassword) {
+        if (!user.mustChangePassword && currentPassword && !bcrypt.compareSync(currentPassword, user.passwordHash) && currentPassword !== user.tempPassword) {
           return res.status(400).json({ success: false, message: 'Current/temporary password does not match.' });
         }
         user.passwordHash = bcrypt.hashSync(newPassword, 10);
@@ -488,7 +488,7 @@ export const updatePassword = async (req, res) => {
   if (!user) {
     return res.status(404).json({ success: false, message: 'Student account not found.' });
   }
-  if (currentPassword && !bcrypt.compareSync(currentPassword, user.passwordHash) && currentPassword !== user.tempPassword) {
+  if (!user.mustChangePassword && currentPassword && !bcrypt.compareSync(currentPassword, user.passwordHash) && currentPassword !== user.tempPassword) {
     return res.status(400).json({ success: false, message: 'Current/temporary password does not match.' });
   }
   user.passwordHash = bcrypt.hashSync(newPassword, 10);

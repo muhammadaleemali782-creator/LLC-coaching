@@ -163,7 +163,7 @@ export const PaymentModal: React.FC = () => {
       }
     } catch (err: any) {}
 
-    const razorpayKey = serverOrder?.keyId || selectedCourseForPayment.razorpayKeyId || websiteSettings?.razorpayKeyId;
+    const razorpayKey = serverOrder?.keyId || selectedCourseForPayment?.razorpayKeyId || websiteSettings?.razorpayKeyId || 'rzp_live_TbWh7wBlq0NQuz';
 
     // Zero-crash guard: If Razorpay key is missing or not a valid Razorpay key format, switch to Direct UPI seamlessly
     if (!razorpayKey || !razorpayKey.startsWith('rzp_')) {
@@ -309,6 +309,7 @@ export const PaymentModal: React.FC = () => {
         showToast(`❌ Payment Failed: ${failResp?.error?.description || 'Declined by bank.'}`, 'error');
       });
       rzp.open();
+      setIsProcessing(false);
     } catch (err: any) {
       setIsProcessing(false);
       showToast('❌ Unable to open Razorpay: ' + (err?.message || 'Please retry'), 'error');
