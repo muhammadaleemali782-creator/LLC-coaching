@@ -306,7 +306,9 @@ export const PaymentModal: React.FC = () => {
       const rzp = new (window as any).Razorpay(options);
       rzp.on('payment.failed', function (failResp: any) {
         setIsProcessing(false);
-        showToast(`❌ Payment Failed: ${failResp?.error?.description || 'Declined by bank.'}`, 'error');
+        const reason = failResp?.error?.description || 'Razorpay Key Unauthorized or Declined.';
+        showToast(`❌ ${reason} Switched to Direct UPI / Scanner.`, 'error');
+        setPaymentMode('upi');
       });
       rzp.open();
       setIsProcessing(false);
