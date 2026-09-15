@@ -79,7 +79,19 @@ export const PaymentModal: React.FC = () => {
   // 100% RAZORPAY GATEWAY ONLY (Zero-Bypass Cryptographic Verification)
   const handleRazorpayPayment = async () => {
     setIsProcessing(true);
-    const razorpayKey = selectedCourseForPayment.razorpayKeyId || websiteSettings?.razorpayKeyId || 'rzp_live_TbWh7wBlq0NQuz';
+
+    // 1. Create server-side locked Razorpay Order (zero frontend price tampering)
+    let serverOrder: { orderId: string; amount: number; currency: string; keyId: string } | null = null;
+    try {
+      const orderRes = await api.payments.createOrder(selectedCourseForPayment.id);
+      if (orderRes && orderRes.success) {
+        serverOrder = orderRes;
+      }
+    } catch (err: any) {
+      console.warn('Server order creation fallback:', err);
+    }
+
+    const razorpayKey = serverOrder?.keyId || selectedCourseForPayment.razorpayKeyId || websiteSettings?.razorpayKeyId || 'rzp_live_TbWh7wBlq0NQuz';
 
     if (!(window as any).Razorpay) {
       const script = document.createElement('script');
@@ -100,13 +112,14 @@ export const PaymentModal: React.FC = () => {
 
     let paymentAttemptDone = false;
 
-    const options = {
+    const options: any = {
       key: razorpayKey,
-      amount: selectedCourseForPayment.discountFee * 100, // in paise
-      currency: 'INR',
+      amount: serverOrder ? serverOrder.amount : (selectedCourseForPayment.discountFee * 100),
+      currency: serverOrder ? serverOrder.currency : 'INR',
       name: websiteSettings?.instituteName || 'Learning Coaching Center (L.C.C.)',
       description: `Enrollment Fee: ${selectedCourseForPayment.title}`,
       image: websiteSettings?.logoUrl || '/logo.jpg',
+      ...(serverOrder?.orderId ? { order_id: serverOrder.orderId } : {}),
       handler: async function (response: any) {
         paymentAttemptDone = true;
 

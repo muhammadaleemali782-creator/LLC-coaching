@@ -239,6 +239,17 @@ export const api = {
 
   // Payments Security Verification
   payments: {
+    createOrder: (courseId: string) =>
+      request<{
+        success: boolean;
+        orderId: string;
+        amount: number;
+        currency: string;
+        keyId: string;
+      }>('/payments/create-order', {
+        method: 'POST',
+        body: JSON.stringify({ courseId })
+      }),
     verifyRazorpay: (body: {
       razorpay_payment_id: string;
       razorpay_order_id?: string;

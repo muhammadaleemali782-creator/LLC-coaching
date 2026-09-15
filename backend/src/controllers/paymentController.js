@@ -2,6 +2,79 @@ import crypto from 'crypto';
 import mongoose from 'mongoose';
 import { TransactionModel, CourseModel, UserModel, SettingModel, getDB, saveDB } from '../config/db.js';
 
+// Server-side Razorpay Order Creation (Zero Frontend Secrets, Server Locked Price)
+export const createRazorpayOrder = async (req, res) => {
+  try {
+    const { courseId } = req.body;
+    if (!courseId) {
+      return res.status(400).json({ success: false, message: 'Course ID is required.' });
+    }
+
+    // 1. Fetch exact course details from Database
+    let course = null;
+    if (mongoose.connection.readyState === 1) {
+      course = await CourseModel.findOne({ id: courseId });
+    } else {
+      const db = getDB();
+      course = (db.courses || []).find(c => c.id === courseId);
+    }
+
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    const amountInRupees = Number(course.discountFee ?? course.fee ?? 0);
+    if (amountInRupees <= 0) {
+      return res.status(400).json({ success: false, message: 'Invalid course amount.' });
+    }
+
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+    if (!keyId || !keySecret) {
+      return res.status(500).json({ success: false, message: 'Razorpay keys not configured on server.' });
+    }
+
+    // 2. Create Order directly on Razorpay server via official API
+    const authHeader = 'Basic ' + Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+    const response = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': authHeader
+      },
+      body: JSON.stringify({
+        amount: Math.round(amountInRupees * 100), // in paise
+        currency: 'INR',
+        receipt: `rcpt_${courseId.slice(0, 8)}_${Date.now()}`,
+        notes: {
+          courseId: course.id,
+          courseTitle: course.title
+        }
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return res.status(response.status).json({
+        success: false,
+        message: data.error?.description || 'Failed to create Razorpay order.'
+      });
+    }
+
+    // 3. Return strictly order id, amount, and public keyId (Never secret)
+    return res.json({
+      success: true,
+      orderId: data.id,
+      amount: data.amount,
+      currency: data.currency,
+      keyId
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 export const verifyRazorpayPayment = async (req, res) => {
   try {
     const {
