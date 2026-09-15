@@ -1,21 +1,15 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Bell, ChevronRight, X, Calendar, AlertCircle, Search } from 'lucide-react';
+import { Bell, ChevronRight, X, Calendar, AlertCircle } from 'lucide-react';
 import { Notice } from '../types';
 
 export const NoticeTicker: React.FC = () => {
   const { notices, navigateTo } = useApp();
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
-  const [isAllNoticesOpen, setIsAllNoticesOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
 
   if (!notices || notices.length === 0) return null;
 
   const activeNotices = notices.slice(0, 5);
-  const filteredAllNotices = notices.filter(n =>
-    n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (n.description && n.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
 
   return (
     <>
@@ -68,9 +62,9 @@ export const NoticeTicker: React.FC = () => {
             </div>
           </div>
 
-          {/* View All Button */}
+          {/* View All Button - Navigates directly to Notices page */}
           <button
-            onClick={() => setIsAllNoticesOpen(true)}
+            onClick={() => navigateTo('notices')}
             className="flex items-center gap-1 text-xs font-bold text-[#0066FF] hover:text-blue-800 shrink-0 transition-colors z-10 bg-blue-100 hover:bg-blue-200 px-2.5 py-1 rounded-lg cursor-pointer"
             title="View All Official Notices"
           >
@@ -79,93 +73,6 @@ export const NoticeTicker: React.FC = () => {
           </button>
         </div>
       </div>
-
-      {/* All Notices Modal */}
-      {isAllNoticesOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-2xl bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 sm:p-7 space-y-5 max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2.5 rounded-2xl bg-[#0066FF] text-white">
-                  <Bell className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-slate-900 leading-tight">
-                    Official Notice Board
-                  </h3>
-                  <p className="text-xs text-slate-500 font-medium">
-                    All announcements, exam circulars & academic notices
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsAllNoticesOpen(false)}
-                className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Search Input */}
-            <div className="relative shrink-0">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search notices by keyword, batch, exam..."
-                className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066FF]"
-              />
-            </div>
-
-            {/* Notices List */}
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-              {filteredAllNotices.length > 0 ? (
-                filteredAllNotices.map((notice) => (
-                  <div
-                    key={notice.id}
-                    onClick={() => {
-                      setIsAllNoticesOpen(false);
-                      setSelectedNotice(notice);
-                    }}
-                    className="p-4 rounded-2xl border border-slate-100 hover:border-blue-300 bg-slate-50/70 hover:bg-blue-50/50 transition-all cursor-pointer group space-y-2"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-[#0066FF] bg-blue-100/80 px-2 py-0.5 rounded-md">
-                        {notice.badgeText || 'ANNOUNCEMENT'}
-                      </span>
-                      <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{notice.date}</span>
-                      </div>
-                    </div>
-                    <h4 className="text-sm font-black text-slate-900 group-hover:text-[#0066FF] transition-colors leading-snug">
-                      {notice.title}
-                    </h4>
-                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                      {notice.description}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-10 text-slate-400 text-xs">
-                  No notices found matching "{searchTerm}"
-                </div>
-              )}
-            </div>
-
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 shrink-0">
-              <span>Total Notices: <strong>{notices.length}</strong></span>
-              <button
-                onClick={() => setIsAllNoticesOpen(false)}
-                className="px-4 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Notice Detail Modal */}
       {selectedNotice && (

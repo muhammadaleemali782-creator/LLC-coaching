@@ -75,23 +75,23 @@ export const Footer: React.FC = () => {
             <button onClick={() => navigateTo('contact', 'contact-section')} className="hover:text-[#0066FF] transition-colors cursor-pointer">
               Contacts
             </button>
-            <button onClick={() => navigateTo('student-portal')} className="hover:text-[#0066FF] transition-colors text-[#0066FF] cursor-pointer">
-              Student Portal
-            </button>
-            <button
-              onClick={() => {
-                if (isAdminAuthenticated) {
-                  navigateTo('admin-panel');
-                } else {
-                  setIsAdminAuthModalOpen(true);
-                }
-              }}
-              className="flex items-center gap-1 hover:text-emerald-600 transition-colors text-slate-500 cursor-pointer"
-              title="Director / Admin Portal"
-            >
-              <Shield className="w-3 h-3 text-emerald-500" />
-              <span>{isAdminAuthenticated ? 'Admin Desk' : 'Admin Login'}</span>
-            </button>
+            {isAdminAuthenticated ? (
+              <button
+                onClick={() => navigateTo('admin-panel')}
+                className="flex items-center gap-1 hover:text-emerald-600 transition-colors text-emerald-600 font-black cursor-pointer"
+                title="Director Admin Panel"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>Admin Desk</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => navigateTo('student-portal')}
+                className="hover:text-[#0066FF] transition-colors text-[#0066FF] font-bold cursor-pointer"
+              >
+                Student Portal
+              </button>
+            )}
           </div>
 
           {/* Social Icons & Back to Top */}

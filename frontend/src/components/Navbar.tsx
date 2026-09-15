@@ -198,7 +198,7 @@ export const Navbar: React.FC = () => {
             )}
           </button>
 
-          {/* Admin / Director Desk Access Button */}
+          {/* Unified Auth Button: Admin Desk when admin logged in, Student Profile when student logged in, Student Portal otherwise */}
           {isAdminAuthenticated ? (
             <button
               onClick={() => navigateTo('admin-panel')}
@@ -208,14 +208,35 @@ export const Navbar: React.FC = () => {
               <Shield className="w-3.5 h-3.5" />
               <span className="whitespace-nowrap">Admin Desk</span>
             </button>
+          ) : currentStudent ? (
+            <div className="flex items-center gap-1 sm:gap-2">
+              <button
+                onClick={() => navigateTo('student-portal')}
+                className="flex items-center gap-1.5 sm:gap-2 bg-white/10 hover:bg-white/20 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-white/20 transition-all cursor-pointer"
+              >
+                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400 text-slate-950 font-bold text-[10px] sm:text-xs flex items-center justify-center">
+                  {currentStudent.name.charAt(0)}
+                </div>
+                <span className="text-[11px] sm:text-xs font-bold text-white hidden sm:inline truncate max-w-[100px]">
+                  {currentStudent.name.split(' ')[0]}
+                </span>
+              </button>
+              <button
+                onClick={logoutStudent}
+                className="p-1.5 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
+                title="Log Out"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
           ) : (
             <button
-              onClick={() => setIsAdminAuthModalOpen(true)}
+              onClick={() => setIsStudentAuthModalOpen(true)}
               className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
-              title="Director / Admin Login"
+              title="Student Portal Login"
             >
-              <Shield className="w-3.5 h-3.5 text-slate-950" />
-              <span className="whitespace-nowrap">Admin</span>
+              <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-950" />
+              <span className="whitespace-nowrap font-black">Student Portal</span>
             </button>
           )}
 
@@ -262,29 +283,19 @@ export const Navbar: React.FC = () => {
               ) : (
                 <button
                   onClick={() => {
-                    setIsAdminAuthModalOpen(true);
+                    if (currentStudent) {
+                      navigateTo('student-portal');
+                    } else {
+                      setIsStudentAuthModalOpen(true);
+                    }
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider text-center border border-white/20 flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 rounded-2xl bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider text-center shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Shield className="w-4 h-4 text-amber-300" />
-                  <span>Director / Admin Login</span>
+                  <User className="w-4 h-4" />
+                  <span>{currentStudent ? `Student Portal (${currentStudent.name})` : 'Student Portal'}</span>
                 </button>
               )}
-
-              <button
-                onClick={() => {
-                  if (currentStudent) {
-                    navigateTo('student-portal');
-                  } else {
-                    setIsStudentAuthModalOpen(true);
-                  }
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full py-3 rounded-2xl bg-[#0066FF] text-white font-black text-xs uppercase tracking-wider text-center shadow-sm cursor-pointer"
-              >
-                {currentStudent ? `Student Portal (${currentStudent.name})` : 'Student Portal & Login'}
-              </button>
             </div>
           </div>
         )}
