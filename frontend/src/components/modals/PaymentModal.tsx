@@ -165,11 +165,11 @@ export const PaymentModal: React.FC = () => {
 
     const razorpayKey = serverOrder?.keyId || selectedCourseForPayment.razorpayKeyId || websiteSettings?.razorpayKeyId;
 
-    // Zero-crash guard: If Razorpay keys are not configured or invalid, switch to Direct UPI seamlessly
-    if (!razorpayKey || razorpayKey === 'rzp_live_TbWh7wBlq0NQuz' || !razorpayKey.startsWith('rzp_')) {
+    // Zero-crash guard: If Razorpay key is missing or not a valid Razorpay key format, switch to Direct UPI seamlessly
+    if (!razorpayKey || !razorpayKey.startsWith('rzp_')) {
       setIsProcessing(false);
       setPaymentMode('upi');
-      showToast('Razorpay keys not configured on server. Switched to Direct UPI & WhatsApp.', 'info');
+      showToast('Razorpay key not configured. Switched to Direct UPI & WhatsApp.', 'info');
       return;
     }
 
