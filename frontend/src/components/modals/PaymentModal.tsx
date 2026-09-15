@@ -438,14 +438,14 @@ export const PaymentModal: React.FC = () => {
           </div>
         ) : (
           /* ================= PAYMENT CHECKOUT FORM (RAZORPAY ONLY) ================= */
-          <div className="p-5 sm:p-7 space-y-5">
+          <div className="p-4 sm:p-5 space-y-3.5">
             {/* Course Summary Card */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50/60 border border-blue-200 flex items-center justify-between gap-3 shadow-xs">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50/60 border border-blue-200 flex items-center justify-between gap-3 shadow-xs">
               <div className="space-y-0.5 min-w-0">
-                <span className="text-[10px] font-black text-[#0066FF] uppercase tracking-wider bg-white px-2 py-0.5 rounded-md border border-blue-200">
+                <span className="text-[9px] font-black text-[#0066FF] uppercase tracking-wider bg-white px-2 py-0.5 rounded-md border border-blue-200">
                   {selectedCourseForPayment.targetClass}
                 </span>
-                <h4 className="text-xs sm:text-sm font-black text-slate-900 truncate mt-1">
+                <h4 className="text-xs sm:text-sm font-black text-slate-900 truncate mt-0.5">
                   {selectedCourseForPayment.title}
                 </h4>
                 <p className="text-[10px] text-slate-500 font-medium">Instructor: Director Aman Arora & Faculty</p>
@@ -461,29 +461,29 @@ export const PaymentModal: React.FC = () => {
             </div>
 
             {/* Logged in Student Info Badge */}
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-blue-100 text-[#0066FF] flex items-center justify-center font-black">
-                  <UserCheck className="w-4 h-4" />
+            <div className="p-2.5 sm:p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-blue-100 text-[#0066FF] flex items-center justify-center font-black">
+                  <UserCheck className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <span className="font-bold text-slate-900 block">{currentStudent.name}</span>
+                  <span className="font-bold text-slate-900 block leading-tight">{currentStudent.name}</span>
                   <span className="text-[10px] text-slate-500 font-mono">{currentStudent.email} • {currentStudent.phone}</span>
                 </div>
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-bold">
                 Logged In
               </span>
             </div>
 
             {/* Payment Method Switcher */}
-            <div className="flex rounded-2xl bg-slate-100 p-1 border border-slate-200">
+            <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200">
               <button
                 type="button"
                 onClick={() => setPaymentMode('razorpay')}
-                className={`flex-1 py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`flex-1 py-1.5 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   paymentMode === 'razorpay'
-                    ? 'bg-[#0066FF] text-white shadow-sm'
+                    ? 'bg-[#0066FF] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -493,9 +493,9 @@ export const PaymentModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setPaymentMode('upi')}
-                className={`flex-1 py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`flex-1 py-1.5 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   paymentMode === 'upi'
-                    ? 'bg-emerald-600 text-white shadow-sm'
+                    ? 'bg-emerald-600 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -507,7 +507,7 @@ export const PaymentModal: React.FC = () => {
             {paymentMode === 'razorpay' ? (
               <>
                 {/* Razorpay Gateway Box */}
-                <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 text-xs space-y-2 text-slate-700">
+                <div className="p-3 sm:p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200 text-xs space-y-1.5 text-slate-700">
                   <div className="flex items-center gap-2 font-bold text-[#0066FF]">
                     <CreditCard className="w-4 h-4" />
                     <span>Razorpay Automated Gateway</span>
@@ -518,11 +518,11 @@ export const PaymentModal: React.FC = () => {
                 </div>
 
                 {/* Primary Action Button */}
-                <div className="pt-2">
+                <div className="pt-1">
                   <button
                     disabled={isProcessing}
                     onClick={handleRazorpayPayment}
-                    className="w-full py-4 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full py-3.5 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {isProcessing ? (
                       <>
@@ -537,7 +537,7 @@ export const PaymentModal: React.FC = () => {
                     )}
                   </button>
 
-                  <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 font-medium mt-2.5">
+                  <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 font-medium mt-2">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                     <span>100% Secure • Automatic WhatsApp Redirect • Verified E-Receipt</span>
                   </div>
@@ -546,20 +546,20 @@ export const PaymentModal: React.FC = () => {
             ) : (
               <>
                 {/* Direct UPI Box */}
-                <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-xs space-y-3 text-slate-700">
+                <div className="p-3 sm:p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-xs space-y-2.5 text-slate-700">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 font-black text-emerald-800">
                       <QrCode className="w-4 h-4 text-emerald-600" />
                       <span>Institute Official UPI</span>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900">
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900">
                       Instant Admission
                     </span>
                   </div>
 
-                  <div className="p-3 bg-white rounded-xl border border-emerald-200 flex items-center justify-between gap-2">
+                  <div className="p-2.5 bg-white rounded-xl border border-emerald-200 flex items-center justify-between gap-2">
                     <div>
-                      <span className="text-[10px] font-bold text-slate-400 block">UPI ID:</span>
+                      <span className="text-[9px] font-bold text-slate-400 block">UPI ID:</span>
                       <span className="font-mono text-xs font-black text-slate-900">{instituteUpi}</span>
                     </div>
                     <button
@@ -575,10 +575,10 @@ export const PaymentModal: React.FC = () => {
                   <div className="flex gap-2">
                     <a
                       href={`upi://pay?pa=${instituteUpi}&pn=LCC%20Coaching&am=${selectedCourseForPayment.discountFee}&cu=INR`}
-                      className="flex-1 py-2 rounded-xl bg-white border border-emerald-300 hover:bg-emerald-100/50 text-emerald-900 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
+                      className="flex-1 py-1.5 rounded-xl bg-white border border-emerald-300 hover:bg-emerald-100/50 text-emerald-900 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
                     >
                       <Smartphone className="w-3.5 h-3.5" />
-                      <span>Open in GPay / PhonePe</span>
+                      <span>GPay / PhonePe</span>
                     </a>
                     {cleanPhone && (
                       <a
@@ -587,10 +587,10 @@ export const PaymentModal: React.FC = () => {
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
+                        className="flex-1 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
                       >
                         <MessageSquare className="w-3.5 h-3.5 fill-current" />
-                        <span>WhatsApp Director</span>
+                        <span>WhatsApp</span>
                       </a>
                     )}
                   </div>
@@ -604,7 +604,7 @@ export const PaymentModal: React.FC = () => {
                       placeholder="e.g. 425189201948 or leave blank"
                       value={utrInput}
                       onChange={e => setUtrInput(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-emerald-500 font-mono"
+                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-emerald-500 font-mono"
                     />
                   </div>
                 </div>
@@ -613,7 +613,7 @@ export const PaymentModal: React.FC = () => {
                   <button
                     disabled={isProcessing}
                     onClick={handleDirectUpiSubmit}
-                    className="w-full py-4 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-emerald-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {isProcessing ? (
                       <>
@@ -628,7 +628,7 @@ export const PaymentModal: React.FC = () => {
                     )}
                   </button>
 
-                  <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 font-medium mt-2.5">
+                  <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 font-medium mt-2">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Instant Course Unlock • WhatsApp Batch Access • Verified E-Receipt</span>
                   </div>
