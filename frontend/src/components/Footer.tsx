@@ -4,7 +4,7 @@ import { GraduationCap, Phone, Mail, MapPin, Heart, Shield, Sparkles, ArrowUp } 
 import { Youtube, Instagram } from './SocialIcons';
 
 export const Footer: React.FC = () => {
-  const { navigateTo, websiteSettings, socialLinks } = useApp();
+  const { navigateTo, websiteSettings, socialLinks, isAdminAuthenticated, setIsAdminAuthModalOpen } = useApp();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -77,6 +77,20 @@ export const Footer: React.FC = () => {
             </button>
             <button onClick={() => navigateTo('student-portal')} className="hover:text-[#0066FF] transition-colors text-[#0066FF] cursor-pointer">
               Student Portal
+            </button>
+            <button
+              onClick={() => {
+                if (isAdminAuthenticated) {
+                  navigateTo('admin-panel');
+                } else {
+                  setIsAdminAuthModalOpen(true);
+                }
+              }}
+              className="flex items-center gap-1 hover:text-emerald-600 transition-colors text-slate-500 cursor-pointer"
+              title="Director / Admin Portal"
+            >
+              <Shield className="w-3 h-3 text-emerald-500" />
+              <span>{isAdminAuthenticated ? 'Admin Desk' : 'Admin Login'}</span>
             </button>
           </div>
 

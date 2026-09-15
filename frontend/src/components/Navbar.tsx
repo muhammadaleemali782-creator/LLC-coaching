@@ -198,7 +198,7 @@ export const Navbar: React.FC = () => {
             )}
           </button>
 
-          {/* Student / Admin Auth Trigger Button */}
+          {/* Student Auth Trigger Button */}
           {currentStudent ? (
             <div className="flex items-center gap-1 sm:gap-2">
               <button
@@ -231,6 +231,27 @@ export const Navbar: React.FC = () => {
             </button>
           )}
 
+          {/* Admin / Director Desk Access Button */}
+          {isAdminAuthenticated ? (
+            <button
+              onClick={() => navigateTo('admin-panel')}
+              className="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+              title="Open Director Admin Panel"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span className="hidden md:inline whitespace-nowrap">Admin Desk</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setIsAdminAuthModalOpen(true)}
+              className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-[11px] sm:text-xs font-bold border border-white/20 transition-all flex items-center gap-1.5 cursor-pointer"
+              title="Director / Admin Login"
+            >
+              <Shield className="w-3.5 h-3.5 text-amber-300" />
+              <span className="hidden md:inline whitespace-nowrap">Admin</span>
+            </button>
+          )}
+
           {/* Mobile Hamburger Toggle */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -260,16 +281,27 @@ export const Navbar: React.FC = () => {
           </div>
 
             <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
-              {isAdminAuthenticated && (
+              {isAdminAuthenticated ? (
                 <button
                   onClick={() => {
                     navigateTo('admin-panel');
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full py-3 rounded-2xl bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider text-center shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs uppercase tracking-wider text-center shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Shield className="w-4 h-4" />
                   <span>Open Director Desk</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setIsAdminAuthModalOpen(true);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider text-center border border-white/20 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Shield className="w-4 h-4 text-amber-300" />
+                  <span>Director / Admin Login</span>
                 </button>
               )}
 
