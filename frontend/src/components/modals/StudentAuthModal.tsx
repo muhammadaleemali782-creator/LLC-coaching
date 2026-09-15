@@ -162,14 +162,14 @@ export const StudentAuthModal: React.FC = () => {
 
               <div>
                 <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                  {tab === 'login' ? 'Email Address (Student or Admin) *' : 'Student Email Address *'}
+                  Registered Email Address *
                 </label>
                 <div className="relative">
                   <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="email"
                     required
-                    placeholder={tab === 'login' ? 'student@example.com or admin@lcc.edu' : 'student@example.com'}
+                    placeholder="name@example.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#0066FF]"
