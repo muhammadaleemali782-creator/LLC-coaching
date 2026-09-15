@@ -180,7 +180,7 @@ const SettingSchema = new mongoose.Schema({
   heroBadgeText: String,
   allowStudentReviews: Boolean,
   maintenanceMode: Boolean,
-  razorpayKeyId: String,
+  razorpayKeyId: { type: String, default: 'rzp_live_TbWh7wBlq0NQuz' },
   defaultWhatsappRedirectUrl: String,
   defaultPlaylistRedirectUrl: String,
   heroPosterUrl: String,
@@ -642,7 +642,8 @@ const defaultData = {
     noticeTickerSpeed: 'normal',
     heroBadgeText: "INDIA'S TOP RATED COACHING & EDTECH",
     allowStudentReviews: true,
-    maintenanceMode: false
+    maintenanceMode: false,
+    razorpayKeyId: process.env.RAZORPAY_KEY_ID || 'rzp_live_TbWh7wBlq0NQuz'
   },
   inquiries: []
 };

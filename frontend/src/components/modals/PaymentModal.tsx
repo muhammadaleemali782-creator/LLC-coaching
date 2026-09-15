@@ -79,7 +79,7 @@ export const PaymentModal: React.FC = () => {
   // 100% RAZORPAY GATEWAY ONLY (Zero-Bypass Cryptographic Verification)
   const handleRazorpayPayment = async () => {
     setIsProcessing(true);
-    const razorpayKey = selectedCourseForPayment.razorpayKeyId || websiteSettings?.razorpayKeyId || 'rzp_test_lcc_coaching';
+    const razorpayKey = selectedCourseForPayment.razorpayKeyId || websiteSettings?.razorpayKeyId || 'rzp_live_TbWh7wBlq0NQuz';
 
     if (!(window as any).Razorpay) {
       const script = document.createElement('script');
