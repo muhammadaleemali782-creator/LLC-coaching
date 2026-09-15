@@ -220,15 +220,16 @@ export const Navbar: React.FC = () => {
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
-          ) : !isAdminAuthenticated ? (
+          ) : (
             <button
               onClick={() => setIsStudentAuthModalOpen(true)}
-              className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+              title="Student Portal Login"
             >
-              <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-              <span className="whitespace-nowrap">Login</span>
+              <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-950" />
+              <span className="whitespace-nowrap font-black">Student Portal</span>
             </button>
-          ) : null}
+          )}
 
           {/* Mobile Hamburger Toggle */}
           <button
