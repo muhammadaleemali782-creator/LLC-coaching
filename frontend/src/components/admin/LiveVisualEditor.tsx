@@ -103,6 +103,155 @@ export const rgbToHex = (rgb: string): string => {
   return `#${r}${g}${b}`;
 };
 
+export const getEffectiveBgColor = (el: HTMLElement): string => {
+  let curr: HTMLElement | null = el;
+  while (curr && curr !== document.body && curr !== document.documentElement) {
+    const comp = window.getComputedStyle(curr);
+    const hex = rgbToHex(comp.backgroundColor);
+    if (hex && comp.backgroundColor !== 'transparent' && comp.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+      return hex;
+    }
+    curr = curr.parentElement;
+  }
+  return '#0B3B95';
+};
+
+export const getEffectiveTextColor = (el: HTMLElement): string => {
+  let curr: HTMLElement | null = el;
+  while (curr && curr !== document.body && curr !== document.documentElement) {
+    const comp = window.getComputedStyle(curr);
+    const hex = rgbToHex(comp.color);
+    if (hex && comp.color !== 'transparent' && comp.color !== 'rgba(0, 0, 0, 0)') {
+      return hex;
+    }
+    curr = curr.parentElement;
+  }
+  return '#ffffff';
+};
+
+export const getElementFriendlyInfo = (el: HTMLElement): { name: string; subtitle: string; targetEl: HTMLElement } => {
+  // 1. If clicked a specific button or link
+  if (el.tagName === 'BUTTON' || el.closest('button')) {
+    const btn = (el.tagName === 'BUTTON' ? el : el.closest('button')) as HTMLElement;
+    const txt = btn.innerText.trim();
+    return {
+      name: txt ? `Button: "${txt.slice(0, 25)}"` : 'Action Button',
+      subtitle: btn.id ? `#${btn.id}` : 'Clickable Button',
+      targetEl: btn
+    };
+  }
+
+  if (el.tagName === 'A' || el.closest('a')) {
+    const a = (el.tagName === 'A' ? el : el.closest('a')) as HTMLElement;
+    const txt = a.innerText.trim();
+    return {
+      name: txt ? `Link: "${txt.slice(0, 25)}"` : 'Navigation Link',
+      subtitle: a.getAttribute('href') || 'Hyperlink',
+      targetEl: a
+    };
+  }
+
+  // 2. Header Bars & Strips
+  const navHeader = el.closest('#header-main-navbar') as HTMLElement;
+  if (navHeader) {
+    return {
+      name: 'Campus Portal Navbar (Blue Strip)',
+      subtitle: 'Main Navigation Bar & Menu Links',
+      targetEl: navHeader
+    };
+  }
+
+  const topBar = el.closest('#header-top-bar') as HTMLElement;
+  if (topBar) {
+    return {
+      name: 'Top Announcement & Helpline Bar',
+      subtitle: 'Batch 2026-27 Strip',
+      targetEl: topBar
+    };
+  }
+
+  const brandBanner = el.closest('#header-brand-banner') as HTMLElement;
+  if (brandBanner) {
+    return {
+      name: 'Institutional Bilingual Brand Header',
+      subtitle: 'L.C.C. Logo & Varanasi Title Banner',
+      targetEl: brandBanner
+    };
+  }
+
+  const noticeTicker = el.closest('#header-notice-ticker') as HTMLElement;
+  if (noticeTicker) {
+    return {
+      name: 'Live Alert Marquee Notice Bar',
+      subtitle: 'Scrolling Breaking News Strip',
+      targetEl: noticeTicker
+    };
+  }
+
+  // 3. Hero Cards & Spotlight
+  const quickLinks = el.closest('#hero-quick-links-box') as HTMLElement;
+  if (quickLinks && (el === quickLinks || el.closest('#hero-quick-links-header') || el.classList.contains('bg-white'))) {
+    return {
+      name: 'Quick Links Portal Card',
+      subtitle: 'Admission, Batches & DPP Links Box',
+      targetEl: quickLinks
+    };
+  }
+
+  const leadership = el.closest('#hero-leadership-box') as HTMLElement;
+  if (leadership && (el === leadership || el.closest('#hero-leadership-header') || el.classList.contains('bg-white'))) {
+    return {
+      name: 'Director & Leadership Spotlight Card',
+      subtitle: 'Aman Arora Director Showcase Card',
+      targetEl: leadership
+    };
+  }
+
+  const slider = el.closest('#hero-slider-box') as HTMLElement;
+  if (slider && el === slider) {
+    return {
+      name: 'Main Photo Slider Showcase',
+      subtitle: 'Hero Center Photo Slider Box',
+      targetEl: slider
+    };
+  }
+
+  // 4. Photo / Image
+  if (el.tagName === 'IMG') {
+    const img = el as HTMLImageElement;
+    return {
+      name: 'Photo / Image',
+      subtitle: img.alt || 'Website Graphic / Photo',
+      targetEl: img
+    };
+  }
+
+  // 5. Headings
+  if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(el.tagName)) {
+    return {
+      name: `${el.tagName} Heading`,
+      subtitle: el.innerText.trim().slice(0, 40) || 'Section Heading',
+      targetEl: el
+    };
+  }
+
+  // 6. Text Elements
+  if (['P', 'SPAN', 'LI', 'LABEL'].includes(el.tagName)) {
+    return {
+      name: 'Text Content',
+      subtitle: el.innerText.trim().slice(0, 40) || 'Typography Element',
+      targetEl: el
+    };
+  }
+
+  // 7. General Container
+  return {
+    name: el.id ? `#${el.id}` : `${el.tagName.toUpperCase()} Container Box`,
+    subtitle: el.innerText.trim().slice(0, 35) || 'Layout Box',
+    targetEl: el
+  };
+};
+
 export const getDomPath = (el: HTMLElement): string => {
   if (el.id) return `#${el.id}`;
   const path: string[] = [];
@@ -209,6 +358,8 @@ export const LiveVisualEditor: React.FC = () => {
   // Point & Click Target State
   const [clickedTarget, setClickedTarget] = useState<{
     type: 'text' | 'image' | 'element';
+    friendlyName: string;
+    friendlySubtitle: string;
     originalValue: string;
     newValue: string;
     originalBgColor: string;
@@ -306,15 +457,18 @@ export const LiveVisualEditor: React.FC = () => {
       e.preventDefault();
       e.stopPropagation();
 
-      const computed = window.getComputedStyle(target);
-      const currentBg = rgbToHex(computed.backgroundColor) || '#ffffff';
-      const currentText = rgbToHex(computed.color) || '#000000';
+      const friendlyInfo = getElementFriendlyInfo(target);
+      const effectiveEl = friendlyInfo.targetEl;
+      const currentBg = getEffectiveBgColor(effectiveEl);
+      const currentText = getEffectiveTextColor(effectiveEl);
 
       // Check if image
-      if (target.tagName === 'IMG') {
-        const img = target as HTMLImageElement;
+      if (effectiveEl.tagName === 'IMG') {
+        const img = effectiveEl as HTMLImageElement;
         setClickedTarget({
           type: 'image',
+          friendlyName: friendlyInfo.name,
+          friendlySubtitle: friendlyInfo.subtitle,
           originalValue: img.src,
           newValue: img.src,
           originalBgColor: currentBg,
@@ -328,20 +482,22 @@ export const LiveVisualEditor: React.FC = () => {
       }
 
       // Check if leaf text node or container element
-      const hasNoChildren = target.children.length === 0;
-      const textContent = target.innerText?.trim() || '';
+      const hasNoChildren = effectiveEl.children.length === 0;
+      const textContent = effectiveEl.innerText?.trim() || '';
       const isText = hasNoChildren && textContent.length > 0 && textContent.length < 500;
 
       setClickedTarget({
         type: isText ? 'text' : 'element',
+        friendlyName: friendlyInfo.name,
+        friendlySubtitle: friendlyInfo.subtitle,
         originalValue: isText ? textContent : '',
         newValue: isText ? textContent : '',
         originalBgColor: currentBg,
         newBgColor: currentBg,
         originalTextColor: currentText,
         newTextColor: currentText,
-        elementRef: target,
-        tagName: target.tagName
+        elementRef: effectiveEl,
+        tagName: effectiveEl.tagName
       });
     };
 
@@ -352,6 +508,51 @@ export const LiveVisualEditor: React.FC = () => {
       document.body.classList.remove('visual-editor-mode-active');
     };
   }, [isAdminAuthenticated, isEditorActive]);
+
+  // Live Real-Time Preview Functions (Instantly modifies DOM for live preview)
+  const updateBgColor = (color: string) => {
+    if (!clickedTarget || !clickedTarget.elementRef) return;
+    try {
+      clickedTarget.elementRef.style.backgroundColor = color;
+    } catch (e) {}
+    setClickedTarget({ ...clickedTarget, newBgColor: color });
+  };
+
+  const updateTextColor = (color: string) => {
+    if (!clickedTarget || !clickedTarget.elementRef) return;
+    try {
+      clickedTarget.elementRef.style.color = color;
+    } catch (e) {}
+    setClickedTarget({ ...clickedTarget, newTextColor: color });
+  };
+
+  const updateContentValue = (val: string) => {
+    if (!clickedTarget || !clickedTarget.elementRef) return;
+    try {
+      if (clickedTarget.type === 'text') {
+        clickedTarget.elementRef.innerText = val;
+      } else if (clickedTarget.type === 'image') {
+        (clickedTarget.elementRef as HTMLImageElement).src = val;
+      }
+    } catch (e) {}
+    setClickedTarget({ ...clickedTarget, newValue: val });
+  };
+
+  // Revert preview changes on Cancel
+  const handleCancelEdit = () => {
+    if (clickedTarget && clickedTarget.elementRef) {
+      try {
+        clickedTarget.elementRef.style.backgroundColor = clickedTarget.originalBgColor;
+        clickedTarget.elementRef.style.color = clickedTarget.originalTextColor;
+        if (clickedTarget.type === 'image') {
+          (clickedTarget.elementRef as HTMLImageElement).src = clickedTarget.originalValue;
+        } else if (clickedTarget.type === 'text') {
+          clickedTarget.elementRef.innerText = clickedTarget.originalValue;
+        }
+      } catch (e) {}
+    }
+    setClickedTarget(null);
+  };
 
   if (!isAdminAuthenticated) return null;
 
@@ -689,32 +890,35 @@ export const LiveVisualEditor: React.FC = () => {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150"
         >
           <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-950 rounded-3xl border border-slate-800 p-6 text-white space-y-4 shadow-2xl">
-            {/* Header */}
+            {/* Header with Friendly Name */}
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 {clickedTarget.type === 'image' ? (
-                  <ImageIcon className="w-5 h-5 text-purple-400" />
+                  <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center">
+                    <ImageIcon className="w-4 h-4 text-purple-400" />
+                  </div>
                 ) : clickedTarget.type === 'text' ? (
-                  <Type className="w-5 h-5 text-amber-400" />
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
+                    <Type className="w-4 h-4 text-amber-400" />
+                  </div>
                 ) : (
-                  <Palette className="w-5 h-5 text-emerald-400" />
+                  <div className="w-8 h-8 rounded-xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center">
+                    <Palette className="w-4 h-4 text-blue-400" />
+                  </div>
                 )}
                 <div>
-                  <h3 className="text-sm font-black uppercase tracking-wider">
-                    {clickedTarget.type === 'image'
-                      ? 'Replace Image'
-                      : clickedTarget.type === 'text'
-                      ? 'Edit Text & Colors'
-                      : 'Customize Box & Colors'}
+                  <h3 className="text-sm font-black text-white tracking-wide">
+                    {clickedTarget.friendlyName}
                   </h3>
-                  <span className="text-[10px] text-slate-500 font-mono">
-                    &lt;{clickedTarget.tagName.toLowerCase()}&gt; element
+                  <span className="text-[11px] text-slate-400 font-medium">
+                    {clickedTarget.friendlySubtitle}
                   </span>
                 </div>
               </div>
               <button
-                onClick={() => setClickedTarget(null)}
-                className="p-1 rounded-full text-slate-400 hover:text-white cursor-pointer"
+                onClick={handleCancelEdit}
+                className="p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer transition-colors"
+                title="Cancel & Revert"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -734,11 +938,11 @@ export const LiveVisualEditor: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-slate-400 block mb-1">Image URL</label>
+                  <label className="text-[11px] font-bold text-slate-400 block mb-1">New Image URL (Previews instantly)</label>
                   <input
                     type="text"
                     value={clickedTarget.newValue}
-                    onChange={e => setClickedTarget({ ...clickedTarget, newValue: e.target.value })}
+                    onChange={e => updateContentValue(e.target.value)}
                     className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
                   />
                 </div>
@@ -750,11 +954,11 @@ export const LiveVisualEditor: React.FC = () => {
                   <p className="line-clamp-2 italic font-mono text-slate-300">{clickedTarget.originalValue}</p>
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-slate-400 block mb-1">Edit Text Content</label>
+                  <label className="text-[11px] font-bold text-slate-400 block mb-1">Edit Text Content (Previews instantly on website)</label>
                   <textarea
                     rows={3}
                     value={clickedTarget.newValue}
-                    onChange={e => setClickedTarget({ ...clickedTarget, newValue: e.target.value })}
+                    onChange={e => updateContentValue(e.target.value)}
                     className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400"
                   />
                 </div>
@@ -776,19 +980,19 @@ export const LiveVisualEditor: React.FC = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <input
                     type="color"
-                    value={clickedTarget.newBgColor || '#ffffff'}
-                    onChange={e => setClickedTarget({ ...clickedTarget, newBgColor: e.target.value })}
+                    value={clickedTarget.newBgColor || '#0B3B95'}
+                    onChange={e => updateBgColor(e.target.value)}
                     className="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer bg-transparent p-0.5"
                     title="Choose any color from infinite palette"
                   />
                   <input
                     type="text"
                     value={clickedTarget.newBgColor}
-                    onChange={e => setClickedTarget({ ...clickedTarget, newBgColor: e.target.value })}
-                    placeholder="#002147"
+                    onChange={e => updateBgColor(e.target.value)}
+                    placeholder="#0B3B95"
                     className="w-28 px-3 py-1.5 bg-slate-950 border border-slate-700 rounded-lg font-mono text-xs text-white uppercase focus:outline-none focus:border-amber-400"
                   />
-                  <span className="text-[10px] text-slate-400">Infinite HEX / Spectrum</span>
+                  <span className="text-[10px] text-slate-400">Live preview on click</span>
                 </div>
                 {/* Quick Swatches */}
                 <div className="flex flex-wrap gap-1.5 pt-1">
@@ -796,10 +1000,10 @@ export const LiveVisualEditor: React.FC = () => {
                     <button
                       key={`bg-${color}`}
                       type="button"
-                      onClick={() => setClickedTarget({ ...clickedTarget, newBgColor: color })}
+                      onClick={() => updateBgColor(color)}
                       style={{ backgroundColor: color }}
                       className={`w-5 h-5 rounded-full border border-slate-600 transition-transform hover:scale-125 cursor-pointer ${
-                        clickedTarget.newBgColor === color ? 'ring-2 ring-amber-400 scale-110' : ''
+                        clickedTarget.newBgColor.toLowerCase() === color.toLowerCase() ? 'ring-2 ring-amber-400 scale-110' : ''
                       }`}
                       title={color}
                     />
@@ -815,19 +1019,19 @@ export const LiveVisualEditor: React.FC = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <input
                     type="color"
-                    value={clickedTarget.newTextColor || '#000000'}
-                    onChange={e => setClickedTarget({ ...clickedTarget, newTextColor: e.target.value })}
+                    value={clickedTarget.newTextColor || '#ffffff'}
+                    onChange={e => updateTextColor(e.target.value)}
                     className="w-9 h-9 rounded-lg border border-slate-700 cursor-pointer bg-transparent p-0.5"
                     title="Choose any text color from infinite palette"
                   />
                   <input
                     type="text"
                     value={clickedTarget.newTextColor}
-                    onChange={e => setClickedTarget({ ...clickedTarget, newTextColor: e.target.value })}
+                    onChange={e => updateTextColor(e.target.value)}
                     placeholder="#ffffff"
                     className="w-28 px-3 py-1.5 bg-slate-950 border border-slate-700 rounded-lg font-mono text-xs text-white uppercase focus:outline-none focus:border-amber-400"
                   />
-                  <span className="text-[10px] text-slate-400">Infinite HEX / Spectrum</span>
+                  <span className="text-[10px] text-slate-400">Live preview on click</span>
                 </div>
                 {/* Quick Swatches */}
                 <div className="flex flex-wrap gap-1.5 pt-1">
@@ -835,10 +1039,10 @@ export const LiveVisualEditor: React.FC = () => {
                     <button
                       key={`text-${color}`}
                       type="button"
-                      onClick={() => setClickedTarget({ ...clickedTarget, newTextColor: color })}
+                      onClick={() => updateTextColor(color)}
                       style={{ backgroundColor: color }}
                       className={`w-5 h-5 rounded-full border border-slate-600 transition-transform hover:scale-125 cursor-pointer ${
-                        clickedTarget.newTextColor === color ? 'ring-2 ring-amber-400 scale-110' : ''
+                        clickedTarget.newTextColor.toLowerCase() === color.toLowerCase() ? 'ring-2 ring-amber-400 scale-110' : ''
                       }`}
                       title={color}
                     />
@@ -846,22 +1050,46 @@ export const LiveVisualEditor: React.FC = () => {
                 </div>
               </div>
 
-              {/* Live Preview Pill */}
-              <div
-                className="p-3 rounded-xl border border-slate-700 flex items-center justify-center font-bold text-xs shadow-inner transition-colors"
-                style={{
-                  backgroundColor: clickedTarget.newBgColor || '#ffffff',
-                  color: clickedTarget.newTextColor || '#000000'
-                }}
-              >
-                Sample Preview: L.C.C. Coaching Portal
+              {/* LIVE PREVIEW BOX */}
+              <div className="p-3.5 rounded-2xl border border-blue-500/30 bg-blue-950/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-xs font-black text-amber-400 uppercase tracking-wider">
+                    <Eye className="w-4 h-4 animate-pulse" /> Live Preview Box
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                    ✓ Website pe real-time change ho raha hai
+                  </span>
+                </div>
+
+                <div
+                  className="p-4 rounded-xl border border-slate-700 shadow-md flex flex-col items-center justify-center text-center transition-all duration-150 min-h-[60px]"
+                  style={{
+                    backgroundColor: clickedTarget.newBgColor || '#0B3B95',
+                    color: clickedTarget.newTextColor || '#ffffff'
+                  }}
+                >
+                  <span className="font-extrabold text-sm tracking-wide">
+                    {clickedTarget.type === 'text'
+                      ? (clickedTarget.newValue || clickedTarget.originalValue)
+                      : clickedTarget.friendlyName}
+                  </span>
+                  {clickedTarget.type !== 'text' && (
+                    <span className="text-[10px] opacity-80 mt-0.5">
+                      {clickedTarget.friendlySubtitle}
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-[10px] text-slate-400 text-center leading-relaxed">
+                  💡 <b>Preview:</b> Website pe live check karein. Pasand aaye toh <b>Apply Live Change</b> dabayein, ya <b>Cancel</b> karke pehle jaisa restore karein.
+                </p>
               </div>
             </div>
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
               <button
-                onClick={() => setClickedTarget(null)}
+                onClick={handleCancelEdit}
                 className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 cursor-pointer"
               >
                 Cancel
