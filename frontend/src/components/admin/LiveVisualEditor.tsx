@@ -17,10 +17,12 @@ import {
   Settings,
   Image as ImageIcon,
   Type,
-  Palette
+  Palette,
+  Upload
 } from 'lucide-react';
 
 import { VisualOverrideItem } from '../../types';
+import { compressImageFile } from '../../utils/imageCompressor';
 
 export const DEFAULT_SECTION_ORDER = [
   'hero',
@@ -638,8 +640,16 @@ export const LiveVisualEditor: React.FC = () => {
     if (clickedTarget.type === 'text') {
       const val = clickedTarget.newValue.trim();
       const orig = clickedTarget.originalValue.trim();
-      if (orig === websiteSettings.instituteName?.trim()) updatedSettings.instituteName = val;
-      if (orig === websiteSettings.directorName?.trim()) updatedSettings.directorName = val;
+      const el = clickedTarget.elementRef;
+      const isDirector = el.closest('#hero-leadership-box') || 
+                         el.closest('#about-section') || 
+                         orig === websiteSettings.directorName?.trim() ||
+                         clickedTarget.friendlyName.toLowerCase().includes('director');
+
+      if (isDirector && (clickedTarget.friendlyName.toLowerCase().includes('heading') || clickedTarget.friendlyName.toLowerCase().includes('director') || orig.toLowerCase().includes('aman') || orig.toLowerCase().includes('director'))) {
+        updatedSettings.directorName = val;
+      }
+      if (orig === websiteSettings.instituteName?.trim() || el.closest('#header-brand-banner')) updatedSettings.instituteName = val;
       if (orig === websiteSettings.contactPhone?.trim()) updatedSettings.contactPhone = val;
       if (orig === websiteSettings.contactEmail?.trim()) updatedSettings.contactEmail = val;
       if (orig === websiteSettings.contactAddress?.trim()) updatedSettings.contactAddress = val;
@@ -647,9 +657,33 @@ export const LiveVisualEditor: React.FC = () => {
       if (orig === websiteSettings.heroBadgeText?.trim()) updatedSettings.heroBadgeText = val;
       if (orig === websiteSettings.instituteTagline?.trim()) updatedSettings.instituteTagline = val;
     } else if (clickedTarget.type === 'image') {
-      if (clickedTarget.originalValue === websiteSettings.directorPhotoUrl) updatedSettings.directorPhotoUrl = clickedTarget.newValue;
-      if (clickedTarget.originalValue === websiteSettings.logoUrl) updatedSettings.logoUrl = clickedTarget.newValue;
-      if (clickedTarget.originalValue === websiteSettings.heroPosterUrl) updatedSettings.heroPosterUrl = clickedTarget.newValue;
+      const el = clickedTarget.elementRef;
+      const alt = (el.getAttribute('alt') || '').toLowerCase();
+      const isDirector = el.closest('#hero-leadership-box') || 
+                         el.closest('#about-section') || 
+                         alt.includes('director') || 
+                         alt.includes('founder') || 
+                         alt.includes('aman') ||
+                         clickedTarget.friendlyName.toLowerCase().includes('director') ||
+                         clickedTarget.friendlySubtitle.toLowerCase().includes('director');
+
+      const isLogo = el.closest('#header-brand-banner') || 
+                     el.closest('#header-main-navbar') || 
+                     alt.includes('logo') || 
+                     alt.includes('seal') ||
+                     clickedTarget.friendlyName.toLowerCase().includes('logo');
+
+      const isHeroPoster = el.closest('#hero-poster-banner') || 
+                           alt.includes('poster') || 
+                           alt.includes('banner');
+
+      if (isDirector) {
+        updatedSettings.directorPhotoUrl = clickedTarget.newValue;
+      } else if (isLogo) {
+        updatedSettings.logoUrl = clickedTarget.newValue;
+      } else if (isHeroPoster) {
+        updatedSettings.heroPosterUrl = clickedTarget.newValue;
+      }
     }
 
     // 5. Save to AppContext & localStorage & backend immediately
@@ -943,8 +977,37 @@ export const LiveVisualEditor: React.FC = () => {
                     type="text"
                     value={clickedTarget.newValue}
                     onChange={e => updateContentValue(e.target.value)}
+                    placeholder="https://... or upload local image file below"
                     className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
                   />
+                </div>
+
+                {/* Upload Image From Device (Auto-Compressed for permanent cloud save) */}
+                <div>
+                  <input
+                    type="file"
+                    id="live-editor-img-upload"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const compressed = await compressImageFile(file, 900, 0.82);
+                        updateContentValue(compressed);
+                      } catch (err: any) {
+                        alert(err.message || 'Failed to process local image');
+                      }
+                    }}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('live-editor-img-upload')?.click()}
+                    className="w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-sm"
+                  >
+                    <Upload className="w-4 h-4 text-amber-300" />
+                    <span>Upload Photo From Device / Gallery (Auto-Compressed)</span>
+                  </button>
                 </div>
               </div>
             ) : clickedTarget.type === 'text' ? (

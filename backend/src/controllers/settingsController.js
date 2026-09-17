@@ -18,16 +18,11 @@ export const getSettings = async (req, res) => {
 export const updateSettings = async (req, res) => {
   try {
     if (mongoose.connection.readyState === 1) {
-      let settings = await SettingModel.findOne();
-      if (!settings) {
-        settings = await SettingModel.create(req.body);
-      } else {
-        Object.assign(settings, req.body);
-        if (req.body.visualOverrides) {
-          settings.markModified('visualOverrides');
-        }
-        await settings.save();
-      }
+      const settings = await SettingModel.findOneAndUpdate(
+        {},
+        { $set: req.body },
+        { new: true, upsert: true, setDefaultsOnInsert: true }
+      );
       return res.json({ success: true, message: 'Website branding & settings updated successfully in Cloud MongoDB!', data: settings });
     }
     const db = getDB();

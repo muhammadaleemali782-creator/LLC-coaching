@@ -383,12 +383,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         if (setsRes.status === 'fulfilled' && setsRes.value.data) {
           const cloudSets = setsRes.value.data;
-          const localOverrides = loadSaved<Record<string, any>>('lcc_visual_overrides', {});
-          if (localOverrides && Object.keys(localOverrides).length > 0) {
-            cloudSets.visualOverrides = { ...localOverrides, ...(cloudSets.visualOverrides || {}) };
-          }
-          setWebsiteSettings(cloudSets);
-          saveItem('lcc_website_settings', cloudSets);
+          setWebsiteSettings(prev => {
+            const localOverrides = loadSaved<Record<string, any>>('lcc_visual_overrides', {});
+            const merged: WebsiteSettings = {
+              ...prev,
+              ...cloudSets,
+              directorPhotoUrl: cloudSets.directorPhotoUrl || prev.directorPhotoUrl,
+              logoUrl: cloudSets.logoUrl || prev.logoUrl,
+              heroPosterUrl: cloudSets.heroPosterUrl || prev.heroPosterUrl,
+              directorName: cloudSets.directorName || prev.directorName,
+              visualOverrides: {
+                ...(localOverrides || {}),
+                ...(prev.visualOverrides || {}),
+                ...(cloudSets.visualOverrides || {})
+              }
+            };
+            saveItem('lcc_website_settings', merged);
+            if (merged.visualOverrides) {
+              saveItem('lcc_visual_overrides', merged.visualOverrides);
+            }
+            return merged;
+          });
         }
         if (coursesRes.status === 'fulfilled' && coursesRes.value.data?.length) {
           setCourses(coursesRes.value.data);
@@ -731,8 +746,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateWebsiteSettings = async (settings: Partial<WebsiteSettings>) => {
     try {
-      await api.settings.update(settings);
-    } catch (e) {}
+      const res = await api.settings.update(settings);
+      if (res && res.data) {
+        setWebsiteSettings(prev => {
+          const merged = { ...prev, ...res.data };
+          saveItem('lcc_website_settings', merged);
+          if (merged.visualOverrides) {
+            saveItem('lcc_visual_overrides', merged.visualOverrides);
+          }
+          return merged;
+        });
+        showToast('Website settings saved permanently to cloud database!', 'success');
+        return;
+      }
+    } catch (e: any) {
+      console.warn('Settings cloud sync note:', e.message);
+    }
     setWebsiteSettings(prev => {
       const updated = { ...prev, ...settings };
       saveItem('lcc_website_settings', updated);

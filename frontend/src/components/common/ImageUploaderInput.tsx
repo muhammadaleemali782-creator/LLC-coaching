@@ -1,6 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { Upload, Image as ImageIcon, X, Link } from 'lucide-react';
 
+import { compressImageFile } from '../../utils/imageCompressor';
+
 interface ImageUploaderInputProps {
   label: string;
   value: string;
@@ -19,27 +21,20 @@ export const ImageUploaderInput: React.FC<ImageUploaderInputProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert('File size exceeds 5MB limit. Please choose a smaller image.');
-      return;
-    }
-
     setIsUploading(true);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64Url = event.target?.result as string;
-      onChange(base64Url);
+    try {
+      const compressedDataUrl = await compressImageFile(file, 900, 0.82);
+      onChange(compressedDataUrl);
+    } catch (err: any) {
+      alert(err.message || 'Failed to process local image file.');
+    } finally {
       setIsUploading(false);
-    };
-    reader.onerror = () => {
-      setIsUploading(false);
-      alert('Failed to read local file.');
-    };
-    reader.readAsDataURL(file);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   return (
