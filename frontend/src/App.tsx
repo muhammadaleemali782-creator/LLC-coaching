@@ -34,8 +34,47 @@ import { AdminPanel } from './components/admin/AdminPanel';
 import { LiveVisualEditor, applyVisualOverrides, DEFAULT_SECTION_ORDER } from './components/admin/LiveVisualEditor';
 import { ToastContainer } from './components/Toast';
 
+// Progressive Chunked Fake Screen (Skeleton Shimmer) for instant perception while DB connects
+const SkeletonHomeScreen: React.FC = () => {
+  return (
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-8 animate-pulse">
+      {/* Fake Header Alert Banner */}
+      <div className="h-10 w-full rounded-xl skeleton-shimmer" />
+
+      {/* Fake Hero Grid (Quick Links, Center Slider, Director Card) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+        <div className="lg:col-span-3 h-80 rounded-2xl skeleton-shimmer" />
+        <div className="lg:col-span-6 h-80 rounded-2xl skeleton-shimmer" />
+        <div className="lg:col-span-3 h-80 rounded-2xl skeleton-shimmer" />
+      </div>
+
+      {/* Fake Category Filter Tabs */}
+      <div className="flex gap-3 overflow-hidden py-2">
+        {[1, 2, 3, 4, 5, 6].map(i => (
+          <div key={i} className="h-10 w-32 rounded-full skeleton-shimmer shrink-0" />
+        ))}
+      </div>
+
+      {/* Fake Course Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="rounded-3xl border border-slate-200 overflow-hidden bg-white p-4 space-y-4">
+            <div className="h-48 rounded-2xl skeleton-shimmer w-full" />
+            <div className="h-5 rounded-md skeleton-shimmer w-3/4" />
+            <div className="h-4 rounded-md skeleton-shimmer w-1/2" />
+            <div className="flex justify-between items-center pt-2">
+              <div className="h-8 w-24 rounded-lg skeleton-shimmer" />
+              <div className="h-8 w-28 rounded-xl skeleton-shimmer" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const MainContent: React.FC = () => {
-  const { activeView, isAdminAuthenticated, theme, websiteSettings, notices, navigateTo } = useApp();
+  const { activeView, isAdminAuthenticated, theme, websiteSettings, notices, navigateTo, isInitialSyncLoading } = useApp();
 
   // Apply visual overrides across page reloads and dynamic renders permanently
   React.useEffect(() => {
@@ -99,9 +138,13 @@ const MainContent: React.FC = () => {
 
         <main className={activeView !== 'admin-panel' ? 'pb-32 xl:pb-16' : ''}>
           {activeView === 'home' && (
-            <>
-              {currentSectionOrder.map(secKey => sectionMap[secKey] || null)}
-            </>
+            isInitialSyncLoading && !websiteSettings?.instituteName ? (
+              <SkeletonHomeScreen />
+            ) : (
+              <>
+                {currentSectionOrder.map(secKey => sectionMap[secKey] || null)}
+              </>
+            )
           )}
 
           {activeView === 'courses' && (

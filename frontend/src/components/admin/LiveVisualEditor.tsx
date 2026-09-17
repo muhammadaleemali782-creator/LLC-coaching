@@ -19,7 +19,8 @@ import {
   Type,
   Palette,
   Upload,
-  Link2
+  Link2,
+  Loader2
 } from 'lucide-react';
 
 import { VisualOverrideItem } from '../../types';
@@ -133,7 +134,17 @@ export const getEffectiveTextColor = (el: HTMLElement): string => {
 };
 
 export const getElementFriendlyInfo = (el: HTMLElement): { name: string; subtitle: string; targetEl: HTMLElement } => {
-  // 1. If clicked a specific button or link
+  // 1. If clicked directly on an Image or has img inside/closest
+  if (el.tagName === 'IMG') {
+    const img = el as HTMLImageElement;
+    return {
+      name: 'Photo / Image',
+      subtitle: img.alt || 'Website Graphic / Photo',
+      targetEl: img
+    };
+  }
+
+  // 2. If clicked a specific button or link
   if (el.tagName === 'BUTTON' || el.closest('button')) {
     const btn = (el.tagName === 'BUTTON' ? el : el.closest('button')) as HTMLElement;
     const txt = btn.innerText.trim();
@@ -219,15 +230,6 @@ export const getElementFriendlyInfo = (el: HTMLElement): { name: string; subtitl
     };
   }
 
-  // 4. Photo / Image
-  if (el.tagName === 'IMG') {
-    const img = el as HTMLImageElement;
-    return {
-      name: 'Photo / Image',
-      subtitle: img.alt || 'Website Graphic / Photo',
-      targetEl: img
-    };
-  }
 
   // 5. Headings
   if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(el.tagName)) {
@@ -370,6 +372,7 @@ export const LiveVisualEditor: React.FC = () => {
   const [isEditorActive, setIsEditorActive] = useState<boolean>(false);
   const [isReorderModalOpen, setIsReorderModalOpen] = useState<boolean>(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // Point & Click Target State
   const [clickedTarget, setClickedTarget] = useState<{
@@ -740,17 +743,20 @@ export const LiveVisualEditor: React.FC = () => {
     }
 
     // 5. Save to AppContext & localStorage & backend immediately
+    setIsSaving(true);
     try {
       localStorage.setItem('lcc_visual_overrides', JSON.stringify(updatedOverrides));
       await updateWebsiteSettings(updatedSettings);
       pushSnapshot(updatedSettings, courses, `Updated ${clickedTarget.tagName}: colors/content`);
       setHasUnsavedChanges(false);
       showToast('Live changes saved permanently! It will remain even after page reload.', 'success');
+      setClickedTarget(null);
     } catch (err: any) {
       showToast('Saved to local browser storage!', 'info');
+      setClickedTarget(null);
+    } finally {
+      setIsSaving(false);
     }
-
-    setClickedTarget(null);
   };
 
   // Move Header Item Up
@@ -1245,15 +1251,38 @@ export const LiveVisualEditor: React.FC = () => {
                     color: clickedTarget.newTextColor || '#ffffff'
                   }}
                 >
-                  <span className="font-extrabold text-sm tracking-wide">
-                    {clickedTarget.type === 'text'
-                      ? (clickedTarget.newValue || clickedTarget.originalValue)
-                      : clickedTarget.friendlyName}
-                  </span>
-                  {clickedTarget.type !== 'text' && (
-                    <span className="text-[10px] opacity-80 mt-0.5">
-                      {clickedTarget.friendlySubtitle}
-                    </span>
+                  {clickedTarget.type === 'image' ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-amber-400 shadow-md bg-slate-900 flex items-center justify-center">
+                        <img
+                          src={clickedTarget.newValue}
+                          alt="Live Thumbnail Preview"
+                          className="w-full h-full object-cover"
+                          onError={(e: any) => {
+                            e.target.src = 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80';
+                          }}
+                        />
+                      </div>
+                      <span className="font-extrabold text-xs tracking-wide text-white">
+                        {clickedTarget.friendlyName}
+                      </span>
+                      <span className="text-[10px] text-amber-300">
+                        {clickedTarget.friendlySubtitle}
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="font-extrabold text-sm tracking-wide">
+                        {clickedTarget.type === 'text'
+                          ? (clickedTarget.newValue || clickedTarget.originalValue)
+                          : clickedTarget.friendlyName}
+                      </span>
+                      {clickedTarget.type !== 'text' && (
+                        <span className="text-[10px] opacity-80 mt-0.5">
+                          {clickedTarget.friendlySubtitle}
+                        </span>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -1266,17 +1295,34 @@ export const LiveVisualEditor: React.FC = () => {
             {/* Action Buttons */}
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
               <button
+                type="button"
+                disabled={isSaving}
                 onClick={handleCancelEdit}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-xs font-bold text-slate-300 cursor-pointer"
               >
                 Cancel
               </button>
               <button
+                type="button"
+                disabled={isSaving}
                 onClick={handleApplyClickEdit}
-                className="px-6 py-2 rounded-xl bg-[#0066FF] hover:bg-blue-600 text-white text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md cursor-pointer"
+                className={`px-6 py-2.5 rounded-xl text-white text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-md transition-all ${
+                  isSaving
+                    ? 'bg-blue-800 opacity-80 cursor-wait'
+                    : 'bg-[#0066FF] hover:bg-blue-600 active:scale-95 cursor-pointer'
+                }`}
               >
-                <Check className="w-3.5 h-3.5" />
-                <span>Apply Live Change</span>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-300" />
+                    <span>Saving Changes...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Apply Live Change</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

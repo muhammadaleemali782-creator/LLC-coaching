@@ -150,6 +150,7 @@ export interface AppContextType {
   toasts: Toast[];
   showToast: (message: string, type?: 'success' | 'info' | 'error' | 'warning') => void;
   removeToast: (id: string) => void;
+  isInitialSyncLoading: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -328,6 +329,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [isInitialSyncLoading, setIsInitialSyncLoading] = useState<boolean>(true);
 
   // Initial Fetch from Backend (100% Backend-Controlled Engine)
   useEffect(() => {
@@ -431,6 +433,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       } catch (e) {
         console.log('ℹ️ Running in resilient fallback mode');
+      } finally {
+        setIsInitialSyncLoading(false);
       }
     };
     syncBackend();
@@ -1196,7 +1200,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         submitQuizScore,
         toasts,
         showToast,
-        removeToast
+        removeToast,
+        isInitialSyncLoading
       }}
     >
       {children}

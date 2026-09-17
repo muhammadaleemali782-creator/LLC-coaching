@@ -246,6 +246,10 @@ export const Hero: React.FC = () => {
                       <img
                         src={websiteSettings?.directorPhotoUrl || "/assets/founder.png"}
                         alt={directorName}
+                        decoding="async"
+                        onError={(e: any) => {
+                          e.target.src = '/assets/founder.png';
+                        }}
                         className="w-full h-full object-cover object-top"
                       />
                     </div>
