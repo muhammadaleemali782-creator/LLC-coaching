@@ -229,6 +229,7 @@ export interface VisualOverrideItem {
   value?: string;
   backgroundColor?: string;
   textColor?: string;
+  linkUrl?: string;
 }
 
 // Website Global Settings

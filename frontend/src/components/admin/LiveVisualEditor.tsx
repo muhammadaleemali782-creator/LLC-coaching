@@ -18,7 +18,8 @@ import {
   Image as ImageIcon,
   Type,
   Palette,
-  Upload
+  Upload,
+  Link2
 } from 'lucide-react';
 
 import { VisualOverrideItem } from '../../types';
@@ -332,6 +333,19 @@ export const applyVisualOverrides = (overrides?: Record<string, VisualOverrideIt
       if (item.textColor && targetEl.style.color !== item.textColor) {
         targetEl.style.color = item.textColor;
       }
+
+      if (item.linkUrl !== undefined) {
+        const linkEl = targetEl.tagName === 'A' ? (targetEl as HTMLAnchorElement) : (targetEl.closest('a') as HTMLAnchorElement | null);
+        if (linkEl) {
+          if (linkEl.getAttribute('href') !== item.linkUrl) {
+            linkEl.setAttribute('href', item.linkUrl);
+            if (item.linkUrl.startsWith('http')) {
+              linkEl.setAttribute('target', '_blank');
+              linkEl.setAttribute('rel', 'noopener noreferrer');
+            }
+          }
+        }
+      }
     }
   });
 };
@@ -368,6 +382,8 @@ export const LiveVisualEditor: React.FC = () => {
     newBgColor: string;
     originalTextColor: string;
     newTextColor: string;
+    originalLink?: string;
+    newLink?: string;
     elementRef: HTMLElement | null;
     tagName: string;
   } | null>(null);
@@ -464,6 +480,10 @@ export const LiveVisualEditor: React.FC = () => {
       const currentBg = getEffectiveBgColor(effectiveEl);
       const currentText = getEffectiveTextColor(effectiveEl);
 
+      // Check link href (if el is <a> or inside <a>)
+      const linkEl = effectiveEl.tagName === 'A' ? (effectiveEl as HTMLAnchorElement) : (effectiveEl.closest('a') as HTMLAnchorElement | null);
+      const currentLink = linkEl ? (linkEl.getAttribute('href') || '') : '';
+
       // Check if image
       if (effectiveEl.tagName === 'IMG') {
         const img = effectiveEl as HTMLImageElement;
@@ -477,6 +497,8 @@ export const LiveVisualEditor: React.FC = () => {
           newBgColor: currentBg,
           originalTextColor: currentText,
           newTextColor: currentText,
+          originalLink: currentLink,
+          newLink: currentLink,
           elementRef: img,
           tagName: 'IMG'
         });
@@ -498,6 +520,8 @@ export const LiveVisualEditor: React.FC = () => {
         newBgColor: currentBg,
         originalTextColor: currentText,
         newTextColor: currentText,
+        originalLink: currentLink,
+        newLink: currentLink,
         elementRef: effectiveEl,
         tagName: effectiveEl.tagName
       });
@@ -540,6 +564,17 @@ export const LiveVisualEditor: React.FC = () => {
     setClickedTarget({ ...clickedTarget, newValue: val });
   };
 
+  const updateLinkValue = (url: string) => {
+    if (!clickedTarget || !clickedTarget.elementRef) return;
+    try {
+      const linkEl = clickedTarget.elementRef.tagName === 'A' ? (clickedTarget.elementRef as HTMLAnchorElement) : (clickedTarget.elementRef.closest('a') as HTMLAnchorElement | null);
+      if (linkEl) {
+        linkEl.setAttribute('href', url);
+      }
+    } catch (e) {}
+    setClickedTarget({ ...clickedTarget, newLink: url });
+  };
+
   // Revert preview changes on Cancel
   const handleCancelEdit = () => {
     if (clickedTarget && clickedTarget.elementRef) {
@@ -550,6 +585,12 @@ export const LiveVisualEditor: React.FC = () => {
           (clickedTarget.elementRef as HTMLImageElement).src = clickedTarget.originalValue;
         } else if (clickedTarget.type === 'text') {
           clickedTarget.elementRef.innerText = clickedTarget.originalValue;
+        }
+        if (clickedTarget.originalLink !== undefined) {
+          const linkEl = clickedTarget.elementRef.tagName === 'A' ? (clickedTarget.elementRef as HTMLAnchorElement) : (clickedTarget.elementRef.closest('a') as HTMLAnchorElement | null);
+          if (linkEl) {
+            linkEl.setAttribute('href', clickedTarget.originalLink);
+          }
         }
       } catch (e) {}
     }
@@ -609,11 +650,22 @@ export const LiveVisualEditor: React.FC = () => {
       clickedTarget.elementRef.style.color = clickedTarget.newTextColor;
     }
 
-    // 2. Apply content to the live DOM
+    // 2. Apply content & link to the live DOM
     if (clickedTarget.type === 'image') {
       (clickedTarget.elementRef as HTMLImageElement).src = clickedTarget.newValue;
     } else if (clickedTarget.type === 'text' && clickedTarget.newValue) {
       clickedTarget.elementRef.innerText = clickedTarget.newValue;
+    }
+
+    if (clickedTarget.newLink !== undefined) {
+      const linkEl = clickedTarget.elementRef.tagName === 'A' ? (clickedTarget.elementRef as HTMLAnchorElement) : (clickedTarget.elementRef.closest('a') as HTMLAnchorElement | null);
+      if (linkEl) {
+        linkEl.setAttribute('href', clickedTarget.newLink);
+        if (clickedTarget.newLink.startsWith('http')) {
+          linkEl.setAttribute('target', '_blank');
+          linkEl.setAttribute('rel', 'noopener noreferrer');
+        }
+      }
     }
 
     // 3. Build persistent override object
@@ -623,7 +675,8 @@ export const LiveVisualEditor: React.FC = () => {
       originalValue: clickedTarget.originalValue,
       value: clickedTarget.newValue,
       backgroundColor: clickedTarget.newBgColor,
-      textColor: clickedTarget.newTextColor
+      textColor: clickedTarget.newTextColor,
+      linkUrl: clickedTarget.newLink
     };
 
     const updatedOverrides = {
@@ -1010,23 +1063,84 @@ export const LiveVisualEditor: React.FC = () => {
                   </button>
                 </div>
               </div>
-            ) : clickedTarget.type === 'text' ? (
+            ) : (
               <div className="space-y-3">
-                <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400">
-                  <span className="text-[10px] text-slate-500 uppercase font-black block mb-1">Original Text:</span>
-                  <p className="line-clamp-2 italic font-mono text-slate-300">{clickedTarget.originalValue}</p>
-                </div>
-                <div>
-                  <label className="text-[11px] font-bold text-slate-400 block mb-1">Edit Text Content (Previews instantly on website)</label>
-                  <textarea
-                    rows={3}
-                    value={clickedTarget.newValue}
-                    onChange={e => updateContentValue(e.target.value)}
-                    className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400"
-                  />
-                </div>
+                {clickedTarget.originalValue && (
+                  <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400">
+                    <span className="text-[10px] text-slate-500 uppercase font-black block mb-1">Current Text / Content:</span>
+                    <p className="line-clamp-2 italic font-mono text-slate-300">{clickedTarget.originalValue}</p>
+                  </div>
+                )}
+                {clickedTarget.originalValue && (
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-400 block mb-1">Edit Text Content (Previews instantly on website)</label>
+                    <textarea
+                      rows={3}
+                      value={clickedTarget.newValue}
+                      onChange={e => updateContentValue(e.target.value)}
+                      className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+                )}
               </div>
-            ) : null}
+            )}
+
+            {/* HYPERLINK / REDIRECT URL CONTROLLER (Works on any Button, Link, Image, or Box) */}
+            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+              <div className="flex items-center gap-1.5 text-xs font-black uppercase text-blue-400">
+                <Link2 className="w-4 h-4" />
+                <span>Link / Click Redirect URL</span>
+              </div>
+              <p className="text-[10px] text-slate-400">
+                Aap is element pe click hone par kisi bhi page ya external link pe bhej sakte hain (eg: <code>/courses</code>, <code>/admission</code>, ya <code>https://wa.me/...</code>).
+              </p>
+              <input
+                type="text"
+                value={clickedTarget.newLink || ''}
+                onChange={e => updateLinkValue(e.target.value)}
+                placeholder="/courses, /admission, ya https://wa.me/..."
+                className="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-[#0066FF]"
+              />
+            </div>
+
+            {/* OPTIONAL BACKGROUND PHOTO UPLOAD (For any container / section box) */}
+            {clickedTarget.type !== 'image' && (
+              <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-black uppercase text-purple-400">
+                  <Upload className="w-4 h-4" />
+                  <span>Set Background Photo (Mobile / Desktop)</span>
+                </div>
+                <input
+                  type="file"
+                  id="live-editor-bg-upload"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const compressed = await compressImageFile(file, 900, 0.82);
+                      if (clickedTarget.elementRef) {
+                        clickedTarget.elementRef.style.backgroundImage = `url(${compressed})`;
+                        clickedTarget.elementRef.style.backgroundSize = 'cover';
+                        clickedTarget.elementRef.style.backgroundPosition = 'center';
+                      }
+                      updateBgColor(`url(${compressed})`);
+                    } catch (err: any) {
+                      alert(err.message || 'Failed to process local image');
+                    }
+                  }}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('live-editor-bg-upload')?.click()}
+                  className="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-750 text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-colors border border-slate-700"
+                >
+                  <Upload className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Upload Background Image from Device / Gallery</span>
+                </button>
+              </div>
+            )}
 
             {/* INFINITE COLOR PALETTE CUSTOMIZATION */}
             <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
