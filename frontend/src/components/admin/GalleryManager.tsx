@@ -5,7 +5,7 @@ import { Plus, Trash2, Image, Layers, Sparkles, ExternalLink, X, Save } from 'lu
 import { ImageUploaderInput } from '../common/ImageUploaderInput';
 
 export const GalleryManager: React.FC = () => {
-  const { galleryItems, setGalleryItems, showToast } = useApp();
+  const { galleryItems, addGalleryItem, deleteGalleryItem, showToast } = useApp();
   const [isAdding, setIsAdding] = useState(false);
 
   const [newItem, setNewItem] = useState<Partial<GalleryItem>>({
@@ -22,22 +22,17 @@ export const GalleryManager: React.FC = () => {
       showToast('Title and Image URL are required.', 'warning');
       return;
     }
-    const item: GalleryItem = {
-      id: `gal-${Date.now()}`,
-      title: newItem.title,
+    addGalleryItem({
+      title: newItem.title!,
       category: newItem.category || 'classroom',
-      imageUrl: newItem.imageUrl,
-      date: newItem.date || 'Recent Event',
+      imageUrl: newItem.imageUrl!,
       description: newItem.description || 'Campus photo from Learning Coaching Center.'
-    };
-    setGalleryItems(prev => [item, ...prev]);
+    });
     setIsAdding(false);
-    showToast('Photo added to campus gallery!', 'success');
   };
 
   const handleDelete = (id: string) => {
-    setGalleryItems(prev => prev.filter(g => g.id !== id));
-    showToast('Photo removed from gallery.', 'info');
+    deleteGalleryItem(id);
   };
 
   return (

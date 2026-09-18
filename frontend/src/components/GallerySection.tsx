@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { GalleryItem } from '../types';
-import { Image, Award, Sparkles, Filter, Calendar, Users, Layers, ArrowRight } from 'lucide-react';
+import { Award } from 'lucide-react';
 
 export const GallerySection: React.FC = () => {
-  const { galleryItems } = useApp();
+  const { galleryItems, isInitialSyncLoading } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const categories = [
@@ -12,32 +11,19 @@ export const GallerySection: React.FC = () => {
     { id: 'toppers', label: 'Toppers & Awards' },
     { id: 'classroom', label: 'Smart Classrooms & Labs' },
     { id: 'event', label: 'Events & Functions' },
+    { id: 'events', label: 'Events (Admin)' },
     { id: 'students', label: 'Student Activities & Debates' }
   ];
 
-  const verifiedGalleryItems: GalleryItem[] = galleryItems.map(item => {
-    if (!item) return item;
-    if (item.category === 'students' || item.id === 'gal-5' || item.title?.includes('Debate') || item.imageUrl?.includes('moss') || item.imageUrl?.includes('forest')) {
-      return {
-        ...item,
-        title: 'Inter-School Stage Debate & Speech Competition',
-        category: 'students',
-        imageUrl: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800&auto=format&fit=crop&q=80',
-        description: 'Students passionately defending arguments on stage, building public speaking charisma and critical thinking.'
-      };
-    }
-    return item;
-  });
-
-  const filteredItems = verifiedGalleryItems.filter(item => {
+  const filteredItems = galleryItems.filter(item => {
     if (selectedCategory === 'all') return true;
     return item.category === selectedCategory;
   });
 
   return (
-    <section id="gallery-section" className="py-20 px-4 sm:px-6 lg:px-8 bg-white border-t border-slate-200/80 relative">
+    <section id="gallery-section" className="py-20 px-4 sm:px-6 lg:px-8 bg-white border-t border-slate-200/80">
       <div className="max-w-7xl mx-auto">
-        
+
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/80 text-[#0066FF] text-xs font-black uppercase tracking-wider mb-3">
@@ -52,7 +38,7 @@ export const GallerySection: React.FC = () => {
           </p>
         </div>
 
-        {/* Filter Pills with Left-to-Right Transition */}
+        {/* Filter Pills */}
         <div className="flex items-center justify-center gap-2 overflow-x-auto pb-4 mb-10 scrollbar-none">
           {categories.map(cat => (
             <button
@@ -69,42 +55,59 @@ export const GallerySection: React.FC = () => {
           ))}
         </div>
 
-        {/* Gallery Cards Grid with Smooth Left-to-Right Slide Animation */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredItems.map((item, index) => (
-            <div
-              key={item.id}
-              style={{ animationDelay: `${index * 100}ms` }}
-              className="bg-[#F8FAFC] border border-slate-200/90 rounded-3xl overflow-hidden shadow-card-clean hover:shadow-learner-lg transition-all duration-500 transform hover:-translate-y-2 group animate-in fade-in slide-in-from-left-6"
-            >
-              <div className="relative h-56 sm:h-64 overflow-hidden bg-slate-900">
-                <img
-                  src={item.imageUrl}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 filter brightness-95"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-
-                <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-[#0066FF] text-[11px] font-black uppercase tracking-wider shadow-sm">
-                  {item.category.toUpperCase()}
-                </span>
-
-                <span className="absolute bottom-3.5 right-3.5 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-white text-[11px] font-mono font-bold">
-                  {item.date}
-                </span>
+        {/* Skeleton shimmer while DB loads */}
+        {isInitialSyncLoading && filteredItems.length === 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} className="rounded-3xl border border-slate-200 overflow-hidden">
+                <div className="h-56 sm:h-64 skeleton-shimmer" />
+                <div className="p-6 space-y-2 bg-white">
+                  <div className="h-4 rounded-md skeleton-shimmer w-4/5" />
+                  <div className="h-3 rounded skeleton-shimmer w-3/5" />
+                </div>
               </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredItems.map((item, index) => (
+              <div
+                key={item.id}
+                style={{ animationDelay: `${index * 100}ms` }}
+                className="bg-[#F8FAFC] border border-slate-200/90 rounded-3xl overflow-hidden shadow-card-clean hover:shadow-learner-lg transition-all duration-500 transform hover:-translate-y-2 group animate-in fade-in slide-in-from-left-6"
+              >
+                <div className="relative h-56 sm:h-64 overflow-hidden bg-slate-200">
+                  <img
+                    src={item.imageUrl}
+                    alt={item.title}
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e: any) => { e.target.style.display = 'none'; }}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 filter brightness-95"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
 
-              <div className="p-6 space-y-2 bg-white">
-                <h3 className="text-base font-extrabold text-slate-900 group-hover:text-[#0066FF] transition-colors leading-snug line-clamp-1">
-                  {item.title}
-                </h3>
-                <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 font-medium">
-                  {item.description}
-                </p>
+                  <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-[#0066FF] text-[11px] font-black uppercase tracking-wider shadow-sm">
+                    {item.category.toUpperCase()}
+                  </span>
+
+                  <span className="absolute bottom-3.5 right-3.5 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-white text-[11px] font-mono font-bold">
+                    {item.date}
+                  </span>
+                </div>
+
+                <div className="p-6 space-y-2 bg-white">
+                  <h3 className="text-base font-extrabold text-slate-900 group-hover:text-[#0066FF] transition-colors leading-snug line-clamp-1">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 font-medium">
+                    {item.description}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
       </div>
     </section>
