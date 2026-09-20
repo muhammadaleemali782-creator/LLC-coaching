@@ -21,9 +21,7 @@ export const getPDFs = async (req, res) => {
       if (category && category !== 'all') query.category = category;
       if (targetClass && targetClass !== 'all') query.targetClass = new RegExp(targetClass, 'i');
       const results = await StudyMaterialModel.find(query).sort({ _id: -1 });
-      if (results && results.length > 0) {
-        return res.json({ success: true, count: results.length, data: results });
-      }
+      return res.json({ success: true, count: results.length, data: results });
     }
   } catch (err) {}
 
@@ -127,9 +125,7 @@ export const getVideos = async (req, res) => {
       if (subject && subject !== 'all') query.subject = subject;
       if (targetClass && targetClass !== 'all') query.targetClass = new RegExp(targetClass, 'i');
       const results = await VideoModel.find(query).sort({ _id: -1 });
-      if (results && results.length > 0) {
-        return res.json({ success: true, count: results.length, data: results });
-      }
+      return res.json({ success: true, count: results.length, data: results });
     }
   } catch (err) {}
 

@@ -374,45 +374,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           localStorage.getItem('lcc_admin_token') ? api.auth.getUsers() : Promise.resolve({ success: true, data: [] } as any)
         ]);
 
-        if (adsRes.status === 'fulfilled' && adsRes.value.data?.length) {
+        if (adsRes.status === 'fulfilled' && Array.isArray(adsRes.value?.data)) {
           setAds(adsRes.value.data);
           saveItem('lcc_ads', adsRes.value.data);
         }
-        if (pdfsRes.status === 'fulfilled' && pdfsRes.value.data?.length) {
+        if (pdfsRes.status === 'fulfilled' && Array.isArray(pdfsRes.value?.data)) {
           const cloudPdfs = pdfsRes.value.data;
-          setStudyMaterials(prev => {
-            const localSaved = loadSaved<StudyMaterial[]>('lcc_study_materials', prev) || [];
-            const cloudIds = new Set(cloudPdfs.map((m: any) => m.id));
-            const localOnly = localSaved.filter((m: any) => !cloudIds.has(m.id));
-            const merged = [...localOnly, ...cloudPdfs];
-            saveItem('lcc_study_materials', merged);
-            return merged;
-          });
+          setStudyMaterials(cloudPdfs);
+          saveItem('lcc_study_materials', cloudPdfs);
         }
-        if (vidsRes.status === 'fulfilled' && vidsRes.value.data?.length) {
+        if (vidsRes.status === 'fulfilled' && Array.isArray(vidsRes.value?.data)) {
           const cloudVids = vidsRes.value.data;
-          setVideos(prev => {
-            const localSaved = loadSaved<VideoLecture[]>('lcc_videos', prev) || [];
-            const cloudIds = new Set(cloudVids.map((v: any) => v.id));
-            const localOnly = localSaved.filter((v: any) => !cloudIds.has(v.id));
-            const merged = [...localOnly, ...cloudVids];
-            saveItem('lcc_videos', merged);
-            // Auto-sync any local-only videos to cloud in background
-            localOnly.forEach((v: any) => {
-              api.media.createVideo(v).catch(() => {});
-            });
-            return merged;
-          });
+          setVideos(cloudVids);
+          saveItem('lcc_videos', cloudVids);
         }
-        if (revsRes.status === 'fulfilled' && revsRes.value.data?.length) {
+        if (revsRes.status === 'fulfilled' && Array.isArray(revsRes.value?.data)) {
           setReviews(revsRes.value.data);
           saveItem('lcc_reviews', revsRes.value.data);
         }
-        if (socsRes.status === 'fulfilled' && socsRes.value.data?.length) {
+        if (socsRes.status === 'fulfilled' && Array.isArray(socsRes.value?.data)) {
           setSocialLinks(socsRes.value.data);
           saveItem('lcc_social_links', socsRes.value.data);
         }
-        if (setsRes.status === 'fulfilled' && setsRes.value.data) {
+        if (setsRes.status === 'fulfilled' && setsRes.value?.data) {
           const cloudSets = setsRes.value.data;
           setWebsiteSettings(prev => {
             const localOverrides = loadSaved<Record<string, any>>('lcc_visual_overrides', {});
@@ -438,71 +422,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return merged;
           });
         }
-        if (coursesRes.status === 'fulfilled' && coursesRes.value.data?.length) {
-          const cloudCourses = coursesRes.value.data;
-          setCourses(prev => {
-            const localSaved = loadSaved<Course[]>('lcc_courses', prev) || [];
-            const cloudIds = new Set(cloudCourses.map((c: any) => c.id));
-            const localOnly = localSaved.filter((c: any) => !cloudIds.has(c.id));
-            const merged = [...localOnly, ...cloudCourses];
-            saveItem('lcc_courses', merged);
-            return merged;
-          });
+        if (coursesRes.status === 'fulfilled' && Array.isArray(coursesRes.value?.data)) {
+          setCourses(coursesRes.value.data);
+          saveItem('lcc_courses', coursesRes.value.data);
         }
-        if (notsRes.status === 'fulfilled' && notsRes.value.data?.length) {
-          const cloudNotices = notsRes.value.data;
-          setNotices(prev => {
-            const localSaved = loadSaved<Notice[]>('lcc_notices', prev) || [];
-            const cloudIds = new Set(cloudNotices.map((n: any) => n.id));
-            const localOnly = localSaved.filter((n: any) => !cloudIds.has(n.id));
-            const merged = [...localOnly, ...cloudNotices];
-            saveItem('lcc_notices', merged);
-            return merged;
-          });
+        if (notsRes.status === 'fulfilled' && Array.isArray(notsRes.value?.data)) {
+          setNotices(notsRes.value.data);
+          saveItem('lcc_notices', notsRes.value.data);
         }
-        if (galRes.status === 'fulfilled' && galRes.value.data?.length) {
-          const cloudGallery = galRes.value.data;
-          setGalleryItems(prev => {
-            const localSaved = loadSaved<GalleryItem[]>('lcc_gallery', prev) || [];
-            const map = new Map<string, GalleryItem>();
-            cloudGallery.forEach((g: any) => map.set(g.id, g));
-            localSaved.forEach((g: any) => {
-              if (!map.has(g.id)) {
-                map.set(g.id, g);
-                api.gallery.create(g).catch(() => {});
-              }
-            });
-            const merged = Array.from(map.values());
-            saveItem('lcc_gallery', merged);
-            return merged;
-          });
+        if (galRes.status === 'fulfilled' && Array.isArray(galRes.value?.data)) {
+          setGalleryItems(galRes.value.data);
+          saveItem('lcc_gallery', galRes.value.data);
         }
-        if (instaRes.status === 'fulfilled' && (instaRes.value as any)?.data?.length) {
-          const cloudPosts = (instaRes.value as any).data;
-          setInstagramPosts(prev => {
-            const localSaved = loadSaved<InstagramPost[]>('lcc_instagram', prev) || [];
-            const map = new Map<string, InstagramPost>();
-            cloudPosts.forEach((p: any) => map.set(p.id, p));
-            localSaved.forEach((p: any) => {
-              if (!map.has(p.id)) {
-                map.set(p.id, p);
-                api.instagram.create(p).catch(() => {});
-              }
-            });
-            const merged = Array.from(map.values());
-            saveItem('lcc_instagram', merged);
-            return merged;
-          });
+        if (instaRes.status === 'fulfilled' && Array.isArray((instaRes.value as any)?.data)) {
+          setInstagramPosts((instaRes.value as any).data);
+          saveItem('lcc_instagram', (instaRes.value as any).data);
         }
-        if (sylRes.status === 'fulfilled' && sylRes.value.data?.length) {
+        if (sylRes.status === 'fulfilled' && Array.isArray(sylRes.value?.data)) {
           setSyllabuses(sylRes.value.data);
           saveItem('lcc_syllabus', sylRes.value.data);
         }
-        if (inqRes.status === 'fulfilled' && inqRes.value.data?.length) {
+        if (inqRes.status === 'fulfilled' && Array.isArray(inqRes.value?.data)) {
           setInquiries(inqRes.value.data);
           saveItem('lcc_inquiries', inqRes.value.data);
         }
-        if (usersRes.status === 'fulfilled' && (usersRes.value as any)?.data?.length) {
+        if (usersRes.status === 'fulfilled' && Array.isArray((usersRes.value as any)?.data)) {
           const registeredStudents = (usersRes.value as any).data.filter((u: any) => u.role !== 'admin');
           if (registeredStudents.length > 0) setStudents(registeredStudents);
         }

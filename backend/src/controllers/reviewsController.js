@@ -9,9 +9,7 @@ export const getReviews = async (req, res) => {
     if (mongoose.connection.readyState === 1) {
       const query = all ? {} : { status: 'approved' };
       const reviews = await ReviewModel.find(query).sort({ _id: -1 });
-      if (reviews && reviews.length > 0) {
-        return res.json({ success: true, count: reviews.length, data: reviews });
-      }
+      return res.json({ success: true, count: reviews.length, data: reviews });
     }
   } catch (err) {}
 

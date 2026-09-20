@@ -11,9 +11,7 @@ export const getAds = async (req, res) => {
       if (placement) query.placement = placement;
       if (!all) query.isActive = true;
       const results = await AdModel.find(query).sort({ priority: 1 });
-      if (results && results.length > 0) {
-        return res.json({ success: true, count: results.length, data: results });
-      }
+      return res.json({ success: true, count: results.length, data: results });
     }
   } catch (err) {}
 

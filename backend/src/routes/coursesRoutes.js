@@ -9,9 +9,7 @@ router.get('/', async (req, res) => {
   try {
     if (mongoose.connection.readyState === 1) {
       const courses = await CourseModel.find();
-      if (courses && courses.length > 0) {
-        return res.json({ success: true, data: courses });
-      }
+      return res.json({ success: true, data: courses });
     }
     const db = getDB();
     res.json({ success: true, data: db.courses || [] });

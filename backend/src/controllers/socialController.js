@@ -5,9 +5,7 @@ export const getSocialLinks = async (req, res) => {
   try {
     if (mongoose.connection.readyState === 1) {
       const links = await SocialLinkModel.find();
-      if (links && links.length > 0) {
-        return res.json({ success: true, data: links });
-      }
+      return res.json({ success: true, data: links });
     }
   } catch (err) {}
 
