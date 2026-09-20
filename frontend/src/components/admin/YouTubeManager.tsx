@@ -86,7 +86,7 @@ export const YouTubeManager: React.FC = () => {
       targetClass: 'Class 10',
       instructor: 'Aman Arora'
     });
-    showToast(`${newVideo.platform.toUpperCase()} video lecture published!`, 'success');
+    showToast(`${(newVideo.platform || 'video').toUpperCase()} video lecture published!`, 'success');
   };
 
   const handleSaveEdit = async (e: React.FormEvent) => {
@@ -348,7 +348,7 @@ export const YouTubeManager: React.FC = () => {
                     <img src={v.thumbnail} alt={v.title} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                       <span className="px-3 py-1 rounded-full bg-slate-900/90 text-white text-xs font-bold uppercase border border-slate-700">
-                        {platform.toUpperCase()} REEL
+                        {(platform || 'video').toUpperCase()} REEL
                       </span>
                     </div>
                   </div>
