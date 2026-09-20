@@ -41,7 +41,8 @@ export const YouTubeSection: React.FC = () => {
         {/* Video Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {videos.map(vid => {
-            const platform = vid.platform || (vid.youtubeUrl?.includes('instagram') ? 'instagram' : vid.youtubeUrl?.includes('facebook') ? 'facebook' : 'youtube');
+            const rawUrl = vid.videoUrl || vid.youtubeUrl || '';
+            const platform = vid.platform || (rawUrl.includes('instagram') ? 'instagram' : rawUrl.includes('facebook') ? 'facebook' : rawUrl.includes('twitter') || rawUrl.includes('x.com') ? 'twitter' : 'youtube');
 
             return (
               <div
@@ -53,6 +54,9 @@ export const YouTubeSection: React.FC = () => {
                   <img
                     src={vid.thumbnail}
                     alt={vid.title}
+                    onError={(e: any) => {
+                      e.target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80';
+                    }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 filter brightness-90"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
@@ -63,6 +67,8 @@ export const YouTubeSection: React.FC = () => {
                         ? 'bg-pink-600/90 group-hover:bg-pink-600'
                         : platform === 'facebook'
                         ? 'bg-blue-600/90 group-hover:bg-blue-600'
+                        : platform === 'twitter'
+                        ? 'bg-sky-500/90 group-hover:bg-sky-500'
                         : 'bg-rose-600/90 group-hover:bg-rose-600'
                     }`}>
                       <Play className="w-6 h-6 fill-current ml-0.5" />
@@ -83,6 +89,8 @@ export const YouTubeSection: React.FC = () => {
                         ? 'bg-gradient-to-r from-pink-500 to-purple-500'
                         : platform === 'facebook'
                         ? 'bg-blue-600'
+                        : platform === 'twitter'
+                        ? 'bg-sky-500'
                         : 'bg-rose-600'
                     }`}>
                       {platform}

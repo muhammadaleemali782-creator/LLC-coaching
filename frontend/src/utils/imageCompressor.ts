@@ -59,9 +59,25 @@ export const compressImageFile = (file: File, maxDimension = 900, quality = 0.82
 export const normalizeImageUrl = (url: string): string => {
   if (!url) return '';
   const trimmed = url.trim();
+
+  // Google Drive sharing link
   const gdriveMatch = trimmed.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/i);
   if (gdriveMatch && gdriveMatch[1]) {
     return `https://lh3.googleusercontent.com/d/${gdriveMatch[1]}`;
   }
+
+  // YouTube video / shorts link
+  const ytMatch = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/|live\/))([\w-]{11})/i);
+  if (ytMatch && ytMatch[1]) {
+    return `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
+  }
+
+  // Instagram post / reel link
+  const igMatch = trimmed.match(/(?:instagram\.com\/(?:p|reel|reels|tv)\/([a-zA-Z0-9_-]+))/i);
+  if (igMatch && igMatch[1]) {
+    return `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.instagram.com/p/${igMatch[1]}/media/?size=l`)}`;
+  }
+
   return trimmed;
 };
+

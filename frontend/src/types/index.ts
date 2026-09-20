@@ -73,7 +73,7 @@ export interface Notice {
   description: string;
 }
 
-export type VideoPlatform = 'youtube' | 'instagram' | 'facebook';
+export type VideoPlatform = 'youtube' | 'instagram' | 'facebook' | 'twitter' | 'other';
 
 export interface VideoLecture {
   id: string;

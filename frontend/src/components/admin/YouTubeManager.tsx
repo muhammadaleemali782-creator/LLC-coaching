@@ -3,6 +3,8 @@ import { useApp } from '../../context/AppContext';
 import { VideoLecture, VideoPlatform } from '../../types';
 import { Video, Plus, Trash2, Eye, EyeOff, Play, Share2, Sparkles, Pencil, X, Check } from 'lucide-react';
 import { Youtube } from '../SocialIcons';
+import { ImageUploaderInput } from '../common/ImageUploaderInput';
+import { detectPlatform, extractVideoId, extractThumbnailFromUrl, fetchMediaDetails } from '../../utils/mediaExtractor';
 
 export const YouTubeManager: React.FC = () => {
   const { videos, addVideoLecture, updateVideoLecture, deleteVideoLecture, showToast } = useApp();
@@ -14,6 +16,7 @@ export const YouTubeManager: React.FC = () => {
     title: string;
     videoUrl: string;
     platform: VideoPlatform;
+    thumbnail: string;
     duration: string;
     subject: string;
     targetClass: string;
@@ -22,34 +25,60 @@ export const YouTubeManager: React.FC = () => {
     title: '',
     videoUrl: '',
     platform: 'youtube',
+    thumbnail: '',
     duration: '15:00',
     subject: 'Mathematics',
     targetClass: 'Class 10',
     instructor: 'Aman Arora'
   });
 
-  const extractEmbedInfo = (url: string, platform: VideoPlatform) => {
-    let embedUrl = '';
-    let videoId = '';
-    let thumbnail = 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80';
+  const handleNewUrlChange = (url: string) => {
+    const detected = detectPlatform(url);
+    const autoThumb = extractThumbnailFromUrl(url, detected);
 
-    if (platform === 'youtube') {
-      const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/))([\w-]{11})/i);
-      videoId = match ? match[1] : (url.trim().length === 11 ? url.trim() : 'kJQP7kiw5Fk');
-      embedUrl = `https://www.youtube.com/embed/${videoId}`;
-      thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-    } else if (platform === 'instagram') {
-      const cleanUrl = url.split('?')[0].replace(/\/+$/, '');
-      embedUrl = `${cleanUrl}/embed/`;
-      videoId = cleanUrl.split('/').pop() || 'insta';
-      thumbnail = 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&auto=format&fit=crop&q=80';
-    } else if (platform === 'facebook') {
-      embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0`;
-      videoId = 'fb-vid';
-      thumbnail = 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop&q=80';
+    setNewVideo(prev => ({
+      ...prev,
+      videoUrl: url,
+      platform: detected,
+      thumbnail: autoThumb || prev.thumbnail
+    }));
+
+    if (url.trim().startsWith('http')) {
+      fetchMediaDetails(url).then(info => {
+        setNewVideo(prev => ({
+          ...prev,
+          title: prev.title ? prev.title : (info.title || prev.title),
+          thumbnail: info.thumbnail || prev.thumbnail
+        }));
+      }).catch(() => {});
     }
+  };
 
-    return { embedUrl, videoId, thumbnail };
+  const handleEditUrlChange = (url: string) => {
+    if (!editingVideo) return;
+    const detected = detectPlatform(url);
+    const autoThumb = extractThumbnailFromUrl(url, detected);
+
+    setEditingVideo({
+      ...editingVideo,
+      videoUrl: url,
+      youtubeUrl: url,
+      platform: detected,
+      thumbnail: autoThumb || editingVideo.thumbnail
+    });
+
+    if (url.trim().startsWith('http')) {
+      fetchMediaDetails(url).then(info => {
+        setEditingVideo(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            title: prev.title ? prev.title : (info.title || prev.title),
+            thumbnail: info.thumbnail || prev.thumbnail
+          };
+        });
+      }).catch(() => {});
+    }
   };
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -59,13 +88,15 @@ export const YouTubeManager: React.FC = () => {
       return;
     }
 
-    const { videoId, thumbnail } = extractEmbedInfo(newVideo.videoUrl, newVideo.platform);
+    const platform = newVideo.platform || detectPlatform(newVideo.videoUrl);
+    const videoId = extractVideoId(newVideo.videoUrl, platform) || 'video';
+    const thumbnail = newVideo.thumbnail || extractThumbnailFromUrl(newVideo.videoUrl, platform);
 
     await addVideoLecture({
       title: newVideo.title,
       youtubeUrl: newVideo.videoUrl,
       videoUrl: newVideo.videoUrl,
-      platform: newVideo.platform,
+      platform,
       videoId,
       youtubeId: videoId,
       thumbnail,
@@ -81,12 +112,13 @@ export const YouTubeManager: React.FC = () => {
       title: '',
       videoUrl: '',
       platform: 'youtube',
+      thumbnail: '',
       duration: '15:00',
       subject: 'Mathematics',
       targetClass: 'Class 10',
       instructor: 'Aman Arora'
     });
-    showToast(`${(newVideo.platform || 'video').toUpperCase()} video lecture published!`, 'success');
+    showToast(`${platform.toUpperCase()} video lecture published!`, 'success');
   };
 
   const handleSaveEdit = async (e: React.FormEvent) => {
@@ -94,15 +126,16 @@ export const YouTubeManager: React.FC = () => {
     if (!editingVideo) return;
     setIsSaving(true);
     try {
-      const { videoId, thumbnail } = extractEmbedInfo(
-        editingVideo.videoUrl || editingVideo.youtubeUrl || '',
-        editingVideo.platform || 'youtube'
-      );
+      const url = editingVideo.videoUrl || editingVideo.youtubeUrl || '';
+      const platform = editingVideo.platform || detectPlatform(url);
+      const videoId = extractVideoId(url, platform) || 'video';
+      const thumbnail = editingVideo.thumbnail || extractThumbnailFromUrl(url, platform);
+
       await updateVideoLecture(editingVideo.id, {
         title: editingVideo.title,
-        videoUrl: editingVideo.videoUrl || editingVideo.youtubeUrl,
-        youtubeUrl: editingVideo.videoUrl || editingVideo.youtubeUrl,
-        platform: editingVideo.platform || 'youtube',
+        videoUrl: url,
+        youtubeUrl: url,
+        platform,
         targetClass: editingVideo.targetClass,
         subject: editingVideo.subject,
         instructor: editingVideo.instructor,
@@ -163,6 +196,8 @@ export const YouTubeManager: React.FC = () => {
                     <option value="youtube">YouTube (Video / Shorts)</option>
                     <option value="instagram">Instagram (Reel / Post)</option>
                     <option value="facebook">Facebook (Video / Reel)</option>
+                    <option value="twitter">Twitter / X (Video / Post)</option>
+                    <option value="other">Other Video Link</option>
                   </select>
                 </div>
 
@@ -172,8 +207,18 @@ export const YouTubeManager: React.FC = () => {
                     type="text"
                     required
                     value={editingVideo.videoUrl || editingVideo.youtubeUrl || ''}
-                    onChange={e => setEditingVideo({ ...editingVideo, videoUrl: e.target.value, youtubeUrl: e.target.value })}
+                    onChange={e => handleEditUrlChange(e.target.value)}
+                    placeholder="Paste YouTube, Instagram, Facebook, or Twitter video link..."
                     className="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+
+                <div className="md:col-span-3">
+                  <ImageUploaderInput
+                    label="Thumbnail Image (Auto-extracted from link or Upload Custom)"
+                    value={editingVideo.thumbnail || ''}
+                    onChange={url => setEditingVideo({ ...editingVideo, thumbnail: url })}
+                    placeholder="Auto-extracted from video link or click upload..."
                   />
                 </div>
 
@@ -259,6 +304,8 @@ export const YouTubeManager: React.FC = () => {
                 <option value="youtube">YouTube (Video / Shorts)</option>
                 <option value="instagram">Instagram (Reel / Post)</option>
                 <option value="facebook">Facebook (Video / Reel)</option>
+                <option value="twitter">Twitter / X (Video / Post)</option>
+                <option value="other">Other Video Link</option>
               </select>
             </div>
 
@@ -267,16 +314,19 @@ export const YouTubeManager: React.FC = () => {
               <input
                 type="text"
                 required
-                placeholder={
-                  newVideo.platform === 'youtube'
-                    ? 'https://www.youtube.com/watch?v=... or shorts URL'
-                    : newVideo.platform === 'instagram'
-                    ? 'https://www.instagram.com/reel/... or /p/...'
-                    : 'https://www.facebook.com/.../videos/... or fb.watch/...'
-                }
+                placeholder="Paste video link (YouTube, Instagram Reel, Facebook, or Twitter)..."
                 value={newVideo.videoUrl}
-                onChange={e => setNewVideo({ ...newVideo, videoUrl: e.target.value })}
+                onChange={e => handleNewUrlChange(e.target.value)}
                 className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+              />
+            </div>
+
+            <div className="md:col-span-3">
+              <ImageUploaderInput
+                label="Thumbnail Image (Auto-extracted from video link or Upload Custom)"
+                value={newVideo.thumbnail}
+                onChange={url => setNewVideo({ ...newVideo, thumbnail: url })}
+                placeholder="Auto-extracted thumbnail image from video link or upload file..."
               />
             </div>
 
@@ -365,6 +415,8 @@ export const YouTubeManager: React.FC = () => {
                       ? 'bg-pink-500/20 text-pink-400'
                       : platform === 'facebook'
                       ? 'bg-blue-600/20 text-blue-400'
+                      : platform === 'twitter'
+                      ? 'bg-sky-500/20 text-sky-400'
                       : 'bg-rose-500/20 text-rose-400'
                   }`}>
                     {platform}

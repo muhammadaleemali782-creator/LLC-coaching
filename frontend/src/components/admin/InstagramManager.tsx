@@ -4,6 +4,7 @@ import { InstagramPost } from '../../types';
 import { Plus, Edit3, Trash2, Heart, MessageCircle, ExternalLink, Save, X } from 'lucide-react';
 import { Instagram } from '../SocialIcons';
 import { ImageUploaderInput } from '../common/ImageUploaderInput';
+import { extractThumbnailFromUrl } from '../../utils/mediaExtractor';
 
 export const InstagramManager: React.FC = () => {
   const { instagramPosts, setInstagramPosts, showToast } = useApp();
@@ -12,32 +13,64 @@ export const InstagramManager: React.FC = () => {
 
   const [newPost, setNewPost] = useState<Partial<InstagramPost>>({
     caption: '',
-    imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
+    imageUrl: '',
     likes: 1250,
     comments: 48,
-    postUrl: 'https://instagram.com/lcc_coaching_official',
+    postUrl: '',
     timestamp: 'Just now'
   });
 
+  const handlePostUrlChange = (url: string) => {
+    const autoThumb = extractThumbnailFromUrl(url, 'instagram');
+    setNewPost(prev => ({
+      ...prev,
+      postUrl: url,
+      imageUrl: autoThumb || prev.imageUrl,
+      type: url.includes('/reel/') ? 'reel' : 'post'
+    }));
+  };
+
+  const handleEditPostUrlChange = (url: string) => {
+    if (!editingPost) return;
+    const autoThumb = extractThumbnailFromUrl(url, 'instagram');
+    setEditingPost({
+      ...editingPost,
+      postUrl: url,
+      imageUrl: autoThumb || editingPost.imageUrl,
+      type: url.includes('/reel/') ? 'reel' : editingPost.type
+    });
+  };
+
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPost.caption || !newPost.imageUrl) {
+    const finalImage = newPost.imageUrl || extractThumbnailFromUrl(newPost.postUrl || '', 'instagram');
+    if (!newPost.caption || !finalImage) {
       showToast('Caption and image URL are required.', 'warning');
       return;
     }
     const created: InstagramPost = {
       id: `ig-${Date.now()}`,
-      imageUrl: newPost.imageUrl,
+      imageUrl: finalImage,
       caption: newPost.caption,
       likes: Number(newPost.likes) || 100,
       comments: Number(newPost.comments) || 10,
       postUrl: newPost.postUrl || 'https://instagram.com',
-      timestamp: newPost.timestamp || 'Just now'
+      timestamp: newPost.timestamp || 'Just now',
+      type: newPost.postUrl?.includes('/reel/') ? 'reel' : 'post'
     };
     setInstagramPosts(prev => [created, ...prev]);
     setIsAdding(false);
+    setNewPost({
+      caption: '',
+      imageUrl: '',
+      likes: 1250,
+      comments: 48,
+      postUrl: '',
+      timestamp: 'Just now'
+    });
     showToast('Instagram post added to feed!', 'success');
   };
+
 
   const handleSaveEdit = () => {
     if (!editingPost) return;
@@ -80,11 +113,23 @@ export const InstagramManager: React.FC = () => {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
+              <label className="text-xs font-bold text-slate-300 block mb-1">Instagram Post / Reel URL</label>
+              <input
+                type="text"
+                placeholder="https://www.instagram.com/reel/... or /p/..."
+                value={newPost.postUrl}
+                onChange={e => handlePostUrlChange(e.target.value)}
+                className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500"
+              />
+              <span className="text-[11px] text-pink-400 mt-1 block">✨ Paste link above to automatically grab post image preview.</span>
+            </div>
+
+            <div className="sm:col-span-2">
               <ImageUploaderInput
-                label="Post Image (File Upload or URL)"
+                label="Post Image (Auto-extracted or Upload Custom)"
                 value={newPost.imageUrl || ''}
                 onChange={url => setNewPost({ ...newPost, imageUrl: url })}
-                placeholder="Upload Instagram photo file or paste image URL..."
+                placeholder="Auto-extracted from Instagram link or click upload..."
               />
             </div>
 
@@ -116,17 +161,6 @@ export const InstagramManager: React.FC = () => {
                 type="number"
                 value={newPost.comments}
                 onChange={e => setNewPost({ ...newPost, comments: Number(e.target.value) })}
-                className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500"
-              />
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className="text-xs font-bold text-slate-300 block mb-1">Instagram Post URL</label>
-              <input
-                type="text"
-                placeholder="https://instagram.com/p/..."
-                value={newPost.postUrl}
-                onChange={e => setNewPost({ ...newPost, postUrl: e.target.value })}
                 className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500"
               />
             </div>
@@ -216,12 +250,22 @@ export const InstagramManager: React.FC = () => {
 
             <div className="space-y-3">
               <div>
-                <label className="text-[11px] font-bold text-slate-400 block mb-1">Image URL</label>
+                <label className="text-[11px] font-bold text-slate-400 block mb-1">Instagram Post / Reel URL</label>
                 <input
                   type="text"
-                  value={editingPost.imageUrl}
-                  onChange={e => setEditingPost({ ...editingPost, imageUrl: e.target.value })}
+                  value={editingPost.postUrl || ''}
+                  onChange={e => handleEditPostUrlChange(e.target.value)}
+                  placeholder="https://www.instagram.com/reel/... or /p/..."
                   className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500"
+                />
+              </div>
+
+              <div>
+                <ImageUploaderInput
+                  label="Post Image (Auto-extracted or Upload Custom)"
+                  value={editingPost.imageUrl || ''}
+                  onChange={url => setEditingPost({ ...editingPost, imageUrl: url })}
+                  placeholder="Auto-extracted or click upload..."
                 />
               </div>
 

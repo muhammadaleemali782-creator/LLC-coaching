@@ -12,16 +12,19 @@ export const VideoPlayerModal: React.FC = () => {
     showToast('Video link copied to clipboard!', 'info');
   };
 
-  const platform = selectedVideoForPlayer.platform || (selectedVideoForPlayer.youtubeUrl?.includes('instagram') ? 'instagram' : selectedVideoForPlayer.youtubeUrl?.includes('facebook') ? 'facebook' : 'youtube');
+  const rawUrl = selectedVideoForPlayer.videoUrl || selectedVideoForPlayer.youtubeUrl || '';
+  const platform = selectedVideoForPlayer.platform || (rawUrl.includes('instagram') ? 'instagram' : rawUrl.includes('facebook') ? 'facebook' : rawUrl.includes('twitter') || rawUrl.includes('x.com') ? 'twitter' : 'youtube');
   const videoId = selectedVideoForPlayer.videoId || selectedVideoForPlayer.youtubeId || 'kJQP7kiw5Fk';
 
   let playerIframeSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
   if (platform === 'instagram') {
-    const cleanUrl = (selectedVideoForPlayer.videoUrl || selectedVideoForPlayer.youtubeUrl || '').split('?')[0].replace(/\/+$/, '');
+    const cleanUrl = rawUrl.split('?')[0].replace(/\/+$/, '');
     playerIframeSrc = `${cleanUrl}/embed/`;
   } else if (platform === 'facebook') {
-    const rawUrl = selectedVideoForPlayer.videoUrl || selectedVideoForPlayer.youtubeUrl || '';
     playerIframeSrc = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(rawUrl)}&show_text=0`;
+  } else if (platform === 'twitter') {
+    const tweetMatch = rawUrl.match(/status\/(\d+)/);
+    playerIframeSrc = tweetMatch ? `https://platform.twitter.com/embed/Tweet.html?id=${tweetMatch[1]}` : rawUrl;
   }
 
   return (
@@ -36,6 +39,8 @@ export const VideoPlayerModal: React.FC = () => {
                 ? 'bg-pink-500/20 text-pink-400'
                 : platform === 'facebook'
                 ? 'bg-blue-500/20 text-blue-400'
+                : platform === 'twitter'
+                ? 'bg-sky-500/20 text-sky-400'
                 : 'bg-red-500/20 text-red-400'
             }`}>
               <Video className="w-5 h-5" />
