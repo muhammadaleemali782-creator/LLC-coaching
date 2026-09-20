@@ -46,8 +46,11 @@ const CourseSchema = new mongoose.Schema({
   description: String,
   syllabusHighlights: [String],
   isPaid: { type: Boolean, default: true },
-  schedule: String
-});
+  schedule: String,
+  whatsappRedirectUrl: String,
+  privatePlaylistUrl: String,
+  razorpayKeyId: String
+}, { strict: false });
 
 const StudyMaterialSchema = new mongoose.Schema({
   id: String,
@@ -65,7 +68,7 @@ const StudyMaterialSchema = new mongoose.Schema({
   dateAdded: String,
   downloadsCount: { type: Number, default: 0 },
   previewContent: String
-});
+}, { strict: false });
 
 const VideoSchema = new mongoose.Schema({
   id: String,
@@ -84,7 +87,7 @@ const VideoSchema = new mongoose.Schema({
   isPublished: { type: Boolean, default: true },
   isFeatured: { type: Boolean, default: true },
   dateAdded: String
-});
+}, { strict: false });
 
 const NoticeSchema = new mongoose.Schema({
   id: String,
@@ -94,7 +97,7 @@ const NoticeSchema = new mongoose.Schema({
   isImportant: Boolean,
   badgeText: String,
   description: String
-});
+}, { strict: false });
 
 const GallerySchema = new mongoose.Schema({
   id: String,
@@ -103,7 +106,7 @@ const GallerySchema = new mongoose.Schema({
   category: String,
   imageUrl: String,
   date: String
-});
+}, { strict: false });
 
 const InstagramSchema = new mongoose.Schema({
   id: String,
@@ -116,7 +119,7 @@ const InstagramSchema = new mongoose.Schema({
   timestamp: String,
   date: String,
   type: { type: String, default: 'post' }
-});
+}, { strict: false });
 
 const SyllabusSchema = new mongoose.Schema({
   id: String,
@@ -132,7 +135,7 @@ const SyllabusSchema = new mongoose.Schema({
     weightage: String,
     estimatedHours: Number
   }]
-});
+}, { strict: false });
 
 const AdSchema = new mongoose.Schema({
   id: String,
@@ -148,7 +151,7 @@ const AdSchema = new mongoose.Schema({
   endDate: String,
   clicks: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
-});
+}, { strict: false });
 
 const ReviewSchema = new mongoose.Schema({
   id: String,
@@ -158,7 +161,7 @@ const ReviewSchema = new mongoose.Schema({
   comment: String,
   status: { type: String, default: 'approved' },
   date: String
-});
+}, { strict: false });
 
 const SocialLinkSchema = new mongoose.Schema({
   id: String,
@@ -166,7 +169,7 @@ const SocialLinkSchema = new mongoose.Schema({
   label: String,
   url: String,
   isEnabled: { type: Boolean, default: true }
-});
+}, { strict: false });
 
 const SettingSchema = new mongoose.Schema({
   instituteName: String,

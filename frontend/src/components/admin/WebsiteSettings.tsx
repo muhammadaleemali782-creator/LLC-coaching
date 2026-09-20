@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Settings, Save, Bell, Phone, Mail, MapPin, Sparkles, Image as ImageIcon, CheckCircle2, Shield, CreditCard, MessageSquare, ExternalLink } from 'lucide-react';
+import { Settings, Save, Bell, Phone, Mail, MapPin, Sparkles, Image as ImageIcon, CheckCircle2, Shield, CreditCard, MessageSquare, ExternalLink, Loader2 } from 'lucide-react';
 import { Youtube } from '../SocialIcons';
 import { ImageUploaderInput } from '../common/ImageUploaderInput';
 import { getGoogleMapEmbedUrl, getGoogleMapAppUrl } from '../../utils/mapUtils';
 
 export const WebsiteSettings: React.FC = () => {
   const { websiteSettings, updateWebsiteSettings, showToast } = useApp();
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [form, setForm] = useState({
     instituteName: websiteSettings.instituteName || 'Learning Coaching Center (L.C.C.)',
     shortName: websiteSettings.shortName || 'L.C.C.',
@@ -55,10 +57,20 @@ export const WebsiteSettings: React.FC = () => {
     });
   }, [websiteSettings]);
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await updateWebsiteSettings(form);
-    showToast('Institute branding, Razorpay key, logo & settings saved successfully!', 'success');
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsSaving(true);
+    setSaveSuccess(false);
+    try {
+      await updateWebsiteSettings(form);
+      setSaveSuccess(true);
+      showToast('Settings & Google Maps location permanently saved to MongoDB Atlas!', 'success');
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err: any) {
+      showToast('Failed to save settings: ' + err.message, 'error');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -285,7 +297,7 @@ export const WebsiteSettings: React.FC = () => {
 
         {/* Google Maps Campus Location & Live Pin Preview */}
         <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
             <div className="flex items-center gap-2">
               <MapPin className="w-5 h-5 text-red-400" />
               <div>
@@ -293,15 +305,47 @@ export const WebsiteSettings: React.FC = () => {
                 <p className="text-[11px] text-slate-400">Set the exact coaching pin shown on website contact section & Google Maps navigation.</p>
               </div>
             </div>
-            {form.googleMapsEmbedUrl && (
+
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              {form.googleMapsEmbedUrl && (
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, googleMapsEmbedUrl: '' })}
+                  className="text-[11px] text-slate-400 hover:text-red-400 underline cursor-pointer mr-2"
+                >
+                  Reset Default
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => setForm({ ...form, googleMapsEmbedUrl: '' })}
-                className="text-[11px] text-slate-400 hover:text-red-400 underline cursor-pointer"
+                disabled={isSaving}
+                onClick={() => handleSave()}
+                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer ${
+                  saveSuccess
+                    ? 'bg-emerald-600 text-white ring-2 ring-emerald-400'
+                    : isSaving
+                    ? 'bg-blue-700 text-white opacity-85 cursor-wait'
+                    : 'bg-[#0066FF] hover:bg-blue-600 text-white shadow-blue-500/25'
+                }`}
               >
-                Reset to Default Address
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Saving Map...</span>
+                  </>
+                ) : saveSuccess ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-white animate-in zoom-in-50" />
+                    <span>Map Saved!</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Save Map Location</span>
+                  </>
+                )}
               </button>
-            )}
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -327,7 +371,7 @@ export const WebsiteSettings: React.FC = () => {
               <ol className="list-decimal list-inside space-y-0.5 text-slate-300 ml-1">
                 <li>Google Maps par apne coaching ka naam ya address search karein.</li>
                 <li><strong>Share</strong> button dabayein ➔ <strong>Embed a map</strong> chunein ➔ <strong>Copy HTML</strong> par click karein.</li>
-                <li>Upar diye gaye box me paste kar dein (system khud-b-khud exact pin link nikaal lega) aur <strong>Save All Changes Live</strong> dabayein!</li>
+                <li>Upar diye gaye box me paste kar dein (system khud-b-khud exact pin link nikaal lega) aur <strong>Save Map Location</strong> dabayein!</li>
                 <li><i>Ya fir sidhe coaching ka pura pata ya coordinates (e.g. Palahipatti, Varanasi, UP) likhein.</i></li>
               </ol>
             </div>
@@ -365,10 +409,31 @@ export const WebsiteSettings: React.FC = () => {
         <div className="flex justify-end pt-2">
           <button
             type="submit"
-            className="px-8 py-3.5 rounded-2xl bg-[#0066FF] hover:bg-blue-600 text-white text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-xl shadow-blue-500/25 cursor-pointer transition-all active:scale-98"
+            disabled={isSaving}
+            className={`px-9 py-4 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2.5 shadow-xl transition-all active:scale-95 cursor-pointer ${
+              saveSuccess
+                ? 'bg-emerald-600 hover:bg-emerald-500 text-white ring-4 ring-emerald-500/30 scale-102 shadow-emerald-500/30'
+                : isSaving
+                ? 'bg-blue-700 text-white cursor-wait opacity-85 ring-4 ring-blue-500/30'
+                : 'bg-[#0066FF] hover:bg-blue-600 text-white shadow-blue-500/30 hover:shadow-blue-500/50'
+            }`}
           >
-            <Save className="w-4 h-4" />
-            <span>Save All Changes Live</span>
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
+                <span className="animate-pulse">Saving to MongoDB Atlas...</span>
+              </>
+            ) : saveSuccess ? (
+              <>
+                <CheckCircle2 className="w-4 h-4 text-white animate-in zoom-in-50 duration-200" />
+                <span>Saved Live to MongoDB Atlas!</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Save All Changes Live</span>
+              </>
+            )}
           </button>
         </div>
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Course, CourseCategory } from '../../types';
-import { Plus, Edit3, Trash2, GraduationCap, CheckCircle2, Save, X, Star, MessageSquare, CreditCard } from 'lucide-react';
+import { Plus, Edit3, Trash2, GraduationCap, CheckCircle2, Save, X, Star, MessageSquare, CreditCard, Loader2 } from 'lucide-react';
 import { Youtube } from '../SocialIcons';
 import { ImageUploaderInput } from '../common/ImageUploaderInput';
 
@@ -9,6 +9,9 @@ export const CourseManager: React.FC = () => {
   const { courses, addCourse, updateCourse, deleteCourse, showToast } = useApp();
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [addSuccess, setAddSuccess] = useState(false);
+  const [isEditingSaving, setIsEditingSaving] = useState(false);
 
   const [newCourse, setNewCourse] = useState<Partial<Course>>({
     title: '',
@@ -33,24 +36,36 @@ export const CourseManager: React.FC = () => {
       showToast('Course title and target class are required.', 'warning');
       return;
     }
-    await addCourse(newCourse as Course);
-    setIsAdding(false);
-    setNewCourse({
-      title: '',
-      category: 'secondary',
-      targetClass: 'Class 9–10',
-      duration: 'Full Academic Year',
-      fee: 9500,
-      discountFee: 6999,
-      rating: 5.0,
-      instructor: 'Aman Arora',
-      image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
-      badge: 'Toppers Choice',
-      features: ['10-Year PYQs Solved', 'Weekly Board Mocks', '1:1 Doubt Solving'],
-      description: 'Comprehensive coaching with focus on step-by-step formula derivations.',
-      whatsappRedirectUrl: '',
-      privatePlaylistUrl: ''
-    });
+    setIsSubmitting(true);
+    try {
+      await addCourse(newCourse as Course);
+      setAddSuccess(true);
+      showToast(`Course "${newCourse.title}" successfully published & saved in MongoDB!`, 'success');
+      setTimeout(() => {
+        setIsAdding(false);
+        setAddSuccess(false);
+        setNewCourse({
+          title: '',
+          category: 'secondary',
+          targetClass: 'Class 9–10',
+          duration: 'Full Academic Year',
+          fee: 9500,
+          discountFee: 6999,
+          rating: 5.0,
+          instructor: 'Aman Arora',
+          image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
+          badge: 'Toppers Choice',
+          features: ['10-Year PYQs Solved', 'Weekly Board Mocks', '1:1 Doubt Solving'],
+          description: 'Comprehensive coaching with focus on step-by-step formula derivations.',
+          whatsappRedirectUrl: '',
+          privatePlaylistUrl: ''
+        });
+      }, 700);
+    } catch (err: any) {
+      showToast('Failed to publish course: ' + err.message, 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -202,9 +217,31 @@ export const CourseManager: React.FC = () => {
           <div className="flex justify-end pt-2">
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider"
+              disabled={isSubmitting}
+              className={`px-8 py-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer ${
+                addSuccess
+                  ? 'bg-emerald-500 text-white ring-4 ring-emerald-500/30'
+                  : isSubmitting
+                  ? 'bg-emerald-700 text-white cursor-wait opacity-85'
+                  : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/20'
+              }`}
             >
-              Publish to Website
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="animate-pulse">Publishing to MongoDB Atlas...</span>
+                </>
+              ) : addSuccess ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4 text-white animate-in zoom-in-50" />
+                  <span>Published Live!</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4" />
+                  <span>Publish to Website</span>
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -322,6 +359,28 @@ export const CourseManager: React.FC = () => {
                 />
               </div>
 
+              <div>
+                <label className="text-[11px] font-bold text-emerald-400 block mb-1">Post-Payment WhatsApp Group Link</label>
+                <input
+                  type="url"
+                  placeholder="https://chat.whatsapp.com/..."
+                  value={editingCourse.whatsappRedirectUrl || ''}
+                  onChange={e => setEditingCourse({ ...editingCourse, whatsappRedirectUrl: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-red-400 block mb-1">Post-Payment Private YouTube Playlist Link</label>
+                <input
+                  type="url"
+                  placeholder="https://youtube.com/playlist?list=..."
+                  value={editingCourse.privatePlaylistUrl || ''}
+                  onChange={e => setEditingCourse({ ...editingCourse, privatePlaylistUrl: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                />
+              </div>
+
               <div className="sm:col-span-2">
                 <label className="text-[11px] font-bold text-slate-400 block mb-1">Description</label>
                 <textarea
@@ -335,21 +394,39 @@ export const CourseManager: React.FC = () => {
 
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
               <button
+                disabled={isEditingSaving}
                 onClick={() => setEditingCourse(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-300"
+                className="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-300 hover:bg-slate-700 cursor-pointer"
               >
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  updateCourse(editingCourse);
-                  setEditingCourse(null);
-                  showToast('Course updated and saved live!', 'success');
+                disabled={isEditingSaving}
+                onClick={async () => {
+                  setIsEditingSaving(true);
+                  try {
+                    await updateCourse(editingCourse);
+                    showToast(`Course "${editingCourse.title}" updated and saved live to MongoDB!`, 'success');
+                    setEditingCourse(null);
+                  } finally {
+                    setIsEditingSaving(false);
+                  }
                 }}
-                className="px-6 py-2 rounded-xl bg-[#0066FF] hover:bg-blue-600 text-white text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md"
+                className={`px-6 py-2 rounded-xl text-white text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md transition-all active:scale-95 cursor-pointer ${
+                  isEditingSaving ? 'bg-blue-700 opacity-80 cursor-wait' : 'bg-[#0066FF] hover:bg-blue-600'
+                }`}
               >
-                <Save className="w-3.5 h-3.5" />
-                <span>Save Live</span>
+                {isEditingSaving ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Saving to MongoDB...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Save Live to Cloud</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
