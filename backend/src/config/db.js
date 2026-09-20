@@ -109,10 +109,13 @@ const InstagramSchema = new mongoose.Schema({
   id: String,
   imageUrl: String,
   caption: String,
-  likes: Number,
-  comments: Number,
+  title: String,
+  likes: mongoose.Schema.Types.Mixed,
+  comments: mongoose.Schema.Types.Mixed,
   postUrl: String,
-  timestamp: String
+  timestamp: String,
+  date: String,
+  type: { type: String, default: 'post' }
 });
 
 const SyllabusSchema = new mongoose.Schema({

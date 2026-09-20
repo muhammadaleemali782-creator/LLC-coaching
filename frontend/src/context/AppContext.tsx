@@ -146,6 +146,9 @@ export interface AppContextType {
   addGalleryItem: (item: Omit<GalleryItem, 'id' | 'date'>) => void;
   updateGalleryItem: (id: string, item: Partial<GalleryItem>) => Promise<void>;
   deleteGalleryItem: (id: string) => void;
+  addInstagramPost: (post: Omit<InstagramPost, 'id'>) => Promise<void>;
+  updateInstagramPost: (id: string, post: Partial<InstagramPost>) => Promise<void>;
+  deleteInstagramPost: (id: string) => Promise<void>;
   updateStudentProgress: (courseId: string, progress: number) => void;
   submitQuizScore: (testId: string, score: number) => void;
 
@@ -282,7 +285,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [syllabuses, setSyllabuses] = useState<SyllabusItem[]>(() => loadSaved('lcc_syllabus', INITIAL_SYLLABUS));
   const [notices, setNotices] = useState<Notice[]>(() => loadSaved('lcc_notices', INITIAL_NOTICES));
   const [videos, setVideos] = useState<VideoLecture[]>(() => loadSaved('lcc_videos', INITIAL_VIDEOS));
-  const [instagramPosts, setInstagramPosts] = useState<InstagramPost[]>(() => loadSaved('lcc_instagram', INITIAL_INSTAGRAM_POSTS));
+  const [instagramPosts, setInstagramPosts] = useState<InstagramPost[]>(() => {
+    const saved = loadSaved<InstagramPost[]>('lcc_instagram', []);
+    return saved && saved.length > 0 ? saved : INITIAL_INSTAGRAM_POSTS;
+  });
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(() => loadSaved('lcc_gallery', INITIAL_GALLERY));
   const [students, setStudents] = useState<Student[]>(() => loadSaved('lcc_students', INITIAL_STUDENTS));
   const [transactions, setTransactions] = useState<Transaction[]>(() => loadSaved('lcc_transactions', INITIAL_TRANSACTIONS));
@@ -348,6 +354,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           coursesRes,
           notsRes,
           galRes,
+          instaRes,
           sylRes,
           inqRes,
           usersRes
@@ -361,6 +368,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           api.courses.get(),
           api.notices.get(),
           api.gallery.get(),
+          api.instagram.get(),
           api.syllabus.get(),
           api.inquiries.get(),
           localStorage.getItem('lcc_admin_token') ? api.auth.getUsers() : Promise.resolve({ success: true, data: [] } as any)
@@ -466,6 +474,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             });
             const merged = Array.from(map.values());
             saveItem('lcc_gallery', merged);
+            return merged;
+          });
+        }
+        if (instaRes.status === 'fulfilled' && (instaRes.value as any)?.data?.length) {
+          const cloudPosts = (instaRes.value as any).data;
+          setInstagramPosts(prev => {
+            const localSaved = loadSaved<InstagramPost[]>('lcc_instagram', prev) || [];
+            const map = new Map<string, InstagramPost>();
+            cloudPosts.forEach((p: any) => map.set(p.id, p));
+            localSaved.forEach((p: any) => {
+              if (!map.has(p.id)) {
+                map.set(p.id, p);
+                api.instagram.create(p).catch(() => {});
+              }
+            });
+            const merged = Array.from(map.values());
+            saveItem('lcc_instagram', merged);
             return merged;
           });
         }
@@ -1193,6 +1218,65 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // Instagram Feed & Reels Management (Permanent Cloud & Local Storage Sync)
+  const addInstagramPost = async (post: Omit<InstagramPost, 'id'>) => {
+    const newPost: InstagramPost = {
+      ...post,
+      id: `ig-${Date.now()}`,
+      timestamp: post.timestamp || post.date || 'Just now',
+      date: post.date || post.timestamp || 'Just now'
+    };
+    setInstagramPosts(prev => {
+      const updated = [newPost, ...prev.filter(p => p.id !== newPost.id)];
+      saveItem('lcc_instagram', updated);
+      return updated;
+    });
+    try {
+      const res = await api.instagram.create(newPost);
+      if (res && res.data) {
+        setInstagramPosts(prev => {
+          const synced = prev.map(p => p.id === newPost.id ? { ...p, ...res.data } : p);
+          saveItem('lcc_instagram', synced);
+          return synced;
+        });
+      }
+      showToast('Instagram post saved permanently to Cloud Database!', 'success');
+    } catch (e: any) {
+      console.warn('Cloud Instagram upload note:', e.message);
+      showToast('Instagram post saved locally on this device.', 'info');
+    }
+  };
+
+  const updateInstagramPost = async (id: string, post: Partial<InstagramPost>) => {
+    setInstagramPosts(prev => {
+      const updated = prev.map(p => (p.id === id ? { ...p, ...post } : p));
+      saveItem('lcc_instagram', updated);
+      return updated;
+    });
+    try {
+      await api.instagram.update(id, post);
+      showToast('Instagram post updated permanently in cloud database!', 'success');
+    } catch (e: any) {
+      console.warn('Cloud Instagram update note:', e.message);
+      showToast('Instagram post updated locally.', 'info');
+    }
+  };
+
+  const deleteInstagramPost = async (id: string) => {
+    setInstagramPosts(prev => {
+      const updated = prev.filter(p => p.id !== id);
+      saveItem('lcc_instagram', updated);
+      return updated;
+    });
+    try {
+      await api.instagram.delete(id);
+      showToast('Instagram post removed from cloud database.', 'info');
+    } catch (e: any) {
+      console.warn('Cloud Instagram delete note:', e.message);
+      showToast('Instagram post removed.', 'info');
+    }
+  };
+
   const updateStudentProgress = (courseId: string, progress: number) => {
     if (!currentStudent) return;
     setCurrentStudent(prev => {
@@ -1299,6 +1383,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addGalleryItem,
         updateGalleryItem,
         deleteGalleryItem,
+        addInstagramPost,
+        updateInstagramPost,
+        deleteInstagramPost,
         updateStudentProgress,
         submitQuizScore,
         toasts,

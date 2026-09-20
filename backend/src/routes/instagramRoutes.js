@@ -20,13 +20,16 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const post = {
-      id: `ig-${Date.now()}`,
+      id: req.body.id || `ig-${Date.now()}`,
       imageUrl: req.body.imageUrl || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
-      caption: req.body.caption || 'New update from L.C.C. Official',
+      caption: req.body.caption || req.body.title || 'New update from L.C.C. Official',
+      title: req.body.title || req.body.caption || 'New update from L.C.C. Official',
       likes: req.body.likes || 120,
       comments: req.body.comments || 15,
       postUrl: req.body.postUrl || 'https://instagram.com',
-      timestamp: req.body.timestamp || 'Just now'
+      timestamp: req.body.timestamp || req.body.date || 'Just now',
+      date: req.body.date || req.body.timestamp || 'Just now',
+      type: req.body.type || (req.body.postUrl?.includes('/reel/') ? 'reel' : 'post')
     };
     if (mongoose.connection.readyState === 1) {
       const created = await InstagramModel.create(post);
