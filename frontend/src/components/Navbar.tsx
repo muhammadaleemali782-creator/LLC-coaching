@@ -41,6 +41,9 @@ export const Navbar: React.FC = () => {
     showToast
   } = useApp();
 
+  const contactPhone = websiteSettings?.contactPhone || '+91 9250703092';
+  const cleanPhone = contactPhone.replace(/[^0-9]/g, '');
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
 
@@ -85,13 +88,13 @@ export const Navbar: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 text-[10px] sm:text-[11px] font-bold">
-          <a href="tel:+919876543210" className="hover:text-amber-300 flex items-center gap-1 whitespace-nowrap bg-white/10 px-2 py-0.5 rounded-full">
+          <a href={`tel:${contactPhone}`} className="hover:text-amber-300 flex items-center gap-1 whitespace-nowrap bg-white/10 px-2 py-0.5 rounded-full">
             <Phone className="w-3 h-3 shrink-0" />
-            <span className="hidden xs:inline">+91 98765 43210</span>
+            <span className="hidden xs:inline">{contactPhone}</span>
             <span className="xs:hidden">Call</span>
           </a>
           <a
-            href="https://wa.me/919876543210"
+            href={`https://wa.me/${cleanPhone}`}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors whitespace-nowrap"
@@ -346,7 +349,7 @@ export const Navbar: React.FC = () => {
           </button>
 
           <a
-            href="https://wa.me/919876543210"
+            href={`https://wa.me/${cleanPhone}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex flex-col items-center gap-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 cursor-pointer"

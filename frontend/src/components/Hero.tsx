@@ -160,8 +160,8 @@ export const Hero: React.FC = () => {
                 {/* Helpline Box */}
                 <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-center">
                   <span className="text-[10px] font-black text-amber-900 block uppercase">Director Helpline</span>
-                  <a href="tel:+919876543210" className="text-xs font-black text-[#0B3B95] hover:underline block mt-0.5">
-                    {websiteSettings?.contactPhone || '+91 98765 43210'}
+                  <a href={`tel:${websiteSettings?.contactPhone || '+91 9250703092'}`} className="text-xs font-black text-[#0B3B95] hover:underline block mt-0.5">
+                    {websiteSettings?.contactPhone || '+91 9250703092'}
                   </a>
                 </div>
               </div>

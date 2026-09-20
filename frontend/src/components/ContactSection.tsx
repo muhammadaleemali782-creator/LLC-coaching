@@ -92,7 +92,7 @@ export const ContactSection: React.FC = () => {
                 <span className="text-sm font-black text-slate-900">Instant Chat Available</span>
               </div>
               <a
-                href="https://wa.me/919876543210"
+                href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm"
@@ -111,7 +111,7 @@ export const ContactSection: React.FC = () => {
             <div className="h-64 sm:h-72 rounded-3xl overflow-hidden border border-slate-200 shadow-card-clean bg-slate-100">
               <iframe
                 title="LCC Coaching Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3549.400552721867!2d78.0068!3d27.1767!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjfCsDEwJzM2LjEiTiA3OMKwMDAnMjQuNSJF!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(address || 'Palahipatti, Varanasi, Sindhora Road')}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
                 className="w-full h-full border-0"
                 loading="lazy"
               />
