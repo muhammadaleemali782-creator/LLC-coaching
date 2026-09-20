@@ -174,7 +174,7 @@ export const AppDownloadSection: React.FC = () => {
                             <img src={c.image} alt={c.title} className="w-14 h-14 rounded-xl object-cover" />
                             <div className="flex-1 min-w-0">
                               <h5 className="font-bold text-slate-900 text-[11px] truncate">{c.title}</h5>
-                              <span className="text-[10px] text-slate-400 block">{c.targetClass} • By Aman Arora</span>
+                              <span className="text-[10px] text-slate-400 block">{c.targetClass} • By Aman Singh Gautam</span>
                               <div className="flex items-center justify-between mt-1">
                                 <span className="font-black text-blue-600 text-xs">₹{c.discountFee}</span>
                                 <span className="text-[9px] font-bold text-amber-500 flex items-center gap-0.5">
@@ -191,9 +191,9 @@ export const AppDownloadSection: React.FC = () => {
                     <div>
                       <span className="font-bold text-slate-900 text-xs block mb-2">Top Mentors</span>
                       <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-100">
-                        <img src="/assets/founder.png" alt="Aman Arora" className="w-9 h-9 rounded-full object-cover border border-blue-500" />
+                        <img src="/assets/founder.png" alt="Aman Singh Gautam" className="w-9 h-9 rounded-full object-cover border border-blue-500" />
                         <div className="flex-1">
-                          <span className="font-bold text-slate-900 text-[11px] block">Aman Arora</span>
+                          <span className="font-bold text-slate-900 text-[11px] block">Aman Singh Gautam</span>
                           <span className="text-[9px] text-slate-400">Founder & Academic Director</span>
                         </div>
                         <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 text-[9px] font-bold">
@@ -240,9 +240,9 @@ export const AppDownloadSection: React.FC = () => {
                 {activeScreen === 'chat' && (
                   <div className="p-4 space-y-3 animate-in fade-in duration-200">
                     <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                      <img src="/assets/founder.png" alt="Aman Arora" className="w-8 h-8 rounded-full object-cover" />
+                      <img src="/assets/founder.png" alt="Aman Singh Gautam" className="w-8 h-8 rounded-full object-cover" />
                       <div>
-                        <h5 className="font-bold text-slate-900 text-xs">Aman Arora (Mentor)</h5>
+                        <h5 className="font-bold text-slate-900 text-xs">Aman Singh Gautam (Mentor)</h5>
                         <span className="text-[9px] text-emerald-500 font-bold flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Online for Doubts
                         </span>

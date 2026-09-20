@@ -19,18 +19,28 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
+    const itemId = req.body.id || `gal-${Date.now()}`;
     const item = {
-      id: `gal-${Date.now()}`,
       ...req.body,
+      id: itemId,
       date: req.body.date || 'Recent Event'
     };
     if (mongoose.connection.readyState === 1) {
-      const created = await GalleryModel.create(item);
-      return res.status(201).json({ success: true, message: 'Gallery item added', data: created });
+      const saved = await GalleryModel.findOneAndUpdate(
+        { id: itemId },
+        { $set: item },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+      return res.status(201).json({ success: true, message: 'Gallery item added', data: saved });
     }
     const db = getDB();
     if (!db.gallery) db.gallery = [];
-    db.gallery.unshift(item);
+    const existingIndex = db.gallery.findIndex(g => g.id === itemId);
+    if (existingIndex >= 0) {
+      db.gallery[existingIndex] = item;
+    } else {
+      db.gallery.unshift(item);
+    }
     saveDB(db);
     res.status(201).json({ success: true, message: 'Gallery item added', data: item });
   } catch (err) {

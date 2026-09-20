@@ -141,8 +141,8 @@ app.use((err, req, res, next) => {
 
 // Start Server if run directly
 if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
-  app.listen(PORT, () => {
-    console.log(`🚀 L.C.C. Production Backend API active on port ${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 L.C.C. Production Backend API active on port ${PORT} (0.0.0.0)`);
     console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
   });
 }

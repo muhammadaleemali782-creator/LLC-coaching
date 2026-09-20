@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext';
 
 export const AboutSection: React.FC = () => {
   const { websiteSettings } = useApp();
-  const director = websiteSettings?.directorName || 'Aman Arora';
+  const director = websiteSettings?.directorName || 'Aman Singh Gautam';
   const institute = websiteSettings?.instituteName || 'Learning Coaching Center (L.C.C.)';
 
   const milestones = [

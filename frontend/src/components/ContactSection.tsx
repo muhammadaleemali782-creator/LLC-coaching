@@ -8,10 +8,10 @@ export const ContactSection: React.FC = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [sent, setSent] = useState(false);
 
-  const director = websiteSettings?.directorName || 'Aman Arora';
-  const phone = websiteSettings?.contactPhone || '+91 98765 43210';
+  const director = websiteSettings?.directorName || 'Aman Singh Gautam';
+  const phone = websiteSettings?.contactPhone || '+91 9250703092';
   const email = websiteSettings?.contactEmail || 'admissions@lcc.edu';
-  const address = websiteSettings?.contactAddress || 'L.C.C. Education Campus, Main Market Road, Near City Central, Varanasi, Uttar Pradesh 221001.';
+  const address = websiteSettings?.contactAddress || 'Palahipatti, Varanasi, Sindhora Road — Near Union Bank';
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,7 +123,7 @@ export const ContactSection: React.FC = () => {
 
               {sent ? (
                 <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-700 text-xs font-bold text-center">
-                  Thank you! Your message has been delivered to Aman Arora & counseling team.
+                  Thank you! Your message has been delivered to {director} & counseling team.
                 </div>
               ) : (
                 <form onSubmit={handleSend} className="space-y-3">

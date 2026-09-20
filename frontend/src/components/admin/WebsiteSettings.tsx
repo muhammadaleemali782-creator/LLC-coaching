@@ -12,10 +12,10 @@ export const WebsiteSettings: React.FC = () => {
     instituteTagline: websiteSettings.instituteTagline || 'Learning Coaching Center',
     logoUrl: websiteSettings.logoUrl || '/logo.jpg',
     faviconUrl: websiteSettings.faviconUrl || '/logo.jpg',
-    directorName: websiteSettings.directorName || 'Aman Arora',
-    contactPhone: websiteSettings.contactPhone || '+91 98765 43210',
+    directorName: websiteSettings.directorName || 'Aman Singh Gautam',
+    contactPhone: websiteSettings.contactPhone || '+91 9250703092',
     contactEmail: websiteSettings.contactEmail || 'admissions@lcc.edu',
-    contactAddress: websiteSettings.contactAddress || 'Near City Central, Main Road, Coaching Hub',
+    contactAddress: websiteSettings.contactAddress || 'Palahipatti, Varanasi, Sindhora Road — Near Union Bank',
     emergencyAlertText: websiteSettings.emergencyAlertText || 'Admissions Open for Session 2026-2027 (Scholarship Test on Sunday)',
     noticeTickerSpeed: websiteSettings.noticeTickerSpeed || 'normal',
     heroBadgeText: websiteSettings.heroBadgeText || "INDIA'S TOP RATED COACHING & EDTECH",
@@ -25,7 +25,7 @@ export const WebsiteSettings: React.FC = () => {
     defaultWhatsappRedirectUrl: websiteSettings.defaultWhatsappRedirectUrl || '',
     defaultPlaylistRedirectUrl: websiteSettings.defaultPlaylistRedirectUrl || '',
     heroPosterUrl: websiteSettings.heroPosterUrl || '',
-    directorPhotoUrl: websiteSettings.directorPhotoUrl || ''
+    directorPhotoUrl: websiteSettings.directorPhotoUrl || '/assets/founder.png'
   });
 
   useEffect(() => {
@@ -35,10 +35,10 @@ export const WebsiteSettings: React.FC = () => {
       instituteTagline: websiteSettings.instituteTagline || 'Learning Coaching Center',
       logoUrl: websiteSettings.logoUrl || '/logo.jpg',
       faviconUrl: websiteSettings.faviconUrl || '/logo.jpg',
-      directorName: websiteSettings.directorName || 'Aman Arora',
-      contactPhone: websiteSettings.contactPhone || '+91 98765 43210',
+      directorName: websiteSettings.directorName || 'Aman Singh Gautam',
+      contactPhone: websiteSettings.contactPhone || '+91 9250703092',
       contactEmail: websiteSettings.contactEmail || 'admissions@lcc.edu',
-      contactAddress: websiteSettings.contactAddress || 'Near City Central, Main Road, Coaching Hub',
+      contactAddress: websiteSettings.contactAddress || 'Palahipatti, Varanasi, Sindhora Road — Near Union Bank',
       emergencyAlertText: websiteSettings.emergencyAlertText || 'Admissions Open for Session 2026-2027 (Scholarship Test on Sunday)',
       noticeTickerSpeed: websiteSettings.noticeTickerSpeed || 'normal',
       heroBadgeText: websiteSettings.heroBadgeText || "INDIA'S TOP RATED COACHING & EDTECH",

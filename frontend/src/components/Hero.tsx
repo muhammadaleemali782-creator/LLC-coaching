@@ -84,7 +84,7 @@ export const Hero: React.FC = () => {
   };
 
   const instituteFullName = websiteSettings?.instituteName || 'Learning Coaching Center (L.C.C.)';
-  const directorName = websiteSettings?.directorName || 'Aman Arora';
+  const directorName = websiteSettings?.directorName || 'Aman Singh Gautam';
 
   return (
     <section className="bg-slate-100/70 border-b border-slate-200/90 pb-8 sm:pb-12 pt-3 sm:pt-4 px-2 sm:px-4 lg:px-6">

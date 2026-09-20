@@ -235,10 +235,11 @@ const INITIAL_SOCIALS: SocialLink[] = [
 
 const INITIAL_SETTINGS: WebsiteSettings = {
   instituteName: 'Learning Coaching Center (L.C.C.)',
-  directorName: 'Aman Arora',
-  contactPhone: '+91 98765 43210',
+  directorName: 'Aman Singh Gautam',
+  directorPhotoUrl: '/assets/founder.png',
+  contactPhone: '+91 9250703092',
   contactEmail: 'admissions@lcc.edu',
-  contactAddress: 'Near City Central, Main Road, Coaching Hub',
+  contactAddress: 'Palahipatti, Varanasi, Sindhora Road — Near Union Bank',
   emergencyAlertText: 'Admissions Open for Session 2026-2027 (Scholarship Test on Sunday)',
   noticeTickerSpeed: 'normal',
   heroBadgeText: "INDIA'S TOP RATED COACHING & EDTECH",
@@ -410,10 +411,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const merged: WebsiteSettings = {
               ...prev,
               ...cloudSets,
-              directorPhotoUrl: cloudSets.directorPhotoUrl || prev.directorPhotoUrl,
-              logoUrl: cloudSets.logoUrl || prev.logoUrl,
+              directorPhotoUrl: cloudSets.directorPhotoUrl || prev.directorPhotoUrl || '/assets/founder.png',
+              logoUrl: cloudSets.logoUrl || prev.logoUrl || '/logo.jpg',
               heroPosterUrl: cloudSets.heroPosterUrl || prev.heroPosterUrl,
-              directorName: cloudSets.directorName || prev.directorName,
+              directorName: cloudSets.directorName || prev.directorName || 'Aman Singh Gautam',
+              contactPhone: cloudSets.contactPhone || prev.contactPhone || '+91 9250703092',
+              contactAddress: cloudSets.contactAddress || prev.contactAddress || 'Palahipatti, Varanasi, Sindhora Road — Near Union Bank',
               visualOverrides: {
                 ...(localOverrides || {}),
                 ...(prev.visualOverrides || {}),
@@ -453,13 +456,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const cloudGallery = galRes.value.data;
           setGalleryItems(prev => {
             const localSaved = loadSaved<GalleryItem[]>('lcc_gallery', prev) || [];
-            const cloudIds = new Set(cloudGallery.map((g: any) => g.id));
-            const localOnly = localSaved.filter((g: any) => !cloudIds.has(g.id));
-            const merged = [...localOnly, ...cloudGallery];
-            saveItem('lcc_gallery', merged);
-            localOnly.forEach((g: any) => {
-              api.gallery.create(g).catch(() => {});
+            const map = new Map<string, GalleryItem>();
+            cloudGallery.forEach((g: any) => map.set(g.id, g));
+            localSaved.forEach((g: any) => {
+              if (!map.has(g.id)) {
+                map.set(g.id, g);
+                api.gallery.create(g).catch(() => {});
+              }
             });
+            const merged = Array.from(map.values());
+            saveItem('lcc_gallery', merged);
             return merged;
           });
         }
@@ -1130,19 +1136,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Gallery Management
-  const addGalleryItem = (item: Omit<GalleryItem, 'id' | 'date'>) => {
+  const addGalleryItem = async (item: Omit<GalleryItem, 'id' | 'date'>) => {
     const newG: GalleryItem = {
       ...item,
-      id: `g-${Date.now()}`,
+      id: `gal-${Date.now()}`,
       date: new Date().toISOString().split('T')[0]
     };
-    api.gallery.create(newG).catch(() => {});
     setGalleryItems(prev => {
-      const updated = [newG, ...prev];
+      const updated = [newG, ...prev.filter(g => g.id !== newG.id)];
       saveItem('lcc_gallery', updated);
       return updated;
     });
-    showToast('Gallery image added!', 'success');
+    try {
+      const res = await api.gallery.create(newG);
+      if (res && res.data) {
+        setGalleryItems(prev => {
+          const synced = prev.map(g => g.id === newG.id ? { ...g, ...res.data } : g);
+          saveItem('lcc_gallery', synced);
+          return synced;
+        });
+      }
+      showToast('Gallery image saved permanently to Cloud Database!', 'success');
+    } catch (e: any) {
+      console.warn('Cloud gallery upload note:', e.message);
+      showToast('Gallery image saved locally on this device.', 'info');
+    }
   };
 
   const updateGalleryItem = async (id: string, item: Partial<GalleryItem>) => {
@@ -1153,21 +1171,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     try {
       await api.gallery.update(id, item);
-      showToast('Gallery photo updated in cloud database!', 'success');
+      showToast('Gallery photo updated permanently in cloud database!', 'success');
     } catch (e: any) {
       console.warn('Cloud gallery update note:', e.message);
       showToast('Gallery photo updated locally.', 'info');
     }
   };
 
-  const deleteGalleryItem = (id: string) => {
-    api.gallery.delete(id).catch(() => {});
+  const deleteGalleryItem = async (id: string) => {
     setGalleryItems(prev => {
       const updated = prev.filter(g => g.id !== id);
       saveItem('lcc_gallery', updated);
       return updated;
     });
-    showToast('Gallery image removed.', 'info');
+    try {
+      await api.gallery.delete(id);
+      showToast('Gallery image removed from cloud database.', 'info');
+    } catch (e: any) {
+      console.warn('Cloud gallery delete note:', e.message);
+      showToast('Gallery image removed.', 'info');
+    }
   };
 
   const updateStudentProgress = (courseId: string, progress: number) => {
