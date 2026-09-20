@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { Upload, Image as ImageIcon, X, Link } from 'lucide-react';
+import { Upload, Image as ImageIcon, X, Link, Crop } from 'lucide-react';
 
 import { compressImageFile, normalizeImageUrl } from '../../utils/imageCompressor';
+import { ImageCropperModal } from './ImageCropperModal';
 
 interface ImageUploaderInputProps {
   label: string;
@@ -20,6 +21,7 @@ export const ImageUploaderInput: React.FC<ImageUploaderInputProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -83,23 +85,45 @@ export const ImageUploaderInput: React.FC<ImageUploaderInputProps> = ({
         </button>
       </div>
 
-      {/* Image Thumbnail Preview */}
+      {/* Image Thumbnail Preview & Crop Trigger */}
       {value && (
-        <div className="flex items-center gap-2 pt-1">
-          <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 shrink-0">
-            <img
-              src={value}
-              alt="Thumbnail preview"
-              className="w-full h-full object-cover"
-              onError={(e: any) => {
-                e.target.style.display = 'none';
-              }}
-            />
+        <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 shrink-0">
+              <img
+                src={value}
+                alt="Thumbnail preview"
+                className="w-full h-full object-cover"
+                onError={(e: any) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            </div>
+            <span className="text-[10px] text-slate-400 truncate max-w-xs font-mono">
+              {value.startsWith('data:') ? 'Local file (Ready to save)' : value}
+            </span>
           </div>
-          <span className="text-[10px] text-slate-400 truncate max-w-xs font-mono">
-            {value.startsWith('data:') ? 'Local file selected (Base64)' : value}
-          </span>
+
+          <button
+            type="button"
+            onClick={() => setIsCropperOpen(true)}
+            className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600/20 to-indigo-600/20 hover:from-blue-600/30 hover:to-indigo-600/30 text-blue-400 border border-blue-500/40 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-sm"
+            title="Crop, Resize, Zoom, Pan or Rotate Image"
+          >
+            <Crop className="w-3.5 h-3.5 text-blue-400" />
+            <span>Crop & Adjust</span>
+          </button>
         </div>
+      )}
+
+      {/* Interactive Crop & Adjust Modal */}
+      {isCropperOpen && value && (
+        <ImageCropperModal
+          isOpen={isCropperOpen}
+          imageUrl={value}
+          onClose={() => setIsCropperOpen(false)}
+          onApplyCrop={(croppedUrl) => onChange(croppedUrl)}
+        />
       )}
     </div>
   );
