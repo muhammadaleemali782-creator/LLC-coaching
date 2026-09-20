@@ -51,13 +51,24 @@ export const StudyMaterialSection: React.FC = () => {
   const handleDownload = (mat: StudyMaterial) => {
     showToast(`Downloading: ${mat.title}`, 'success');
     
-    const element = document.createElement('a');
-    const file = new Blob([`L.C.C. (Learning Coaching Center) Study Material\n\nTitle: ${mat.title}\nClass: ${mat.targetClass}\nSubject: ${mat.subject}\nChapter: ${mat.chapter}\nPages: ${mat.pages}\n\nNotes Summary:\n${mat.previewContent || 'Official verified notes from L.C.C. Academic Mentors.'}\n\nWebsite: https://lcc.edu\nHelpline: +91 98765 43210`], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = `${mat.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+    const rawUrl = mat.downloadUrl || mat.googleDriveUrl;
+    if (rawUrl && rawUrl !== '#' && rawUrl.trim() !== '') {
+      const match = rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || rawUrl.match(/id=([a-zA-Z0-9_-]+)/);
+      const directUrl = match ? `https://drive.google.com/uc?export=download&id=${match[1]}` : rawUrl;
+      
+      const link = document.createElement('a');
+      link.href = directUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.setAttribute('download', mat.title);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
+    // If no external URL attached, open preview modal
+    setSelectedDocForPreview(mat);
   };
 
   return (

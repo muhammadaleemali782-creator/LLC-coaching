@@ -13,8 +13,19 @@ export const DocPreviewModal: React.FC = () => {
   const handleDownload = () => {
     showToast(`Downloading ${selectedDocForPreview.title}...`, 'success');
     
-    if (selectedDocForPreview.downloadUrl && selectedDocForPreview.downloadUrl.startsWith('http')) {
-      window.open(selectedDocForPreview.downloadUrl, '_blank');
+    const rawUrl = selectedDocForPreview.downloadUrl || selectedDocForPreview.googleDriveUrl;
+    if (rawUrl && rawUrl !== '#' && rawUrl.trim() !== '') {
+      const match = rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || rawUrl.match(/id=([a-zA-Z0-9_-]+)/);
+      const directUrl = match ? `https://drive.google.com/uc?export=download&id=${match[1]}` : rawUrl;
+      
+      const link = document.createElement('a');
+      link.href = directUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.setAttribute('download', selectedDocForPreview.title);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       return;
     }
 
