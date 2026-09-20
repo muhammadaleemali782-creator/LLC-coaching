@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Award } from 'lucide-react';
+import { normalizeImageUrl } from '../utils/imageCompressor';
 
 export const GallerySection: React.FC = () => {
   const { galleryItems, isInitialSyncLoading } = useApp();
@@ -78,7 +79,7 @@ export const GallerySection: React.FC = () => {
               >
                 <div className="relative h-56 sm:h-64 overflow-hidden bg-slate-200">
                   <img
-                    src={item.imageUrl}
+                    src={normalizeImageUrl(item.imageUrl)}
                     alt={item.title}
                     loading="lazy"
                     decoding="async"

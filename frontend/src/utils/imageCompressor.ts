@@ -52,3 +52,16 @@ export const compressImageFile = (file: File, maxDimension = 900, quality = 0.82
     reader.readAsDataURL(file);
   });
 };
+
+/**
+ * Automatically converts Google Drive sharing links into high-speed direct image URLs
+ */
+export const normalizeImageUrl = (url: string): string => {
+  if (!url) return '';
+  const trimmed = url.trim();
+  const gdriveMatch = trimmed.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/i);
+  if (gdriveMatch && gdriveMatch[1]) {
+    return `https://lh3.googleusercontent.com/d/${gdriveMatch[1]}`;
+  }
+  return trimmed;
+};

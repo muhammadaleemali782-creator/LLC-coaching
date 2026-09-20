@@ -144,6 +144,7 @@ export interface AppContextType {
   toggleVideoLecture: (id: string) => void;
   deleteVideoLecture: (id: string) => void;
   addGalleryItem: (item: Omit<GalleryItem, 'id' | 'date'>) => void;
+  updateGalleryItem: (id: string, item: Partial<GalleryItem>) => Promise<void>;
   deleteGalleryItem: (id: string) => void;
   updateStudentProgress: (courseId: string, progress: number) => void;
   submitQuizScore: (testId: string, score: number) => void;
@@ -1130,18 +1131,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Gallery Management
   const addGalleryItem = (item: Omit<GalleryItem, 'id' | 'date'>) => {
-    api.gallery.create(item).catch(() => {});
     const newG: GalleryItem = {
       ...item,
       id: `g-${Date.now()}`,
       date: new Date().toISOString().split('T')[0]
     };
+    api.gallery.create(newG).catch(() => {});
     setGalleryItems(prev => {
       const updated = [newG, ...prev];
       saveItem('lcc_gallery', updated);
       return updated;
     });
     showToast('Gallery image added!', 'success');
+  };
+
+  const updateGalleryItem = async (id: string, item: Partial<GalleryItem>) => {
+    setGalleryItems(prev => {
+      const updated = prev.map(g => (g.id === id ? { ...g, ...item } : g));
+      saveItem('lcc_gallery', updated);
+      return updated;
+    });
+    try {
+      await api.gallery.update(id, item);
+      showToast('Gallery photo updated in cloud database!', 'success');
+    } catch (e: any) {
+      console.warn('Cloud gallery update note:', e.message);
+      showToast('Gallery photo updated locally.', 'info');
+    }
   };
 
   const deleteGalleryItem = (id: string) => {
@@ -1258,6 +1274,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         toggleVideoLecture,
         deleteVideoLecture,
         addGalleryItem,
+        updateGalleryItem,
         deleteGalleryItem,
         updateStudentProgress,
         submitQuizScore,

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Upload, Image as ImageIcon, X, Link } from 'lucide-react';
 
-import { compressImageFile } from '../../utils/imageCompressor';
+import { compressImageFile, normalizeImageUrl } from '../../utils/imageCompressor';
 
 interface ImageUploaderInputProps {
   label: string;
@@ -48,7 +48,7 @@ export const ImageUploaderInput: React.FC<ImageUploaderInputProps> = ({
             required={required}
             placeholder={placeholder}
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => onChange(normalizeImageUrl(e.target.value))}
             className="w-full pl-9 pr-8 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
           />
           <Link className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />

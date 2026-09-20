@@ -54,4 +54,25 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (mongoose.connection.readyState === 1) {
+      const updated = await GalleryModel.findOneAndUpdate({ id }, { $set: req.body }, { new: true });
+      return res.json({ success: true, message: 'Gallery item updated', data: updated });
+    }
+    const db = getDB();
+    if (!db.gallery) db.gallery = [];
+    const index = db.gallery.findIndex(g => g.id === id);
+    if (index >= 0) {
+      db.gallery[index] = { ...db.gallery[index], ...req.body };
+      saveDB(db);
+      return res.json({ success: true, message: 'Gallery item updated', data: db.gallery[index] });
+    }
+    res.status(404).json({ success: false, message: 'Gallery item not found' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 export default router;

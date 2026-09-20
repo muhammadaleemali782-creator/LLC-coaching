@@ -173,6 +173,10 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(item)
     }),
+    update: (id: string, item: any) => request<{ success: boolean; message: string; data: any }>(`/gallery/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(item)
+    }),
     delete: (id: string) => request<{ success: boolean; message: string }>(`/gallery/${id}`, {
       method: 'DELETE'
     })
