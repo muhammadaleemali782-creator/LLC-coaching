@@ -17,20 +17,28 @@ export const getSocialLinks = async (req, res) => {
 
 export const updateSocialLink = async (req, res) => {
   const { id } = req.params;
-  const { url, label, isEnabled } = req.body;
+  const { url, label, isEnabled, platform } = req.body;
 
   try {
     if (mongoose.connection.readyState === 1) {
+      const updateDoc = {};
+      if (url !== undefined) updateDoc.url = url.trim();
+      if (label !== undefined) updateDoc.label = label.trim();
+      if (isEnabled !== undefined) updateDoc.isEnabled = Boolean(isEnabled);
+      if (platform !== undefined) updateDoc.platform = platform.trim();
+
       const updated = await SocialLinkModel.findOneAndUpdate(
         { id },
-        { ...(url !== undefined && { url: url.trim() }), ...(label !== undefined && { label: label.trim() }), ...(isEnabled !== undefined && { isEnabled: Boolean(isEnabled) }) },
-        { new: true }
+        { $set: updateDoc },
+        { new: true, upsert: true, setDefaultsOnInsert: true }
       );
       if (updated) {
         return res.json({ success: true, message: 'Social link updated successfully in Cloud MongoDB!', data: updated });
       }
     }
-  } catch (err) {}
+  } catch (err) {
+    console.error('MongoDB updateSocialLink error:', err.message);
+  }
 
   const db = getDB();
   const link = (db.socialLinks || []).find(s => s.id === id);

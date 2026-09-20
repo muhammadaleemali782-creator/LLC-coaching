@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { MapPin, Phone, Mail, Clock, MessageSquare, Send, Sparkles, CheckCircle2 } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, MessageSquare, Send, Sparkles, CheckCircle2, ExternalLink } from 'lucide-react';
 import { Youtube, Instagram } from './SocialIcons';
+import { getGoogleMapEmbedUrl, getGoogleMapAppUrl } from '../utils/mapUtils';
 
 export const ContactSection: React.FC = () => {
   const { showToast, websiteSettings } = useApp();
@@ -12,6 +13,8 @@ export const ContactSection: React.FC = () => {
   const phone = websiteSettings?.contactPhone || '+91 9250703092';
   const email = websiteSettings?.contactEmail || 'admissions@lcc.edu';
   const address = websiteSettings?.contactAddress || 'Palahipatti, Varanasi, Sindhora Road — Near Union Bank';
+  const mapEmbedUrl = getGoogleMapEmbedUrl(websiteSettings?.googleMapsEmbedUrl, address);
+  const mapAppUrl = getGoogleMapAppUrl(websiteSettings?.googleMapsEmbedUrl, address);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,13 +111,27 @@ export const ContactSection: React.FC = () => {
           <div className="lg:col-span-7 space-y-6">
             
             {/* Interactive Google Map Embed */}
-            <div className="h-64 sm:h-72 rounded-3xl overflow-hidden border border-slate-200 shadow-card-clean bg-slate-100">
-              <iframe
-                title="LCC Coaching Location"
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(address || 'Palahipatti, Varanasi, Sindhora Road')}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
-                className="w-full h-full border-0"
-                loading="lazy"
-              />
+            <div className="rounded-3xl overflow-hidden border border-slate-200 shadow-card-clean bg-slate-100 relative group">
+              <div className="h-64 sm:h-72">
+                <iframe
+                  title="LCC Coaching Location"
+                  src={mapEmbedUrl}
+                  className="w-full h-full border-0"
+                  loading="lazy"
+                />
+              </div>
+              <div className="p-3 bg-white/95 backdrop-blur border-t border-slate-200 flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-700 truncate max-w-[70%]">📍 {address}</span>
+                <a
+                  href={mapAppUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 font-black text-[#0066FF] hover:underline"
+                >
+                  <span>Open in Maps</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
             </div>
 
             {/* Quick Contact Form */}

@@ -243,6 +243,7 @@ export interface WebsiteSettings {
   contactPhone: string;
   contactEmail: string;
   contactAddress: string;
+  googleMapsEmbedUrl?: string;
   emergencyAlertText: string;
   noticeTickerSpeed: 'slow' | 'normal' | 'fast';
   heroBadgeText: string;

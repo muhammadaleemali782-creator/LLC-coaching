@@ -256,7 +256,7 @@ export const updateVideo = async (req, res) => {
       const updated = await VideoModel.findOneAndUpdate(
         { id },
         { $set: updates },
-        { new: true }
+        { new: true, upsert: true, setDefaultsOnInsert: true }
       );
       if (updated) {
         return res.json({ success: true, message: 'Video updated successfully in cloud database!', data: updated });

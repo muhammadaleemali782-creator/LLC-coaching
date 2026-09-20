@@ -178,6 +178,7 @@ const SettingSchema = new mongoose.Schema({
   contactPhone: String,
   contactEmail: String,
   contactAddress: String,
+  googleMapsEmbedUrl: { type: String, default: '' },
   emergencyAlertText: String,
   noticeTickerSpeed: String,
   heroBadgeText: String,
@@ -192,7 +193,7 @@ const SettingSchema = new mongoose.Schema({
   sectionOrder: { type: [String], default: [] },
   heroColumnsOrder: { type: [String], default: [] },
   headerOrder: { type: [String], default: [] }
-});
+}, { strict: false });
 
 const InquirySchema = new mongoose.Schema({
   id: String,
@@ -702,24 +703,42 @@ export const connectOnlineMongoDB = async () => {
     cachedPromise = mongoose.connect(mongoUri, opts)
       .then(async (m) => {
         console.log('🍃 [ONLINE CLOUD MONGODB] Connected successfully to MongoDB Atlas Cloud Database!');
-        // Seed admin if not present
+        // Ensure all collections exist and are initialized in MongoDB Atlas
         try {
-          const adminCount = await UserModel.countDocuments({ role: 'admin' });
-          if (adminCount === 0) {
-            console.log('🌱 Seeding initial admin and collections to MongoDB Atlas...');
-            await UserModel.insertMany(defaultData.users);
-            await CourseModel.insertMany(defaultData.courses);
-            await StudyMaterialModel.insertMany(defaultData.studyMaterials);
-            await VideoModel.insertMany(defaultData.videos);
-            await NoticeModel.insertMany(defaultData.notices);
-            await GalleryModel.insertMany(defaultData.gallery);
-            await InstagramModel.insertMany(defaultData.instagramPosts);
-            await SyllabusModel.insertMany(defaultData.syllabus);
-            await AdModel.insertMany(defaultData.ads);
-            await ReviewModel.insertMany(defaultData.reviews);
-            await SocialLinkModel.insertMany(defaultData.socialLinks);
-            await SettingModel.create(defaultData.settings);
-            console.log('✅ MongoDB Atlas seeded successfully!');
+          const collectionsToCheck = [
+            { model: UserModel, data: defaultData.users, name: 'users' },
+            { model: CourseModel, data: defaultData.courses, name: 'courses' },
+            { model: StudyMaterialModel, data: defaultData.studyMaterials, name: 'studyMaterials' },
+            { model: VideoModel, data: defaultData.videos, name: 'videos' },
+            { model: NoticeModel, data: defaultData.notices, name: 'notices' },
+            { model: GalleryModel, data: defaultData.gallery, name: 'gallery' },
+            { model: InstagramModel, data: defaultData.instagramPosts, name: 'instagramPosts' },
+            { model: SyllabusModel, data: defaultData.syllabus, name: 'syllabus' },
+            { model: AdModel, data: defaultData.ads, name: 'ads' },
+            { model: ReviewModel, data: defaultData.reviews, name: 'reviews' },
+            { model: SocialLinkModel, data: defaultData.socialLinks, name: 'socialLinks' }
+          ];
+
+          for (const item of collectionsToCheck) {
+            try {
+              const count = await item.model.countDocuments();
+              if (count === 0 && item.data && item.data.length > 0) {
+                console.log(`🌱 Seeding initial ${item.name} to MongoDB Atlas...`);
+                await item.model.insertMany(item.data);
+              }
+            } catch (colErr) {
+              console.warn(`⚠️ Collection seed check note (${item.name}):`, colErr.message);
+            }
+          }
+
+          try {
+            const settingsCount = await SettingModel.countDocuments();
+            if (settingsCount === 0) {
+              console.log('🌱 Seeding initial settings to MongoDB Atlas...');
+              await SettingModel.create(defaultData.settings);
+            }
+          } catch (setErr) {
+            console.warn('⚠️ Settings seed check note:', setErr.message);
           }
         } catch (seedErr) {
           console.warn('⚠️ Seed check error:', seedErr.message);

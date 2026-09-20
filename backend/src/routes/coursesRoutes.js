@@ -42,7 +42,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     if (mongoose.connection.readyState === 1) {
-      const updated = await CourseModel.findOneAndUpdate({ id }, req.body, { new: true });
+      const updated = await CourseModel.findOneAndUpdate({ id }, req.body, { new: true, upsert: true, setDefaultsOnInsert: true });
       if (updated) {
         return res.json({ success: true, message: 'Course updated successfully', data: updated });
       }

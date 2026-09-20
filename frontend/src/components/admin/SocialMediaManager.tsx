@@ -1,16 +1,22 @@
-﻿import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Share2, Video, MessageCircle, Globe, Save, CheckCircle2 } from 'lucide-react';
+import { Share2, Video, MessageCircle, Globe, Save, CheckCircle2, Cloud } from 'lucide-react';
 
 export const SocialMediaManager: React.FC = () => {
   const { socialLinks, updateSocialLink, showToast } = useApp();
   const [links, setLinks] = useState(socialLinks);
 
-  const handleSave = (id: string) => {
+  useEffect(() => {
+    if (socialLinks && socialLinks.length > 0) {
+      setLinks(socialLinks);
+    }
+  }, [socialLinks]);
+
+  const handleSave = async (id: string) => {
     const target = links.find(l => l.id === id);
     if (target) {
-      updateSocialLink(id, target);
-      showToast(`${target.label} link updated!`, 'success');
+      await updateSocialLink(id, target);
+      showToast(`${target.label} permanently saved to Cloud MongoDB!`, 'success');
     }
   };
 
@@ -23,11 +29,33 @@ export const SocialMediaManager: React.FC = () => {
     }
   };
 
+  const handleSaveAll = async () => {
+    for (const l of links) {
+      await updateSocialLink(l.id, l);
+    }
+    showToast('All social links permanently saved to Cloud MongoDB!', 'success');
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-black text-white">Social Media & Communication Links</h2>
-        <p className="text-xs text-slate-400">Configure official Instagram, YouTube channel, and WhatsApp helpdesk URLs dynamically.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-black text-white">Social Media & Communication Links</h2>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/80 text-[10px] font-bold">
+              <Cloud className="w-3 h-3" />
+              <span>MongoDB Cloud Sync</span>
+            </span>
+          </div>
+          <p className="text-xs text-slate-400">Configure official Instagram, YouTube channel, and WhatsApp helpdesk URLs dynamically.</p>
+        </div>
+        <button
+          onClick={handleSaveAll}
+          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md self-start sm:self-auto cursor-pointer"
+        >
+          <Save className="w-3.5 h-3.5" />
+          <span>Save All Links Live</span>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
