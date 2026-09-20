@@ -1,5 +1,5 @@
-﻿import express from 'express';
-import { getPDFs, createPDF, deletePDF, trackPDFDownload, getVideos, createVideo, toggleVideoStatus, deleteVideo } from '../controllers/mediaController.js';
+import express from 'express';
+import { getPDFs, createPDF, deletePDF, trackPDFDownload, getVideos, createVideo, updateVideo, toggleVideoStatus, deleteVideo } from '../controllers/mediaController.js';
 import { requireAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -13,6 +13,7 @@ router.post('/pdfs/download/:id', trackPDFDownload);
 // Videos
 router.get('/videos', getVideos);
 router.post('/videos', requireAdmin, createVideo);
+router.put('/videos/:id', requireAdmin, updateVideo);
 router.patch('/videos/:id/toggle', requireAdmin, toggleVideoStatus);
 router.delete('/videos/:id', requireAdmin, deleteVideo);
 

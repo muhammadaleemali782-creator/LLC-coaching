@@ -142,6 +142,10 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(video)
     }),
+    updateVideo: (id: string, video: any) => request<{ success: boolean; message: string; data: any }>(`/media/videos/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(video)
+    }),
     toggleVideo: (id: string) => request<{ success: boolean; message: string; data: any }>(`/media/videos/${id}/toggle`, {
       method: 'PATCH'
     }),

@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { VideoLecture, VideoPlatform } from '../../types';
-import { Video, Plus, Trash2, Eye, EyeOff, Play, Share2, Sparkles } from 'lucide-react';
+import { Video, Plus, Trash2, Eye, EyeOff, Play, Share2, Sparkles, Pencil, X, Check } from 'lucide-react';
 import { Youtube } from '../SocialIcons';
 
 export const YouTubeManager: React.FC = () => {
-  const { videos, addVideoLecture, deleteVideoLecture, showToast } = useApp();
+  const { videos, addVideoLecture, updateVideoLecture, deleteVideoLecture, showToast } = useApp();
   const [isAdding, setIsAdding] = useState(false);
+  const [editingVideo, setEditingVideo] = useState<VideoLecture | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
   const [newVideo, setNewVideo] = useState<{
     title: string;
     videoUrl: string;
@@ -31,8 +34,8 @@ export const YouTubeManager: React.FC = () => {
     let thumbnail = 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80';
 
     if (platform === 'youtube') {
-      const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
-      videoId = match ? match[1] : 'kJQP7kiw5Fk';
+      const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/))([\w-]{11})/i);
+      videoId = match ? match[1] : (url.trim().length === 11 ? url.trim() : 'kJQP7kiw5Fk');
       embedUrl = `https://www.youtube.com/embed/${videoId}`;
       thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
     } else if (platform === 'instagram') {
@@ -86,6 +89,34 @@ export const YouTubeManager: React.FC = () => {
     showToast(`${newVideo.platform.toUpperCase()} video lecture published!`, 'success');
   };
 
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingVideo) return;
+    setIsSaving(true);
+    try {
+      const { videoId, thumbnail } = extractEmbedInfo(
+        editingVideo.videoUrl || editingVideo.youtubeUrl || '',
+        editingVideo.platform || 'youtube'
+      );
+      await updateVideoLecture(editingVideo.id, {
+        title: editingVideo.title,
+        videoUrl: editingVideo.videoUrl || editingVideo.youtubeUrl,
+        youtubeUrl: editingVideo.videoUrl || editingVideo.youtubeUrl,
+        platform: editingVideo.platform || 'youtube',
+        targetClass: editingVideo.targetClass,
+        subject: editingVideo.subject,
+        instructor: editingVideo.instructor,
+        duration: editingVideo.duration,
+        videoId,
+        youtubeId: videoId,
+        thumbnail
+      });
+      setEditingVideo(null);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -102,6 +133,116 @@ export const YouTubeManager: React.FC = () => {
           <span>{isAdding ? 'Cancel' : 'Add Video / Reel'}</span>
         </button>
       </div>
+
+      {/* Edit Video Modal */}
+      {editingVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-2xl shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2 text-amber-400">
+                <Pencil className="w-5 h-5" />
+                <h3 className="text-base font-black uppercase tracking-wider">Edit Video Lecture</h3>
+              </div>
+              <button
+                onClick={() => setEditingVideo(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Select Platform</label>
+                  <select
+                    value={editingVideo.platform || 'youtube'}
+                    onChange={e => setEditingVideo({ ...editingVideo, platform: e.target.value as VideoPlatform })}
+                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  >
+                    <option value="youtube">YouTube (Video / Shorts)</option>
+                    <option value="instagram">Instagram (Reel / Post)</option>
+                    <option value="facebook">Facebook (Video / Reel)</option>
+                  </select>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Video / Reel URL *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingVideo.videoUrl || editingVideo.youtubeUrl || ''}
+                    onChange={e => setEditingVideo({ ...editingVideo, videoUrl: e.target.value, youtubeUrl: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+
+                <div className="md:col-span-3">
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Lecture / Reel Title *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingVideo.title}
+                    onChange={e => setEditingVideo({ ...editingVideo, title: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Target Class / Batch</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingVideo.targetClass}
+                    onChange={e => setEditingVideo({ ...editingVideo, targetClass: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Subject / Topic</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingVideo.subject}
+                    onChange={e => setEditingVideo({ ...editingVideo, subject: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Instructor / Speaker</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingVideo.instructor}
+                    onChange={e => setEditingVideo({ ...editingVideo, instructor: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setEditingVideo(null)}
+                  className="px-5 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-xs font-bold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {isAdding && (
         <form onSubmit={handleAdd} className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 animate-in fade-in duration-150">
@@ -234,12 +375,22 @@ export const YouTubeManager: React.FC = () => {
                 
                 <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
                   <span className="text-[10px] text-slate-400">{v.instructor}</span>
-                  <button
-                    onClick={() => deleteVideoLecture(v.id)}
-                    className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10 cursor-pointer"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setEditingVideo(v)}
+                      className="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/20 cursor-pointer transition-colors"
+                      title="Edit Video"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => deleteVideoLecture(v.id)}
+                      className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10 cursor-pointer transition-colors"
+                      title="Delete Video"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

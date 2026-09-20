@@ -140,6 +140,7 @@ export interface AppContextType {
   addNotice: (notice: Omit<Notice, 'id' | 'date'>) => void;
   deleteNotice: (id: string) => void;
   addVideoLecture: (video: Omit<VideoLecture, 'id' | 'views'>) => void;
+  updateVideoLecture: (id: string, video: Partial<VideoLecture>) => Promise<void>;
   toggleVideoLecture: (id: string) => void;
   deleteVideoLecture: (id: string) => void;
   addGalleryItem: (item: Omit<GalleryItem, 'id' | 'date'>) => void;
@@ -368,12 +369,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           saveItem('lcc_ads', adsRes.value.data);
         }
         if (pdfsRes.status === 'fulfilled' && pdfsRes.value.data?.length) {
-          setStudyMaterials(pdfsRes.value.data);
-          saveItem('lcc_study_materials', pdfsRes.value.data);
+          const cloudPdfs = pdfsRes.value.data;
+          setStudyMaterials(prev => {
+            const localSaved = loadSaved<StudyMaterial[]>('lcc_study_materials', prev) || [];
+            const cloudIds = new Set(cloudPdfs.map((m: any) => m.id));
+            const localOnly = localSaved.filter((m: any) => !cloudIds.has(m.id));
+            const merged = [...localOnly, ...cloudPdfs];
+            saveItem('lcc_study_materials', merged);
+            return merged;
+          });
         }
         if (vidsRes.status === 'fulfilled' && vidsRes.value.data?.length) {
-          setVideos(vidsRes.value.data);
-          saveItem('lcc_videos', vidsRes.value.data);
+          const cloudVids = vidsRes.value.data;
+          setVideos(prev => {
+            const localSaved = loadSaved<VideoLecture[]>('lcc_videos', prev) || [];
+            const cloudIds = new Set(cloudVids.map((v: any) => v.id));
+            const localOnly = localSaved.filter((v: any) => !cloudIds.has(v.id));
+            const merged = [...localOnly, ...cloudVids];
+            saveItem('lcc_videos', merged);
+            // Auto-sync any local-only videos to cloud in background
+            localOnly.forEach((v: any) => {
+              api.media.createVideo(v).catch(() => {});
+            });
+            return merged;
+          });
         }
         if (revsRes.status === 'fulfilled' && revsRes.value.data?.length) {
           setReviews(revsRes.value.data);
@@ -408,16 +427,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
         }
         if (coursesRes.status === 'fulfilled' && coursesRes.value.data?.length) {
-          setCourses(coursesRes.value.data);
-          saveItem('lcc_courses', coursesRes.value.data);
+          const cloudCourses = coursesRes.value.data;
+          setCourses(prev => {
+            const localSaved = loadSaved<Course[]>('lcc_courses', prev) || [];
+            const cloudIds = new Set(cloudCourses.map((c: any) => c.id));
+            const localOnly = localSaved.filter((c: any) => !cloudIds.has(c.id));
+            const merged = [...localOnly, ...cloudCourses];
+            saveItem('lcc_courses', merged);
+            return merged;
+          });
         }
         if (notsRes.status === 'fulfilled' && notsRes.value.data?.length) {
-          setNotices(notsRes.value.data);
-          saveItem('lcc_notices', notsRes.value.data);
+          const cloudNotices = notsRes.value.data;
+          setNotices(prev => {
+            const localSaved = loadSaved<Notice[]>('lcc_notices', prev) || [];
+            const cloudIds = new Set(cloudNotices.map((n: any) => n.id));
+            const localOnly = localSaved.filter((n: any) => !cloudIds.has(n.id));
+            const merged = [...localOnly, ...cloudNotices];
+            saveItem('lcc_notices', merged);
+            return merged;
+          });
         }
         if (galRes.status === 'fulfilled' && galRes.value.data?.length) {
-          setGalleryItems(galRes.value.data);
-          saveItem('lcc_gallery', galRes.value.data);
+          const cloudGallery = galRes.value.data;
+          setGalleryItems(prev => {
+            const localSaved = loadSaved<GalleryItem[]>('lcc_gallery', prev) || [];
+            const cloudIds = new Set(cloudGallery.map((g: any) => g.id));
+            const localOnly = localSaved.filter((g: any) => !cloudIds.has(g.id));
+            const merged = [...localOnly, ...cloudGallery];
+            saveItem('lcc_gallery', merged);
+            localOnly.forEach((g: any) => {
+              api.gallery.create(g).catch(() => {});
+            });
+            return merged;
+          });
         }
         if (sylRes.status === 'fulfilled' && sylRes.value.data?.length) {
           setSyllabuses(sylRes.value.data);
@@ -1032,8 +1075,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Video Management
-  const addVideoLecture = (video: Omit<VideoLecture, 'id' | 'views'>) => {
-    api.media.createVideo(video).catch(() => {});
+  const addVideoLecture = async (video: Omit<VideoLecture, 'id' | 'views'>) => {
     const newV: VideoLecture = {
       ...video,
       id: `v-${Date.now()}`,
@@ -1044,7 +1086,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       saveItem('lcc_videos', updated);
       return updated;
     });
+    try {
+      await api.media.createVideo(newV);
+    } catch (e: any) {
+      console.warn('Cloud video sync note:', e.message);
+    }
     showToast(`Video lecture "${newV.title}" added!`, 'success');
+  };
+
+  const updateVideoLecture = async (id: string, video: Partial<VideoLecture>) => {
+    setVideos(prev => {
+      const updated = prev.map(v => (v.id === id ? { ...v, ...video } : v));
+      saveItem('lcc_videos', updated);
+      return updated;
+    });
+    try {
+      await api.media.updateVideo(id, video);
+      showToast('Video lecture updated in cloud database!', 'success');
+    } catch (e: any) {
+      console.warn('Cloud video update note:', e.message);
+      showToast('Video lecture updated locally.', 'info');
+    }
   };
 
   const toggleVideoLecture = (id: string) => {
@@ -1192,6 +1254,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addNotice,
         deleteNotice,
         addVideoLecture,
+        updateVideoLecture,
         toggleVideoLecture,
         deleteVideoLecture,
         addGalleryItem,

@@ -1,11 +1,14 @@
 import { getDB, saveDB, StudyMaterialModel, VideoModel } from '../config/db.js';
 import mongoose from 'mongoose';
 
-// Helper: Extract YouTube Video ID from any standard URL
+// Helper: Extract YouTube Video ID from any standard URL, shorts, mobile, or embed
 const extractYouTubeId = (url) => {
   if (!url) return null;
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-  return match ? match[1] : null;
+  const trimmed = url.trim();
+  const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?.*v=|shorts\/))([\w-]{11})/i);
+  if (match) return match[1];
+  if (/^[\w-]{11}$/.test(trimmed)) return trimmed;
+  return null;
 };
 
 // ==================== PDFS CONTROLLERS ====================
@@ -147,44 +150,132 @@ export const getVideos = async (req, res) => {
 };
 
 export const createVideo = async (req, res) => {
-  const { title, youtubeUrl, duration, subject, targetClass, instructor } = req.body;
+  const {
+    id,
+    title,
+    youtubeUrl,
+    videoUrl,
+    platform = 'youtube',
+    duration,
+    subject,
+    targetClass,
+    instructor,
+    thumbnail,
+    isPublished = true,
+    isFeatured = true
+  } = req.body;
 
-  if (!title || !youtubeUrl) {
-    return res.status(400).json({ success: false, message: 'Video title and valid YouTube URL are required.' });
+  const finalUrl = (videoUrl || youtubeUrl || '').trim();
+  if (!title || !finalUrl) {
+    return res.status(400).json({ success: false, message: 'Video title and URL are required.' });
   }
 
-  const videoId = extractYouTubeId(youtubeUrl);
-  if (!videoId) {
-    return res.status(400).json({ success: false, message: 'Please enter a valid YouTube video URL (e.g. https://www.youtube.com/watch?v=...)' });
+  let finalVideoId = req.body.videoId || req.body.youtubeId;
+  if (platform === 'youtube' && !finalVideoId) {
+    finalVideoId = extractYouTubeId(finalUrl) || 'dQw4w9WgXcQ';
+  } else if (!finalVideoId) {
+    finalVideoId = `vid-${Date.now()}`;
+  }
+
+  let finalThumbnail = thumbnail;
+  if (!finalThumbnail) {
+    if (platform === 'youtube' && finalVideoId) {
+      finalThumbnail = `https://img.youtube.com/vi/${finalVideoId}/hqdefault.jpg`;
+    } else {
+      finalThumbnail = 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80';
+    }
   }
 
   const newVideo = {
-    id: `v-${Date.now()}`,
+    id: id || `v-${Date.now()}`,
     title: title.trim(),
-    youtubeUrl: youtubeUrl.trim(),
-    videoId,
+    youtubeUrl: finalUrl,
+    videoUrl: finalUrl,
+    platform,
+    videoId: finalVideoId,
+    youtubeId: finalVideoId,
+    thumbnail: finalThumbnail,
     duration: duration || '35:00',
-    views: '1.2K',
+    views: req.body.views || '1.2K',
     subject: subject || 'General Knowledge',
     targetClass: targetClass || 'All Students',
     instructor: instructor || 'Aman Arora',
-    isPublished: true,
-    dateAdded: new Date().toISOString().split('T')[0]
+    isPublished: Boolean(isPublished),
+    isFeatured: Boolean(isFeatured),
+    dateAdded: req.body.dateAdded || new Date().toISOString().split('T')[0]
   };
 
   try {
     if (mongoose.connection.readyState === 1) {
-      const created = await VideoModel.create(newVideo);
-      return res.status(201).json({ success: true, message: 'YouTube lecture added successfully!', data: created });
+      const created = await VideoModel.findOneAndUpdate(
+        { id: newVideo.id },
+        { $set: newVideo },
+        { new: true, upsert: true }
+      );
+      return res.status(201).json({ success: true, message: 'Video lecture published successfully!', data: created });
     }
-  } catch (err) {}
+  } catch (err) {
+    console.error('VideoModel.create error:', err.message);
+  }
 
   const db = getDB();
   if (!db.videos) db.videos = [];
-  db.videos.unshift(newVideo);
+  const existingIdx = db.videos.findIndex(v => v.id === newVideo.id);
+  if (existingIdx >= 0) {
+    db.videos[existingIdx] = newVideo;
+  } else {
+    db.videos.unshift(newVideo);
+  }
   saveDB(db);
 
-  res.status(201).json({ success: true, message: 'YouTube lecture added successfully!', data: newVideo });
+  res.status(201).json({ success: true, message: 'Video lecture published successfully!', data: newVideo });
+};
+
+export const updateVideo = async (req, res) => {
+  const { id } = req.params;
+  const updates = { ...req.body };
+
+  if (updates.videoUrl || updates.youtubeUrl) {
+    const finalUrl = (updates.videoUrl || updates.youtubeUrl).trim();
+    updates.videoUrl = finalUrl;
+    updates.youtubeUrl = finalUrl;
+    if (updates.platform === 'youtube' || (!updates.platform && updates.youtubeUrl)) {
+      const extracted = extractYouTubeId(finalUrl);
+      if (extracted) {
+        updates.videoId = extracted;
+        updates.youtubeId = extracted;
+        if (!updates.thumbnail || updates.thumbnail.includes('img.youtube.com')) {
+          updates.thumbnail = `https://img.youtube.com/vi/${extracted}/hqdefault.jpg`;
+        }
+      }
+    }
+  }
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const updated = await VideoModel.findOneAndUpdate(
+        { id },
+        { $set: updates },
+        { new: true }
+      );
+      if (updated) {
+        return res.json({ success: true, message: 'Video updated successfully in cloud database!', data: updated });
+      }
+    }
+  } catch (err) {
+    console.error('VideoModel.update error:', err.message);
+  }
+
+  const db = getDB();
+  if (!db.videos) db.videos = [];
+  const index = db.videos.findIndex(v => v.id === id);
+  if (index >= 0) {
+    db.videos[index] = { ...db.videos[index], ...updates };
+    saveDB(db);
+    return res.json({ success: true, message: 'Video updated successfully!', data: db.videos[index] });
+  }
+
+  res.status(404).json({ success: false, message: 'Video not found.' });
 };
 
 export const toggleVideoStatus = async (req, res) => {
