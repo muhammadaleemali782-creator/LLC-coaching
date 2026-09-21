@@ -746,6 +746,7 @@ export const LiveVisualEditor: React.FC = () => {
     setIsSaving(true);
     try {
       localStorage.setItem('lcc_visual_overrides', JSON.stringify(updatedOverrides));
+      localStorage.setItem('lcc_website_settings', JSON.stringify(updatedSettings));
       await updateWebsiteSettings(updatedSettings);
       pushSnapshot(updatedSettings, courses, `Updated ${clickedTarget.tagName}: colors/content`);
       setHasUnsavedChanges(false);

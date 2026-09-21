@@ -74,9 +74,14 @@ export const AboutSection: React.FC = () => {
                 <div className="relative shrink-0">
                   <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl overflow-hidden border-4 border-[#0066FF] shadow-lg shadow-blue-500/25 bg-slate-900">
                     <img
-                      src={websiteSettings?.directorPhotoUrl || "/assets/founder.png"}
+                      src={websiteSettings?.visualOverrides?.['section#about-section > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > img:nth-of-type(1)']?.value || websiteSettings?.directorPhotoUrl || "/assets/founder.png"}
                       alt={`${director} - Founder & Director`}
-                      className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-300"
+                      onContextMenu={(e: any) => e.preventDefault()}
+                      onDragStart={(e: any) => e.preventDefault()}
+                      onError={(e: any) => {
+                        e.target.src = '/assets/founder.png';
+                      }}
+                      className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-300 protected-media select-none"
                     />
                   </div>
                   <div className="absolute -bottom-2 -right-2 p-2 rounded-2xl bg-[#0066FF] text-white shadow-md">

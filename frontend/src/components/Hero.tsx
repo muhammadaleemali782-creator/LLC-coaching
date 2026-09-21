@@ -244,13 +244,15 @@ export const Hero: React.FC = () => {
                   <div className="text-center space-y-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
                     <div className="w-24 h-24 mx-auto rounded-xl overflow-hidden border-2 border-[#0B3B95] shadow-md bg-slate-900">
                       <img
-                        src={websiteSettings?.directorPhotoUrl || "/assets/founder.png"}
+                        src={websiteSettings?.visualOverrides?.['div#hero-leadership-box > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > img:nth-of-type(1)']?.value || websiteSettings?.directorPhotoUrl || "/assets/founder.png"}
                         alt={directorName}
                         decoding="async"
+                        onContextMenu={(e: any) => e.preventDefault()}
+                        onDragStart={(e: any) => e.preventDefault()}
                         onError={(e: any) => {
                           e.target.src = '/assets/founder.png';
                         }}
-                        className="w-full h-full object-cover object-top"
+                        className="w-full h-full object-cover object-top protected-media select-none"
                       />
                     </div>
                     <div>

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { toast as sonnerToast } from 'sonner';
 import {
   Course,
   StudyMaterial,
@@ -143,7 +144,7 @@ export interface AppContextType {
   updateVideoLecture: (id: string, video: Partial<VideoLecture>) => Promise<void>;
   toggleVideoLecture: (id: string) => void;
   deleteVideoLecture: (id: string) => void;
-  addGalleryItem: (item: Omit<GalleryItem, 'id' | 'date'>) => void;
+  addGalleryItem: (item: Omit<GalleryItem, 'id' | 'date'> & { date?: string }) => void;
   updateGalleryItem: (id: string, item: Partial<GalleryItem>) => Promise<void>;
   deleteGalleryItem: (id: string) => void;
   addInstagramPost: (post: Omit<InstagramPost, 'id'>) => Promise<void>;
@@ -303,6 +304,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (overrides && Object.keys(overrides).length > 0) {
       saved.visualOverrides = { ...(saved.visualOverrides || {}), ...overrides };
     }
+    // Zero-flash fix: Synchronously resolve director photo from overrides if available
+    const directorOverride = saved.visualOverrides?.['div#hero-leadership-box > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > img:nth-of-type(1)']?.value
+      || saved.visualOverrides?.['section#about-section > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > img:nth-of-type(1)']?.value;
+    if (directorOverride) {
+      saved.directorPhotoUrl = directorOverride;
+    }
     return saved;
   });
 
@@ -400,20 +407,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const cloudSets = setsRes.value.data;
           setWebsiteSettings(prev => {
             const localOverrides = loadSaved<Record<string, any>>('lcc_visual_overrides', {});
+            const allOverrides = {
+              ...(localOverrides || {}),
+              ...(prev.visualOverrides || {}),
+              ...(cloudSets.visualOverrides || {})
+            };
+            const directorOverride = allOverrides['div#hero-leadership-box > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > img:nth-of-type(1)']?.value
+              || allOverrides['section#about-section > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > img:nth-of-type(1)']?.value;
+            const resolvedDirectorPhoto = cloudSets.directorPhotoUrl || directorOverride || prev.directorPhotoUrl || '/assets/founder.png';
+
             const merged: WebsiteSettings = {
               ...prev,
               ...cloudSets,
-              directorPhotoUrl: cloudSets.directorPhotoUrl || prev.directorPhotoUrl || '/assets/founder.png',
+              directorPhotoUrl: resolvedDirectorPhoto,
               logoUrl: cloudSets.logoUrl || prev.logoUrl || '/logo.jpg',
               heroPosterUrl: cloudSets.heroPosterUrl || prev.heroPosterUrl,
               directorName: cloudSets.directorName || prev.directorName || 'Aman Singh Gautam',
               contactPhone: cloudSets.contactPhone || prev.contactPhone || '+91 9250703092',
               contactAddress: cloudSets.contactAddress || prev.contactAddress || 'Palahipatti, Varanasi, Sindhora Road — Near Union Bank',
-              visualOverrides: {
-                ...(localOverrides || {}),
-                ...(prev.visualOverrides || {}),
-                ...(cloudSets.visualOverrides || {})
-              }
+              visualOverrides: allOverrides
             };
             saveItem('lcc_website_settings', merged);
             if (merged.visualOverrides) {
@@ -463,6 +475,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const id = Date.now().toString() + Math.random().toString();
     setToasts(prev => [...prev, { id, type, message }]);
     setTimeout(() => removeToast(id), 4000);
+    try {
+      if (type === 'success') sonnerToast.success(message);
+      else if (type === 'error') sonnerToast.error(message);
+      else if (type === 'warning') sonnerToast.warning(message);
+      else sonnerToast.info(message);
+    } catch (e) {}
   };
 
   const removeToast = (id: string) => {
@@ -1105,11 +1123,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Gallery Management
-  const addGalleryItem = async (item: Omit<GalleryItem, 'id' | 'date'>) => {
+  const addGalleryItem = async (item: Omit<GalleryItem, 'id' | 'date'> & { date?: string }) => {
     const newG: GalleryItem = {
       ...item,
       id: `gal-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0]
+      date: item.date || new Date().toISOString().split('T')[0]
     };
     setGalleryItems(prev => {
       const updated = [newG, ...prev.filter(g => g.id !== newG.id)];

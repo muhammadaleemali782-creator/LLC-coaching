@@ -115,6 +115,7 @@ export interface GalleryItem {
   category: 'classroom' | 'computer_lab' | 'celebration' | 'awards' | 'toppers' | 'event' | 'students' | 'lab' | 'events' | string;
   imageUrl: string;
   date: string;
+  allowDownload?: boolean;
 }
 
 export interface Student {

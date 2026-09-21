@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { GalleryItem } from '../../types';
-import { Plus, Trash2, Image, Layers, Sparkles, ExternalLink, X, Save, Pencil, Check } from 'lucide-react';
+import { Plus, Trash2, Image, Layers, Sparkles, ExternalLink, X, Save, Pencil, Check, Download, Lock, ShieldCheck } from 'lucide-react';
 import { ImageUploaderInput } from '../common/ImageUploaderInput';
 import { normalizeImageUrl } from '../../utils/imageCompressor';
 
@@ -16,7 +16,8 @@ export const GalleryManager: React.FC = () => {
     category: 'classroom',
     imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80',
     date: 'August 2026',
-    description: 'Modern digital classrooms with live doubt sessions.'
+    description: 'Modern digital classrooms with live doubt sessions.',
+    allowDownload: true
   });
 
   const handleAdd = (e: React.FormEvent) => {
@@ -29,7 +30,9 @@ export const GalleryManager: React.FC = () => {
       title: newItem.title!,
       category: newItem.category || 'classroom',
       imageUrl: normalizeImageUrl(newItem.imageUrl!),
-      description: newItem.description || 'Campus photo from Learning Coaching Center.'
+      date: newItem.date || 'August 2026',
+      description: newItem.description || 'Campus photo from Learning Coaching Center.',
+      allowDownload: newItem.allowDownload !== false
     });
     setIsAdding(false);
   };
@@ -44,7 +47,8 @@ export const GalleryManager: React.FC = () => {
         category: editingItem.category,
         imageUrl: normalizeImageUrl(editingItem.imageUrl),
         date: editingItem.date,
-        description: editingItem.description
+        description: editingItem.description,
+        allowDownload: editingItem.allowDownload !== false
       });
       setEditingItem(null);
     } finally {
@@ -154,6 +158,22 @@ export const GalleryManager: React.FC = () => {
                 />
               </div>
 
+              <div className="flex items-center justify-between p-3.5 bg-slate-950 border border-slate-800 rounded-2xl">
+                <div>
+                  <label className="text-xs font-bold text-slate-200 block">Allow Visitors to Download Photo</label>
+                  <p className="text-[11px] text-slate-400">When enabled, students and parents can download the high-resolution photo.</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editingItem.allowDownload !== false}
+                    onChange={e => setEditingItem({ ...editingItem, allowDownload: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                </label>
+              </div>
+
               <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
                 <button
                   type="button"
@@ -237,6 +257,22 @@ export const GalleryManager: React.FC = () => {
                 className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500"
               />
             </div>
+
+            <div className="sm:col-span-2 flex items-center justify-between p-3.5 bg-slate-900 border border-slate-800 rounded-2xl">
+              <div>
+                <label className="text-xs font-bold text-slate-200 block">Allow Visitors to Download Photo</label>
+                <p className="text-[11px] text-slate-400">Default is enabled. Turn off if you wish to restrict downloads for this photo.</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={newItem.allowDownload !== false}
+                  onChange={e => setNewItem({ ...newItem, allowDownload: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              </label>
+            </div>
           </div>
 
           <div className="flex justify-end pt-2">
@@ -271,21 +307,37 @@ export const GalleryManager: React.FC = () => {
                 <p className="text-xs text-slate-400 line-clamp-2 mt-1">{item.description}</p>
               </div>
 
-              <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-1.5">
+              <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
                 <button
-                  onClick={() => setEditingItem(item)}
-                  className="p-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 cursor-pointer transition-colors"
-                  title="Edit Photo"
+                  type="button"
+                  onClick={() => updateGalleryItem(item.id, { allowDownload: item.allowDownload === false ? true : false })}
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors ${
+                    item.allowDownload !== false
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20'
+                      : 'bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20'
+                  }`}
+                  title="Click to toggle download permission for visitors"
                 >
-                  <Pencil className="w-4 h-4" />
+                  {item.allowDownload !== false ? <Download className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                  <span>{item.allowDownload !== false ? 'Download: On' : 'Download: Off'}</span>
                 </button>
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 cursor-pointer transition-colors"
-                  title="Delete Photo"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setEditingItem(item)}
+                    className="p-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 cursor-pointer transition-colors"
+                    title="Edit Photo"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 cursor-pointer transition-colors"
+                    title="Delete Photo"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

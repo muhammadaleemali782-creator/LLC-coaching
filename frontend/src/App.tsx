@@ -33,6 +33,8 @@ import { StudentDashboard } from './components/student/StudentDashboard';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { LiveVisualEditor, applyVisualOverrides, DEFAULT_SECTION_ORDER } from './components/admin/LiveVisualEditor';
 import { ToastContainer } from './components/Toast';
+import { Toaster } from 'sonner';
+import { ScreenProtectionGuard } from './components/common/ScreenProtectionGuard';
 
 // Progressive Chunked Fake Screen (Skeleton Shimmer) for instant perception while DB connects
 const SkeletonHomeScreen: React.FC = () => {
@@ -287,6 +289,8 @@ const MainContent: React.FC = () => {
       <StudentAuthModal />
       <AdminAuthModal />
       <ToastContainer />
+      <Toaster richColors position="top-right" />
+      <ScreenProtectionGuard />
 
       {/* Admin On-Page Live Visual Editor with Time-Machine Undo/Redo & Reshuffle */}
       {isAdminAuthenticated && activeView !== 'admin-panel' && (
