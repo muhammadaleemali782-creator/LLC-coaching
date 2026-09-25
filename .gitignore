@@ -1,4 +1,4 @@
-﻿# Logs
+# Logs
 logs
 *.log
 npm-debug.log*
@@ -31,3 +31,8 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Temporary Build Artifacts
+build_apk_tmp/
+.gradle/
+local.properties
