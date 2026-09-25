@@ -30,6 +30,7 @@ import { VideoPlayerModal } from './components/modals/VideoPlayerModal';
 import { StudentAuthModal } from './components/modals/StudentAuthModal';
 import { AdminAuthModal } from './components/modals/AdminAuthModal';
 import { StudentDashboard } from './components/student/StudentDashboard';
+import { StaffDashboard } from './components/staff/StaffDashboard';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { LiveVisualEditor, applyVisualOverrides, DEFAULT_SECTION_ORDER } from './components/admin/LiveVisualEditor';
 import { ToastContainer } from './components/Toast';
@@ -271,6 +272,12 @@ const MainContent: React.FC = () => {
           {activeView === 'student-portal' && (
             <div className="pt-4 pb-16">
               <StudentDashboard />
+            </div>
+          )}
+
+          {activeView === 'staff-portal' && (
+            <div className="pt-4 pb-16">
+              <StaffDashboard />
             </div>
           )}
 

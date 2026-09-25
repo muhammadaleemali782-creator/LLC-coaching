@@ -16,6 +16,7 @@ import { ReviewsManager } from './ReviewsManager';
 import { SocialMediaManager } from './SocialMediaManager';
 import { WebsiteSettings } from './WebsiteSettings';
 import { MobilePreview } from './MobilePreview';
+import { StaffBranchCommandCenter } from './StaffBranchCommandCenter';
 
 export const AdminPanel: React.FC = () => {
   const { isAdminAuthenticated } = useApp();
@@ -24,6 +25,7 @@ export const AdminPanel: React.FC = () => {
   return (
     <AdminLayout activeTab={activeTab} setActiveTab={setActiveTab}>
       {activeTab === 'overview' && <DashboardOverview onSelectTab={setActiveTab} />}
+      {activeTab === 'branches-staff' && <StaffBranchCommandCenter />}
       {activeTab === 'courses' && <CourseManager />}
       {activeTab === 'pdfs' && <BooksPdfManager />}
       {activeTab === 'videos' && <YouTubeManager />}

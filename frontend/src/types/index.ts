@@ -132,7 +132,9 @@ export interface Student {
   quizScores?: { [testId: string]: number };
   dateJoined?: string;
   joinedDate?: string;
-  role?: 'student' | 'admin';
+  role?: 'student' | 'admin' | 'staff' | 'teacher';
+  branch?: string;
+  designation?: string;
   isActive?: boolean;
   mustChangePassword?: boolean;
   tempPassword?: string;
@@ -260,3 +262,95 @@ export interface WebsiteSettings {
   heroColumnsOrder?: string[];
   headerOrder?: string[];
 }
+
+// Staff & Branch Admission Management Types
+export interface StaffMember {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: 'staff' | 'teacher';
+  branch: string;
+  designation: string;
+  isActive?: boolean;
+  createdAt?: string;
+}
+
+export interface StaffAttendance {
+  id: string;
+  staffId: string;
+  staffName: string;
+  staffEmail?: string;
+  branch: string;
+  date: string;
+  status: 'Present' | 'Absent' | 'On Leave';
+  reason?: string;
+  checkInTime?: string;
+  createdAt?: string;
+}
+
+export interface BranchAdmission {
+  id: string;
+  studentName: string;
+  parentName?: string;
+  phone: string;
+  email?: string;
+  targetClass: string;
+  courseName?: string;
+  branch: string;
+  assignedTeacherId: string;
+  assignedTeacherName: string;
+  admissionType: 'Enrolled' | 'Visited'; // Admitted vs Campus Visit inquiry
+  feesPaid?: number;
+  notes?: string;
+  date: string;
+  status?: string;
+  createdAt?: string;
+}
+
+export interface StaffDashboardStats {
+  branches: string[];
+  summary: {
+    totalStaff: number;
+    totalEnrolled: number;
+    totalVisited: number;
+    totalInteractions: number;
+    staffPresent: number;
+    staffAbsent: number;
+    staffOnLeave: number;
+    overallConversionRate: number;
+  };
+  branchStats: Array<{
+    branch: string;
+    totalStaff: number;
+    staffPresent: number;
+    staffAbsent: number;
+    staffOnLeave: number;
+    totalEnrolled: number;
+    totalVisited: number;
+    totalStudents: number;
+    conversionRate: number;
+  }>;
+  teacherStats: Array<{
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    branch: string;
+    designation: string;
+    totalEnrolled: number;
+    totalVisited: number;
+    totalStudents: number;
+    todayStatus: 'Present' | 'Absent' | 'On Leave' | 'Not Marked';
+    todayReason?: string;
+    todayCheckIn?: string;
+  }>;
+  leaveReasons: Array<{
+    staffName: string;
+    branch: string;
+    status: string;
+    reason: string;
+    checkInTime?: string;
+  }>;
+}
+

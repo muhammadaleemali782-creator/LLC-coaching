@@ -231,6 +231,38 @@ const TransactionSchema = new mongoose.Schema({
   verifiedAt: String
 });
 
+const StaffAttendanceSchema = new mongoose.Schema({
+  id: String,
+  staffId: String,
+  staffName: String,
+  staffEmail: String,
+  branch: String,
+  date: String,
+  status: { type: String, default: 'Present' }, // 'Present' | 'Absent' | 'On Leave'
+  reason: { type: String, default: '' },
+  checkInTime: { type: String, default: 'N/A' },
+  createdAt: { type: Date, default: Date.now }
+}, { strict: false });
+
+const BranchAdmissionSchema = new mongoose.Schema({
+  id: String,
+  studentName: String,
+  parentName: String,
+  phone: String,
+  email: String,
+  targetClass: String,
+  courseName: String,
+  branch: String,
+  assignedTeacherId: String,
+  assignedTeacherName: String,
+  admissionType: { type: String, default: 'Enrolled' }, // 'Enrolled' | 'Visited'
+  feesPaid: { type: Number, default: 0 },
+  notes: String,
+  date: String,
+  status: { type: String, default: 'Active' },
+  createdAt: { type: Date, default: Date.now }
+}, { strict: false });
+
 export const UserModel = mongoose.models.User || mongoose.model('User', UserSchema);
 export const CourseModel = mongoose.models.Course || mongoose.model('Course', CourseSchema);
 export const StudyMaterialModel = mongoose.models.StudyMaterial || mongoose.model('StudyMaterial', StudyMaterialSchema);
@@ -245,6 +277,8 @@ export const SocialLinkModel = mongoose.models.SocialLink || mongoose.model('Soc
 export const SettingModel = mongoose.models.Setting || mongoose.model('Setting', SettingSchema);
 export const InquiryModel = mongoose.models.Inquiry || mongoose.model('Inquiry', InquirySchema);
 export const TransactionModel = mongoose.models.Transaction || mongoose.model('Transaction', TransactionSchema);
+export const StaffAttendanceModel = mongoose.models.StaffAttendance || mongoose.model('StaffAttendance', StaffAttendanceSchema);
+export const BranchAdmissionModel = mongoose.models.BranchAdmission || mongoose.model('BranchAdmission', BranchAdmissionSchema);
 
 // Full Comprehensive Seed Dataset (Matches 100% of Frontend Needs)
 const defaultData = {
@@ -257,6 +291,42 @@ const defaultData = {
       passwordHash: bcrypt.hashSync(process.env.ADMIN_INITIAL_PASSWORD || 'AmanLCC@2026!', 10),
       role: 'admin',
       targetClass: 'Admin',
+      createdAt: new Date().toISOString(),
+      isActive: true
+    },
+    {
+      id: 'staff-rajesh',
+      name: 'Rajesh Verma (Senior Faculty)',
+      email: 'rajesh@lcc.edu',
+      phone: '+919876543211',
+      passwordHash: bcrypt.hashSync('Staff@123', 10),
+      role: 'staff',
+      branch: 'Palahipatti Main Campus (Sindhora Rd)',
+      designation: 'Senior Mathematics Faculty',
+      createdAt: new Date().toISOString(),
+      isActive: true
+    },
+    {
+      id: 'staff-ananya',
+      name: 'Mrs. Ananya Sharma',
+      email: 'ananya@lcc.edu',
+      phone: '+919876543212',
+      passwordHash: bcrypt.hashSync('Staff@123', 10),
+      role: 'staff',
+      branch: 'Sindhora Market Branch',
+      designation: 'Science & Foundation Specialist',
+      createdAt: new Date().toISOString(),
+      isActive: true
+    },
+    {
+      id: 'staff-amit',
+      name: 'Amit Kumar',
+      email: 'amit@lcc.edu',
+      phone: '+919876543213',
+      passwordHash: bcrypt.hashSync('Staff@123', 10),
+      role: 'staff',
+      branch: 'Babatpur City Center',
+      designation: 'Commerce & Career Counselor',
       createdAt: new Date().toISOString(),
       isActive: true
     },
@@ -632,7 +702,119 @@ const defaultData = {
     maintenanceMode: false,
     razorpayKeyId: process.env.RAZORPAY_KEY_ID || 'rzp_live_TbWh7wBlq0NQuz'
   },
-  inquiries: []
+  inquiries: [],
+  branchAdmissions: [
+    {
+      id: 'adm-demo-1',
+      studentName: 'Rohan Gupta',
+      parentName: 'Sanjay Gupta',
+      phone: '+919876500001',
+      email: 'rohan.gupta@gmail.com',
+      targetClass: 'Class 10',
+      courseName: 'Board Exam Ace: Class 9 & 10 Target 95%+',
+      branch: 'Palahipatti Main Campus (Sindhora Rd)',
+      assignedTeacherId: 'staff-rajesh',
+      assignedTeacherName: 'Rajesh Verma (Senior Faculty)',
+      admissionType: 'Enrolled',
+      feesPaid: 6999,
+      notes: 'Completed admission with full fee payment. Started in batch A.',
+      date: new Date().toISOString().split('T')[0],
+      status: 'Active',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'adm-demo-2',
+      studentName: 'Priya Tiwari',
+      parentName: 'Manoj Tiwari',
+      phone: '+919876500002',
+      email: 'priya.t@gmail.com',
+      targetClass: 'Class 8',
+      courseName: 'Middle School Mastery: Class 6 to 8',
+      branch: 'Sindhora Market Branch',
+      assignedTeacherId: 'staff-ananya',
+      assignedTeacherName: 'Mrs. Ananya Sharma',
+      admissionType: 'Visited',
+      feesPaid: 0,
+      notes: 'Visited campus for inquiry with father. Requested trial class on Monday.',
+      date: new Date().toISOString().split('T')[0],
+      status: 'Active',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'adm-demo-3',
+      studentName: 'Vikas Maurya',
+      parentName: 'Ramesh Maurya',
+      phone: '+919876500003',
+      email: 'vikas.m@gmail.com',
+      targetClass: 'Class 12',
+      courseName: 'Senior Secondary Excellence: Class 11 & 12',
+      branch: 'Babatpur City Center',
+      assignedTeacherId: 'staff-amit',
+      assignedTeacherName: 'Amit Kumar',
+      admissionType: 'Enrolled',
+      feesPaid: 8499,
+      notes: 'Admission confirmed. Preparing for JEE & CBSE boards.',
+      date: new Date().toISOString().split('T')[0],
+      status: 'Active',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'adm-demo-4',
+      studentName: 'Sneha Patel',
+      parentName: 'Devendra Patel',
+      phone: '+919876500004',
+      email: 'sneha.p@gmail.com',
+      targetClass: 'Class 5',
+      courseName: 'Junior Champs: Class 1 to 5 Foundation',
+      branch: 'Palahipatti Main Campus (Sindhora Rd)',
+      assignedTeacherId: 'staff-rajesh',
+      assignedTeacherName: 'Rajesh Verma (Senior Faculty)',
+      admissionType: 'Visited',
+      feesPaid: 0,
+      notes: 'Visited for demo class inquiry. Promised to join next month.',
+      date: new Date().toISOString().split('T')[0],
+      status: 'Active',
+      createdAt: new Date().toISOString()
+    }
+  ],
+  staffAttendance: [
+    {
+      id: 'att-rajesh-today',
+      staffId: 'staff-rajesh',
+      staffName: 'Rajesh Verma (Senior Faculty)',
+      staffEmail: 'rajesh@lcc.edu',
+      branch: 'Palahipatti Main Campus (Sindhora Rd)',
+      date: new Date().toISOString().split('T')[0],
+      status: 'Present',
+      reason: '',
+      checkInTime: '08:45 AM',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'att-ananya-today',
+      staffId: 'staff-ananya',
+      staffName: 'Mrs. Ananya Sharma',
+      staffEmail: 'ananya@lcc.edu',
+      branch: 'Sindhora Market Branch',
+      date: new Date().toISOString().split('T')[0],
+      status: 'On Leave',
+      reason: 'Urgent medical & personal leave approved by Director',
+      checkInTime: 'N/A',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'att-amit-today',
+      staffId: 'staff-amit',
+      staffName: 'Amit Kumar',
+      staffEmail: 'amit@lcc.edu',
+      branch: 'Babatpur City Center',
+      date: new Date().toISOString().split('T')[0],
+      status: 'Present',
+      reason: '',
+      checkInTime: '09:00 AM',
+      createdAt: new Date().toISOString()
+    }
+  ]
 };
 
 // In-memory cache fallback for serverless execution
@@ -698,7 +880,9 @@ export const connectOnlineMongoDB = async () => {
             { model: SyllabusModel, data: defaultData.syllabus, name: 'syllabus' },
             { model: AdModel, data: defaultData.ads, name: 'ads' },
             { model: ReviewModel, data: defaultData.reviews, name: 'reviews' },
-            { model: SocialLinkModel, data: defaultData.socialLinks, name: 'socialLinks' }
+            { model: SocialLinkModel, data: defaultData.socialLinks, name: 'socialLinks' },
+            { model: BranchAdmissionModel, data: defaultData.branchAdmissions, name: 'branchAdmissions' },
+            { model: StaffAttendanceModel, data: defaultData.staffAttendance, name: 'staffAttendance' }
           ];
 
           for (const item of collectionsToCheck) {

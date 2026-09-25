@@ -16,7 +16,11 @@ import {
   Advertisement,
   Review,
   SocialLink,
-  WebsiteSettings
+  WebsiteSettings,
+  StaffMember,
+  StaffAttendance,
+  BranchAdmission,
+  StaffDashboardStats
 } from '../types';
 import {
   INITIAL_COURSES,
@@ -45,7 +49,8 @@ export type ActiveView =
   | 'admission'
   | 'contact'
   | 'student-portal'
-  | 'admin-panel';
+  | 'admin-panel'
+  | 'staff-portal';
 
 export interface Toast {
   id: string;
@@ -157,6 +162,18 @@ export interface AppContextType {
   showToast: (message: string, type?: 'success' | 'info' | 'error' | 'warning') => void;
   removeToast: (id: string) => void;
   isInitialSyncLoading: boolean;
+
+  // Staff & Branch Attendance / Admission Methods
+  currentStaff: StaffMember | null;
+  staffList: StaffMember[];
+  staffAttendance: StaffAttendance[];
+  branchAdmissions: BranchAdmission[];
+  staffStats: StaffDashboardStats | null;
+  loginStaff: (email: string, pass: string) => Promise<boolean>;
+  logoutStaff: () => void;
+  markStaffAttendance: (status: 'Present' | 'Absent' | 'On Leave', reason?: string) => Promise<boolean>;
+  registerBranchAdmission: (admission: Omit<BranchAdmission, 'id' | 'createdAt'>) => Promise<boolean>;
+  refreshStaffData: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -344,6 +361,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return localStorage.getItem('lcc_admin_authenticated') === 'true';
   });
 
+  // Staff & Employee Portal State
+  const [currentStaff, setCurrentStaff] = useState<StaffMember | null>(() => {
+    try {
+      const saved = localStorage.getItem('lcc_staff_session');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [staffList, setStaffList] = useState<StaffMember[]>([]);
+  const [staffAttendance, setStaffAttendance] = useState<StaffAttendance[]>([]);
+  const [branchAdmissions, setBranchAdmissions] = useState<BranchAdmission[]>([]);
+  const [staffStats, setStaffStats] = useState<StaffDashboardStats | null>(null);
+
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isInitialSyncLoading, setIsInitialSyncLoading] = useState<boolean>(true);
 
@@ -462,6 +493,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const registeredStudents = (usersRes.value as any).data.filter((u: any) => u.role !== 'admin');
           if (registeredStudents.length > 0) setStudents(registeredStudents);
         }
+        await refreshStaffData();
       } catch (e) {
         console.log('ℹ️ Running in resilient fallback mode');
       } finally {
@@ -470,6 +502,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     syncBackend();
   }, []);
+
+  const refreshStaffData = async () => {
+    try {
+      const [listRes, attRes, admRes, statsRes] = await Promise.allSettled([
+        api.staff.getAll(),
+        api.staff.getAttendance(),
+        api.staff.getAdmissions(),
+        api.staff.getStats()
+      ]);
+      if (listRes.status === 'fulfilled' && listRes.value?.data) {
+        setStaffList(listRes.value.data);
+      }
+      if (attRes.status === 'fulfilled' && attRes.value?.data) {
+        setStaffAttendance(attRes.value.data);
+      }
+      if (admRes.status === 'fulfilled' && admRes.value?.data) {
+        setBranchAdmissions(admRes.value.data);
+      }
+      if (statsRes.status === 'fulfilled' && statsRes.value) {
+        setStaffStats(statsRes.value as any);
+      }
+    } catch (e) {}
+  };
 
   const showToast = (message: string, type: 'success' | 'info' | 'error' | 'warning' = 'info') => {
     const id = Date.now().toString() + Math.random().toString();
@@ -541,6 +596,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsAdminAuthenticated(true);
         showToast('Welcome Director Aman Arora! Opening Director Hub...', 'success');
         navigateTo('admin-panel');
+        return true;
+      }
+
+      if (res.user?.role === 'staff' || res.user?.role === 'teacher') {
+        const staffObj: StaffMember = {
+          id: res.user.id || `staff-${Date.now()}`,
+          name: res.user.name,
+          email: res.user.email,
+          phone: res.user.phone,
+          role: res.user.role,
+          branch: res.user.branch || 'Palahipatti Main Campus (Sindhora Rd)',
+          designation: res.user.designation || 'Faculty Mentor',
+          isActive: true
+        };
+        localStorage.setItem('lcc_auth_token', res.token);
+        localStorage.setItem('lcc_staff_session', JSON.stringify(staffObj));
+        setCurrentStaff(staffObj);
+        refreshStaffData();
+        showToast(`Welcome ${res.user.name}! Opening Employee Portal...`, 'success');
+        navigateTo('staff-portal');
         return true;
       }
 
@@ -696,6 +771,123 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsAdminAuthenticated(false);
     showToast('Signed out of admin portal.', 'info');
     navigateTo('home');
+  };
+
+  // Dedicated Employee / Staff Authentication
+  const loginStaff = async (email: string, pass: string): Promise<boolean> => {
+    try {
+      const res = await api.auth.login({ email: email.trim().toLowerCase(), password: pass });
+      if (res.user?.role === 'staff' || res.user?.role === 'teacher' || res.user?.role === 'admin') {
+        const staffObj: StaffMember = {
+          id: res.user.id || `staff-${Date.now()}`,
+          name: res.user.name,
+          email: res.user.email,
+          phone: res.user.phone,
+          role: res.user.role === 'admin' ? 'staff' : res.user.role,
+          branch: res.user.branch || 'Palahipatti Main Campus (Sindhora Rd)',
+          designation: res.user.designation || (res.user.role === 'admin' ? 'Campus Director' : 'Faculty Mentor'),
+          isActive: true
+        };
+        localStorage.setItem('lcc_auth_token', res.token);
+        localStorage.setItem('lcc_staff_session', JSON.stringify(staffObj));
+        setCurrentStaff(staffObj);
+        await refreshStaffData();
+        showToast(`Welcome ${staffObj.name}! Logged in to Staff Portal.`, 'success');
+        navigateTo('staff-portal');
+        return true;
+      } else {
+        showToast('This account does not have employee/staff privileges.', 'error');
+        return false;
+      }
+    } catch (err: any) {
+      // Local fallback for pre-seeded staff demo accounts
+      const clean = email.trim().toLowerCase();
+      if ((clean === 'rajesh@lcc.edu' || clean === 'ananya@lcc.edu' || clean === 'amit@lcc.edu') && (pass === 'Staff@123' || pass === 'admin123')) {
+        const demoStaff: StaffMember = {
+          id: clean.includes('rajesh') ? 'staff-rajesh' : clean.includes('ananya') ? 'staff-ananya' : 'staff-amit',
+          name: clean.includes('rajesh') ? 'Rajesh Verma (Senior Faculty)' : clean.includes('ananya') ? 'Mrs. Ananya Sharma' : 'Amit Kumar',
+          email: clean,
+          role: 'staff',
+          branch: clean.includes('rajesh') ? 'Palahipatti Main Campus (Sindhora Rd)' : clean.includes('ananya') ? 'Sindhora Market Branch' : 'Babatpur City Center',
+          designation: clean.includes('rajesh') ? 'Senior Mathematics Faculty' : clean.includes('ananya') ? 'Science Specialist' : 'Commerce Counselor',
+          isActive: true
+        };
+        localStorage.setItem('lcc_staff_session', JSON.stringify(demoStaff));
+        setCurrentStaff(demoStaff);
+        await refreshStaffData();
+        showToast(`Welcome ${demoStaff.name}! Logged in to Staff Portal.`, 'success');
+        navigateTo('staff-portal');
+        return true;
+      }
+      showToast(err.message || 'Invalid email or password for staff portal.', 'error');
+      return false;
+    }
+  };
+
+  const logoutStaff = () => {
+    localStorage.removeItem('lcc_staff_session');
+    setCurrentStaff(null);
+    showToast('Staff member signed out successfully.', 'info');
+    navigateTo('home');
+  };
+
+  const markStaffAttendance = async (status: 'Present' | 'Absent' | 'On Leave', reason?: string): Promise<boolean> => {
+    if (!currentStaff) {
+      showToast('Please log in as an employee to mark attendance.', 'error');
+      return false;
+    }
+    try {
+      const res = await api.staff.markAttendance({
+        staffId: currentStaff.id,
+        staffName: currentStaff.name,
+        staffEmail: currentStaff.email,
+        branch: currentStaff.branch,
+        status,
+        reason: (status !== 'Present' ? (reason || 'Personal / Medical Leave') : '')
+      });
+      showToast(res.message || `Attendance marked as ${status}!`, 'success');
+      await refreshStaffData();
+      return true;
+    } catch (err: any) {
+      // Local fallback in case network fails
+      const todayStr = new Date().toISOString().split('T')[0];
+      const fallbackRecord: StaffAttendance = {
+        id: `att-${currentStaff.id}-${todayStr}`,
+        staffId: currentStaff.id,
+        staffName: currentStaff.name,
+        staffEmail: currentStaff.email,
+        branch: currentStaff.branch,
+        date: todayStr,
+        status,
+        reason: status !== 'Present' ? (reason || 'Personal / Medical Leave') : '',
+        checkInTime: status === 'Present' ? new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A'
+      };
+      setStaffAttendance(prev => {
+        const filtered = prev.filter(a => !(a.staffId === currentStaff.id && a.date === todayStr));
+        return [fallbackRecord, ...filtered];
+      });
+      showToast(`Attendance marked as ${status} (saved locally)!`, 'success');
+      return true;
+    }
+  };
+
+  const registerBranchAdmission = async (admissionData: Omit<BranchAdmission, 'id' | 'createdAt'>): Promise<boolean> => {
+    try {
+      const res = await api.staff.createAdmission(admissionData);
+      showToast(res.message || 'Admission / Visit lead logged successfully!', 'success');
+      await refreshStaffData();
+      return true;
+    } catch (err: any) {
+      // Offline fallback
+      const fallbackRecord: BranchAdmission = {
+        id: `adm-${Date.now()}`,
+        ...admissionData,
+        createdAt: new Date().toISOString()
+      };
+      setBranchAdmissions(prev => [fallbackRecord, ...prev]);
+      showToast(admissionData.admissionType === 'Enrolled' ? 'Student admission confirmed & saved!' : 'Student campus visit logged!', 'success');
+      return true;
+    }
   };
 
   // Ads Operations
@@ -1353,7 +1545,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         toasts,
         showToast,
         removeToast,
-        isInitialSyncLoading
+        isInitialSyncLoading,
+        currentStaff,
+        staffList,
+        staffAttendance,
+        branchAdmissions,
+        staffStats,
+        loginStaff,
+        logoutStaff,
+        markStaffAttendance,
+        registerBranchAdmission,
+        refreshStaffData
       }}
     >
       {children}

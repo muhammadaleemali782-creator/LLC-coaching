@@ -25,6 +25,7 @@ import { useApp } from '../../context/AppContext';
 
 export type AdminTab =
   | 'overview'
+  | 'branches-staff'
   | 'courses'
   | 'pdfs'
   | 'videos'
@@ -51,6 +52,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
 
   const navItems = [
     { id: 'overview', label: 'Overview & Live KPIs', icon: LayoutDashboard, badge: null },
+    { id: 'branches-staff', label: 'कर्मचारी व शाखाएं (Staff & Branches)', icon: Users, badge: 'New Hub' },
     { id: 'courses', label: 'Academic Courses', icon: GraduationCap, badge: 'Live DB' },
     { id: 'pdfs', label: 'Books & Drive PDFs', icon: FileText, badge: 'Cloud' },
     { id: 'videos', label: 'Video Lectures', icon: Video, badge: null },

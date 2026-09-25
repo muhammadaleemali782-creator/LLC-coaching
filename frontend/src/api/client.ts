@@ -307,5 +307,34 @@ export const api = {
       body: JSON.stringify(body)
     }),
     getTransactions: () => request<{ success: boolean; data: any[] }>('/payments/transactions')
+  },
+
+  // Staff & Branch Admission Management API
+  staff: {
+    getAll: () => request<{ success: boolean; data: any[] }>('/staff'),
+    create: (body: { name: string; email: string; phone?: string; password: string; branch?: string; designation?: string }) =>
+      request<{ success: boolean; message: string; data: any }>('/staff', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      }),
+    getAttendance: (params?: { date?: string; branch?: string; staffId?: string }) => {
+      const q = new URLSearchParams(params as any).toString();
+      return request<{ success: boolean; data: any[] }>(`/staff/attendance${q ? `?${q}` : ''}`);
+    },
+    markAttendance: (body: { staffId: string; staffName?: string; staffEmail?: string; branch?: string; date?: string; status: string; reason?: string; checkInTime?: string }) =>
+      request<{ success: boolean; message: string; data: any }>('/staff/attendance', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      }),
+    getAdmissions: (params?: { branch?: string; teacherId?: string; type?: string }) => {
+      const q = new URLSearchParams(params as any).toString();
+      return request<{ success: boolean; data: any[] }>(`/staff/admissions${q ? `?${q}` : ''}`);
+    },
+    createAdmission: (body: any) =>
+      request<{ success: boolean; message: string; data: any }>('/staff/admissions', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      }),
+    getStats: () => request<{ success: boolean; branches: string[]; summary: any; branchStats: any[]; teacherStats: any[]; leaveReasons: any[] }>('/staff/stats')
   }
 };

@@ -16,6 +16,7 @@ import galleryRoutes from './src/routes/galleryRoutes.js';
 import instagramRoutes from './src/routes/instagramRoutes.js';
 import syllabusRoutes from './src/routes/syllabusRoutes.js';
 import paymentRoutes from './src/routes/paymentRoutes.js';
+import staffRoutes from './src/routes/staffRoutes.js';
 import { getDB, saveDB, connectOnlineMongoDB, InquiryModel } from './src/config/db.js';
 import mongoose from 'mongoose';
 
@@ -73,6 +74,7 @@ app.use('/api/gallery', galleryRoutes);
 app.use('/api/instagram', instagramRoutes);
 app.use('/api/syllabus', syllabusRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/staff', staffRoutes);
 
 // Inquiries Endpoints
 app.get('/api/inquiries', async (req, res) => {

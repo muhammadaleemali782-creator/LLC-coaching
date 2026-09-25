@@ -5,6 +5,7 @@ import {
   Sparkles,
   BookOpen,
   User,
+  Users,
   Shield,
   Phone,
   MessageSquare,
@@ -25,6 +26,7 @@ import { NoticeTicker } from './NoticeTicker';
 export const Navbar: React.FC = () => {
   const {
     currentStudent,
+    currentStaff,
     isAdminAuthenticated,
     activeView,
     scrollSection,
@@ -32,6 +34,7 @@ export const Navbar: React.FC = () => {
     setIsStudentAuthModalOpen,
     setIsAdminAuthModalOpen,
     logoutStudent,
+    logoutStaff,
     notices,
     websiteSettings,
     colorTheme,
@@ -102,6 +105,16 @@ export const Navbar: React.FC = () => {
             <MessageSquare className="w-3 h-3 shrink-0" />
             <span>WhatsApp</span>
           </a>
+
+          <button
+            type="button"
+            onClick={() => navigateTo('staff-portal')}
+            className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap shadow-xs"
+            title="Employee & Teacher Portal"
+          >
+            <Users className="w-3 h-3 text-slate-950" />
+            <span>कर्मचारी पोर्टल</span>
+          </button>
         </div>
       </div>
     </div>
@@ -211,6 +224,28 @@ export const Navbar: React.FC = () => {
               <Shield className="w-3.5 h-3.5" />
               <span className="whitespace-nowrap">Admin Desk</span>
             </button>
+          ) : currentStaff ? (
+            <div className="flex items-center gap-1 sm:gap-2">
+              <button
+                onClick={() => navigateTo('staff-portal')}
+                className="flex items-center gap-1.5 sm:gap-2 bg-indigo-600/80 hover:bg-indigo-600 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-indigo-400/40 transition-all cursor-pointer shadow-xs"
+                title="Open Employee & Teacher Portal"
+              >
+                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-indigo-700 font-black text-[10px] sm:text-xs flex items-center justify-center">
+                  {(currentStaff.name || 'T').charAt(0).toUpperCase()}
+                </div>
+                <span className="text-[11px] sm:text-xs font-bold text-white hidden sm:inline truncate max-w-[110px]">
+                  Staff: {(currentStaff.name || 'Faculty').split(' ')[0]}
+                </span>
+              </button>
+              <button
+                onClick={logoutStaff}
+                className="p-1.5 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
+                title="Log Out Staff"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
           ) : currentStudent ? (
             <div className="flex items-center gap-1 sm:gap-2">
               <button
@@ -233,14 +268,24 @@ export const Navbar: React.FC = () => {
               </button>
             </div>
           ) : (
-            <button
-              onClick={() => setIsStudentAuthModalOpen(true)}
-              className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
-              title="Student Portal Login"
-            >
-              <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-950" />
-              <span className="whitespace-nowrap font-black">Student Portal</span>
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setIsStudentAuthModalOpen(true)}
+                className="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+                title="Student Portal Login"
+              >
+                <User className="w-3 h-3 text-slate-950" />
+                <span className="whitespace-nowrap font-black">Student</span>
+              </button>
+              <button
+                onClick={() => navigateTo('staff-portal')}
+                className="hidden sm:flex px-3 py-1.5 sm:py-2 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] sm:text-xs font-bold items-center gap-1 cursor-pointer transition-all"
+                title="Employee & Teacher Portal"
+              >
+                <Users className="w-3 h-3 text-amber-300" />
+                <span className="whitespace-nowrap">Staff</span>
+              </button>
+            </div>
           )}
 
           {/* Mobile Hamburger Toggle */}
@@ -283,21 +328,45 @@ export const Navbar: React.FC = () => {
                   <Shield className="w-4 h-4" />
                   <span>Open Director Desk</span>
                 </button>
-              ) : (
+              ) : currentStaff ? (
                 <button
                   onClick={() => {
-                    if (currentStudent) {
-                      navigateTo('student-portal');
-                    } else {
-                      setIsStudentAuthModalOpen(true);
-                    }
+                    navigateTo('staff-portal');
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full py-3 rounded-2xl bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider text-center shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider text-center shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <User className="w-4 h-4" />
-                  <span>{currentStudent ? `Student Portal (${currentStudent.name})` : 'Student Portal'}</span>
+                  <Users className="w-4 h-4" />
+                  <span>कर्मचारी पोर्टल ({currentStaff.name})</span>
                 </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      if (currentStudent) {
+                        navigateTo('student-portal');
+                      } else {
+                        setIsStudentAuthModalOpen(true);
+                      }
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full py-3 rounded-2xl bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider text-center shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>{currentStudent ? `Student Portal (${currentStudent.name})` : 'Student Portal'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      navigateTo('staff-portal');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs uppercase tracking-wider text-center flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                  >
+                    <Users className="w-4 h-4 text-amber-300" />
+                    <span>कर्मचारी पोर्टल लॉगिन (Staff Portal)</span>
+                  </button>
+                </>
               )}
             </div>
           </div>
