@@ -354,3 +354,29 @@ export interface StaffDashboardStats {
   }>;
 }
 
+export interface TeacherTask {
+  id: string;
+  title: string;
+  description?: string;
+  assignedToStaffId: string;
+  assignedToStaffName?: string;
+  dueDate: string;
+  priority?: 'High' | 'Normal' | 'Low';
+  status: 'Pending' | 'Completed';
+  reportNote?: string;
+  submittedAt?: string;
+  createdAt?: string;
+}
+
+export interface StudentDailyAttendance {
+  id: string;
+  studentId: string;
+  studentName: string;
+  teacherId: string;
+  branch: string;
+  date: string;
+  status: 'Present' | 'Absent' | 'On Leave';
+  reason?: string;
+  recordedAt?: string;
+}
+

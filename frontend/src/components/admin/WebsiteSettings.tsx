@@ -301,7 +301,7 @@ export const WebsiteSettings: React.FC = () => {
             <div className="flex items-center gap-2">
               <MapPin className="w-5 h-5 text-red-400" />
               <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-wider">Google Maps Campus Location (गूगल मैप्स लोकेशन)</h3>
+                <h3 className="text-sm font-black text-white uppercase tracking-wider">Google Maps Campus Location & Directions</h3>
                 <p className="text-[11px] text-slate-400">Set the exact coaching pin shown on website contact section & Google Maps navigation.</p>
               </div>
             </div>

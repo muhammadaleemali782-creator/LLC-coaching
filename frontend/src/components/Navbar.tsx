@@ -113,7 +113,7 @@ export const Navbar: React.FC = () => {
             title="Employee & Teacher Portal"
           >
             <Users className="w-3 h-3 text-slate-950" />
-            <span>कर्मचारी पोर्टल</span>
+            <span>Staff Portal</span>
           </button>
         </div>
       </div>
@@ -145,7 +145,7 @@ export const Navbar: React.FC = () => {
             {websiteSettings?.instituteName || 'LEARNING COACHING CENTER (L.C.C.)'}
           </h1>
           <h2 className="text-sm sm:text-xl lg:text-2xl font-black text-[#D32F2F] tracking-wide leading-tight">
-            लर्निंग कोचिंग सेंटर (एल.सी.सी.) वाराणसी
+            {websiteSettings?.instituteTagline || 'EXCELLENCE IN EDUCATION • VARANASI'}
           </h2>
           <p className="text-[10px] sm:text-xs font-bold text-slate-600 hidden sm:block">
             (A Premier Coaching Institute for School Academics, Computer DCA & Spoken English)
@@ -337,7 +337,7 @@ export const Navbar: React.FC = () => {
                   className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider text-center shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Users className="w-4 h-4" />
-                  <span>कर्मचारी पोर्टल ({currentStaff.name})</span>
+                  <span>Staff Portal ({currentStaff.name})</span>
                 </button>
               ) : (
                 <>
@@ -364,7 +364,7 @@ export const Navbar: React.FC = () => {
                     className="w-full py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs uppercase tracking-wider text-center flex items-center justify-center gap-2 cursor-pointer transition-colors"
                   >
                     <Users className="w-4 h-4 text-amber-300" />
-                    <span>कर्मचारी पोर्टल लॉगिन (Staff Portal)</span>
+                    <span>Staff & Teacher Portal</span>
                   </button>
                 </>
               )}
@@ -385,65 +385,64 @@ export const Navbar: React.FC = () => {
     return (
       <>
         {headerOrder.map(partKey => headerPartsMap[partKey] || null)}
-      {activeView !== 'admin-panel' && (
-        <div className="xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 border-t border-slate-200/80 dark:border-slate-800 py-2 px-3 backdrop-blur-xl flex items-center justify-around shadow-2xl transition-colors">
-          <button
-            onClick={() => navigateTo('home')}
-            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors cursor-pointer ${
-              scrollSection === 'home' && activeView === 'home' ? 'text-[#0066FF]' : 'text-slate-400 dark:text-slate-500'
-            }`}
-          >
-            <Sparkles className="w-5 h-5" />
-            <span>Home</span>
-          </button>
+      {/* Mobile Bottom Dock (Optimized for Android APK & Mobile Viewports) */}
+      <div className="xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-800/90 py-2 px-2 backdrop-blur-xl flex items-center justify-around shadow-2xl transition-colors">
+        <button
+          onClick={() => navigateTo('home')}
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer px-2 py-1 rounded-xl ${
+            activeView === 'home' ? 'text-primary-400 bg-primary-950/60' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>Home</span>
+        </button>
 
-          <button
-            onClick={() => navigateTo('courses', 'courses-section')}
-            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors cursor-pointer ${
-              scrollSection === 'courses' ? 'text-[#0066FF]' : 'text-slate-400 dark:text-slate-500'
-            }`}
-          >
-            <GraduationCap className="w-5 h-5" />
-            <span>Courses</span>
-          </button>
+        <button
+          onClick={() => {
+            if (currentStudent) {
+              navigateTo('student-portal');
+            } else {
+              setIsStudentAuthModalOpen(true);
+            }
+          }}
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer px-2.5 py-1 rounded-xl ${
+            activeView === 'student-portal' ? 'text-amber-300 bg-amber-950/60' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <User className="w-4 h-4 text-amber-400" />
+          <span>Student</span>
+        </button>
 
-          <button
-            onClick={() => navigateTo('study-material', 'study-material-section')}
-            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors cursor-pointer ${
-              scrollSection === 'study-material' ? 'text-[#0066FF]' : 'text-slate-400 dark:text-slate-500'
-            }`}
-          >
-            <FileText className="w-5 h-5" />
-            <span>Notes</span>
-          </button>
+        <button
+          onClick={() => navigateTo('staff-portal')}
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer px-2.5 py-1 rounded-xl ${
+            activeView === 'staff-portal' ? 'text-indigo-300 bg-indigo-950/60' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Users className="w-4 h-4 text-indigo-400" />
+          <span>Faculty</span>
+        </button>
 
-          <a
-            href={`https://wa.me/${cleanPhone}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-col items-center gap-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 cursor-pointer"
-          >
-            <MessageSquare className="w-5 h-5" />
-            <span>Chat</span>
-          </a>
+        <button
+          onClick={() => navigateTo('admin-panel')}
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer px-2.5 py-1 rounded-xl ${
+            activeView === 'admin-panel' ? 'text-emerald-300 bg-emerald-950/60' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Shield className="w-4 h-4 text-emerald-400" />
+          <span>Admin</span>
+        </button>
 
-          <button
-            onClick={() => {
-              if (currentStudent) {
-                navigateTo('student-portal');
-              } else {
-                setIsStudentAuthModalOpen(true);
-              }
-            }}
-            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors cursor-pointer ${
-              activeView === 'student-portal' ? 'text-[#0066FF]' : 'text-slate-400 dark:text-slate-500'
-            }`}
-          >
-            <User className="w-5 h-5" />
-            <span>{currentStudent ? 'Portal' : 'Login'}</span>
-          </button>
-        </div>
-      )}
+        <a
+          href={`https://wa.me/${cleanPhone}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center gap-0.5 text-[10px] font-bold text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded-xl cursor-pointer"
+        >
+          <MessageSquare className="w-4 h-4" />
+          <span>Chat</span>
+        </a>
+      </div>
     </>
   );
 };

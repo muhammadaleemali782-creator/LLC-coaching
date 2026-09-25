@@ -20,7 +20,9 @@ import {
   StaffMember,
   StaffAttendance,
   BranchAdmission,
-  StaffDashboardStats
+  StaffDashboardStats,
+  TeacherTask,
+  StudentDailyAttendance
 } from '../types';
 import {
   INITIAL_COURSES,
@@ -169,10 +171,17 @@ export interface AppContextType {
   staffAttendance: StaffAttendance[];
   branchAdmissions: BranchAdmission[];
   staffStats: StaffDashboardStats | null;
+  teacherTasks: TeacherTask[];
+  studentAttendanceRecords: StudentDailyAttendance[];
   loginStaff: (email: string, pass: string) => Promise<boolean>;
   logoutStaff: () => void;
   markStaffAttendance: (status: 'Present' | 'Absent' | 'On Leave', reason?: string) => Promise<boolean>;
   registerBranchAdmission: (admission: Omit<BranchAdmission, 'id' | 'createdAt'>) => Promise<boolean>;
+  adminCreateTeacher: (teacherData: { name: string; email: string; phone?: string; password: string; branch?: string; designation?: string }) => Promise<boolean>;
+  adminResetTeacherPassword: (staffId: string, newPassword: string) => Promise<boolean>;
+  assignTaskToTeacher: (taskData: { title: string; description?: string; assignedToStaffId: string; assignedToStaffName?: string; dueDate?: string; priority?: string }) => Promise<boolean>;
+  submitTeacherWorkReport: (taskId: string, reportNote: string) => Promise<boolean>;
+  markBatchStudentAttendance: (records: Array<{ studentId: string; studentName: string; teacherId: string; branch: string; date?: string; status: 'Present' | 'Absent' | 'On Leave'; reason?: string }>) => Promise<boolean>;
   refreshStaffData: () => Promise<void>;
 }
 
@@ -374,6 +383,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [staffAttendance, setStaffAttendance] = useState<StaffAttendance[]>([]);
   const [branchAdmissions, setBranchAdmissions] = useState<BranchAdmission[]>([]);
   const [staffStats, setStaffStats] = useState<StaffDashboardStats | null>(null);
+  const [teacherTasks, setTeacherTasks] = useState<TeacherTask[]>([]);
+  const [studentAttendanceRecords, setStudentAttendanceRecords] = useState<StudentDailyAttendance[]>([]);
 
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isInitialSyncLoading, setIsInitialSyncLoading] = useState<boolean>(true);
@@ -505,11 +516,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const refreshStaffData = async () => {
     try {
-      const [listRes, attRes, admRes, statsRes] = await Promise.allSettled([
+      const [listRes, attRes, admRes, statsRes, tasksRes, stAttRes] = await Promise.allSettled([
         api.staff.getAll(),
         api.staff.getAttendance(),
         api.staff.getAdmissions(),
-        api.staff.getStats()
+        api.staff.getStats(),
+        api.staff.getTasks(),
+        api.staff.getStudentAttendance()
       ]);
       if (listRes.status === 'fulfilled' && listRes.value?.data) {
         setStaffList(listRes.value.data);
@@ -522,6 +535,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (statsRes.status === 'fulfilled' && statsRes.value) {
         setStaffStats(statsRes.value as any);
+      }
+      if (tasksRes.status === 'fulfilled' && tasksRes.value?.data) {
+        setTeacherTasks(tasksRes.value.data);
+      }
+      if (stAttRes.status === 'fulfilled' && stAttRes.value?.data) {
+        setStudentAttendanceRecords(stAttRes.value.data);
       }
     } catch (e) {}
   };
@@ -887,6 +906,81 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setBranchAdmissions(prev => [fallbackRecord, ...prev]);
       showToast(admissionData.admissionType === 'Enrolled' ? 'Student admission confirmed & saved!' : 'Student campus visit logged!', 'success');
       return true;
+    }
+  };
+
+  const adminCreateTeacher = async (teacherData: {
+    name: string;
+    email: string;
+    phone?: string;
+    password: string;
+    branch?: string;
+    designation?: string;
+  }): Promise<boolean> => {
+    try {
+      const res = await api.staff.create(teacherData);
+      showToast(res.message || 'Teacher account created successfully!', 'success');
+      await refreshStaffData();
+      return true;
+    } catch (err: any) {
+      showToast(err.message || 'Failed to create teacher account.', 'error');
+      return false;
+    }
+  };
+
+  const adminResetTeacherPassword = async (staffId: string, newPassword: string): Promise<boolean> => {
+    try {
+      const res = await api.staff.resetPassword({ staffId, newPassword });
+      showToast(res.message || 'Teacher password updated successfully!', 'success');
+      return true;
+    } catch (err: any) {
+      showToast(err.message || 'Failed to reset teacher password.', 'error');
+      return false;
+    }
+  };
+
+  const assignTaskToTeacher = async (taskData: {
+    title: string;
+    description?: string;
+    assignedToStaffId: string;
+    assignedToStaffName?: string;
+    dueDate?: string;
+    priority?: string;
+  }): Promise<boolean> => {
+    try {
+      const res = await api.staff.createTask(taskData);
+      showToast(res.message || 'Task assigned successfully!', 'success');
+      await refreshStaffData();
+      return true;
+    } catch (err: any) {
+      showToast(err.message || 'Failed to assign task.', 'error');
+      return false;
+    }
+  };
+
+  const submitTeacherWorkReport = async (taskId: string, reportNote: string): Promise<boolean> => {
+    try {
+      const res = await api.staff.submitTaskReport({ taskId, reportNote, status: 'Completed' });
+      showToast(res.message || 'Work report submitted successfully!', 'success');
+      await refreshStaffData();
+      return true;
+    } catch (err: any) {
+      showToast(err.message || 'Failed to submit report.', 'error');
+      return false;
+    }
+  };
+
+  const markBatchStudentAttendance = async (
+    records: Array<{ studentId: string; studentName: string; teacherId: string; branch: string; date?: string; status: 'Present' | 'Absent' | 'On Leave'; reason?: string }>
+  ): Promise<boolean> => {
+    try {
+      const res = await api.staff.markStudentAttendance({ records });
+      showToast(res.message || 'Student attendance saved successfully!', 'success');
+      await refreshStaffData();
+      return true;
+    } catch (err: any) {
+      showToast(err.message || 'Failed to record student attendance.', 'error');
+      return false;
     }
   };
 
@@ -1555,6 +1649,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         logoutStaff,
         markStaffAttendance,
         registerBranchAdmission,
+        adminCreateTeacher,
+        adminResetTeacherPassword,
+        assignTaskToTeacher,
+        submitTeacherWorkReport,
+        markBatchStudentAttendance,
+        teacherTasks,
+        studentAttendanceRecords,
         refreshStaffData
       }}
     >

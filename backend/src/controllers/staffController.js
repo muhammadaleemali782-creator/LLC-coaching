@@ -1,4 +1,4 @@
-import { getDB, saveDB, UserModel, StaffAttendanceModel, BranchAdmissionModel } from '../config/db.js';
+import { getDB, saveDB, UserModel, StaffAttendanceModel, BranchAdmissionModel, TeacherTaskModel, StudentAttendanceModel } from '../config/db.js';
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -357,3 +357,201 @@ export const getDashboardStats = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+// 8. Admin Reset Staff / Teacher Password
+export const resetStaffPassword = async (req, res) => {
+  const { staffId, newPassword } = req.body;
+  if (!staffId || !newPassword) {
+    return res.status(400).json({ success: false, message: 'Staff ID and new password are required.' });
+  }
+
+  const passwordHash = bcrypt.hashSync(newPassword, 10);
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const user = await UserModel.findOneAndUpdate(
+        { $or: [{ id: staffId }, { _id: mongoose.isValidObjectId(staffId) ? staffId : null }] },
+        { $set: { passwordHash } },
+        { new: true }
+      );
+      if (user) {
+        return res.json({ success: true, message: `Password reset successfully for ${user.name}` });
+      }
+    }
+  } catch (err) {}
+
+  const db = getDB();
+  const user = (db.users || []).find(u => u.id === staffId);
+  if (user) {
+    user.passwordHash = passwordHash;
+    saveDB(db);
+    return res.json({ success: true, message: `Password reset successfully for ${user.name}` });
+  }
+
+  res.status(404).json({ success: false, message: 'Staff member not found.' });
+};
+
+// 9. Get Teacher Tasks
+export const getTeacherTasks = async (req, res) => {
+  const { teacherId } = req.query;
+  const query = {};
+  if (teacherId && teacherId !== 'all') query.assignedToStaffId = teacherId;
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const tasks = await TeacherTaskModel.find(query).sort({ _id: -1 });
+      return res.json({ success: true, data: tasks });
+    }
+    const db = getDB();
+    let tasks = db.teacherTasks || [];
+    if (teacherId && teacherId !== 'all') tasks = tasks.filter(t => t.assignedToStaffId === teacherId);
+    res.json({ success: true, data: tasks });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// 10. Assign Task to Teacher (Admin)
+export const createTeacherTask = async (req, res) => {
+  const { title, description, assignedToStaffId, assignedToStaffName, dueDate, priority } = req.body;
+  if (!title || !assignedToStaffId) {
+    return res.status(400).json({ success: false, message: 'Title and assigned staff member are required.' });
+  }
+
+  const newTask = {
+    id: `task-${Date.now()}`,
+    title: title.trim(),
+    description: (description || '').trim(),
+    assignedToStaffId,
+    assignedToStaffName: assignedToStaffName || 'Teacher',
+    dueDate: dueDate || new Date().toISOString().split('T')[0],
+    priority: priority || 'Normal',
+    status: 'Pending', // 'Pending' | 'Completed'
+    reportNote: '',
+    submittedAt: '',
+    createdAt: new Date().toISOString()
+  };
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const created = await TeacherTaskModel.create(newTask);
+      return res.status(201).json({ success: true, message: 'Task assigned successfully!', data: created });
+    }
+  } catch (err) {}
+
+  const db = getDB();
+  if (!db.teacherTasks) db.teacherTasks = [];
+  db.teacherTasks.unshift(newTask);
+  saveDB(db);
+  res.status(201).json({ success: true, message: 'Task assigned successfully!', data: newTask });
+};
+
+// 11. Submit Task Work Report (Teacher)
+export const submitTeacherTaskReport = async (req, res) => {
+  const { taskId, reportNote, status } = req.body;
+  if (!taskId || !reportNote) {
+    return res.status(400).json({ success: false, message: 'Task ID and report note are required.' });
+  }
+
+  const submittedAt = new Date().toISOString();
+  const updateData = {
+    reportNote: reportNote.trim(),
+    status: status || 'Completed',
+    submittedAt
+  };
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const updated = await TeacherTaskModel.findOneAndUpdate(
+        { id: taskId },
+        { $set: updateData },
+        { new: true }
+      );
+      return res.json({ success: true, message: 'Work report submitted successfully!', data: updated });
+    }
+  } catch (err) {}
+
+  const db = getDB();
+  if (!db.teacherTasks) db.teacherTasks = [];
+  const task = db.teacherTasks.find(t => t.id === taskId);
+  if (task) {
+    task.reportNote = updateData.reportNote;
+    task.status = updateData.status;
+    task.submittedAt = submittedAt;
+    saveDB(db);
+    return res.json({ success: true, message: 'Work report submitted successfully!', data: task });
+  }
+  res.status(404).json({ success: false, message: 'Task not found.' });
+};
+
+// 12. Get Student Attendance & Leaves
+export const getStudentAttendance = async (req, res) => {
+  const { teacherId, date, branch } = req.query;
+  const query = {};
+  if (teacherId && teacherId !== 'all') query.teacherId = teacherId;
+  if (date) query.date = date;
+  if (branch && branch !== 'all') query.branch = branch;
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const records = await StudentAttendanceModel.find(query).sort({ _id: -1 });
+      return res.json({ success: true, data: records });
+    }
+    const db = getDB();
+    let records = db.studentAttendance || [];
+    if (teacherId && teacherId !== 'all') records = records.filter(r => r.teacherId === teacherId);
+    if (date) records = records.filter(r => r.date === date);
+    if (branch && branch !== 'all') records = records.filter(r => r.branch === branch);
+    res.json({ success: true, data: records });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// 13. Mark Batch Student Attendance (Teacher or Admin)
+export const markStudentAttendance = async (req, res) => {
+  const { records } = req.body;
+  if (!Array.isArray(records) || records.length === 0) {
+    return res.status(400).json({ success: false, message: 'Student attendance records array is required.' });
+  }
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const processedRecords = records.map(r => ({
+    id: `st-att-${r.studentId}-${r.date || todayStr}`,
+    studentId: r.studentId,
+    studentName: r.studentName,
+    teacherId: r.teacherId,
+    branch: r.branch,
+    date: r.date || todayStr,
+    status: r.status || 'Present', // 'Present' | 'Absent' | 'On Leave'
+    reason: r.reason || '',
+    recordedAt: new Date().toISOString()
+  }));
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      for (const rec of processedRecords) {
+        await StudentAttendanceModel.findOneAndUpdate(
+          { studentId: rec.studentId, date: rec.date },
+          { $set: rec },
+          { upsert: true, new: true }
+        );
+      }
+      return res.json({ success: true, message: `Attendance marked for ${processedRecords.length} students!` });
+    }
+  } catch (err) {}
+
+  const db = getDB();
+  if (!db.studentAttendance) db.studentAttendance = [];
+  for (const rec of processedRecords) {
+    const idx = db.studentAttendance.findIndex(a => a.studentId === rec.studentId && a.date === rec.date);
+    if (idx >= 0) {
+      db.studentAttendance[idx] = { ...db.studentAttendance[idx], ...rec };
+    } else {
+      db.studentAttendance.unshift(rec);
+    }
+  }
+  saveDB(db);
+
+  res.json({ success: true, message: `Attendance marked for ${processedRecords.length} students!` });
+};
+

@@ -263,6 +263,32 @@ const BranchAdmissionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }, { strict: false });
 
+const TeacherTaskSchema = new mongoose.Schema({
+  id: String,
+  title: String,
+  description: String,
+  assignedToStaffId: String,
+  assignedToStaffName: String,
+  dueDate: String,
+  priority: { type: String, default: 'Normal' },
+  status: { type: String, default: 'Pending' }, // 'Pending' | 'Completed'
+  reportNote: { type: String, default: '' },
+  submittedAt: String,
+  createdAt: { type: Date, default: Date.now }
+}, { strict: false });
+
+const StudentAttendanceSchema = new mongoose.Schema({
+  id: String,
+  studentId: String,
+  studentName: String,
+  teacherId: String,
+  branch: String,
+  date: String,
+  status: { type: String, default: 'Present' }, // 'Present' | 'Absent' | 'On Leave'
+  reason: { type: String, default: '' },
+  recordedAt: { type: Date, default: Date.now }
+}, { strict: false });
+
 export const UserModel = mongoose.models.User || mongoose.model('User', UserSchema);
 export const CourseModel = mongoose.models.Course || mongoose.model('Course', CourseSchema);
 export const StudyMaterialModel = mongoose.models.StudyMaterial || mongoose.model('StudyMaterial', StudyMaterialSchema);
@@ -279,6 +305,8 @@ export const InquiryModel = mongoose.models.Inquiry || mongoose.model('Inquiry',
 export const TransactionModel = mongoose.models.Transaction || mongoose.model('Transaction', TransactionSchema);
 export const StaffAttendanceModel = mongoose.models.StaffAttendance || mongoose.model('StaffAttendance', StaffAttendanceSchema);
 export const BranchAdmissionModel = mongoose.models.BranchAdmission || mongoose.model('BranchAdmission', BranchAdmissionSchema);
+export const TeacherTaskModel = mongoose.models.TeacherTask || mongoose.model('TeacherTask', TeacherTaskSchema);
+export const StudentAttendanceModel = mongoose.models.StudentAttendance || mongoose.model('StudentAttendance', StudentAttendanceSchema);
 
 // Full Comprehensive Seed Dataset (Matches 100% of Frontend Needs)
 const defaultData = {
@@ -814,6 +842,58 @@ const defaultData = {
       checkInTime: '09:00 AM',
       createdAt: new Date().toISOString()
     }
+  ],
+  teacherTasks: [
+    {
+      id: 'task-seed-1',
+      title: 'Conduct Class 10 Trigonometry Mock Assessment',
+      description: 'Prepare and administer 50-mark test for Board Exam Ace batch and evaluate answer sheets.',
+      assignedToStaffId: 'staff-rajesh',
+      assignedToStaffName: 'Rajesh Verma (Senior Faculty)',
+      dueDate: new Date().toISOString().split('T')[0],
+      priority: 'High',
+      status: 'Completed',
+      reportNote: 'Mock test successfully conducted with 18 students. Top score was 48/50. Identified 3 students needing revision in Identities.',
+      submittedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'task-seed-2',
+      title: 'Class 8 Science Foundation Lab Session & Parent Call',
+      description: 'Cover Chemical Effects of Current experiment and follow up with parents of visited leads.',
+      assignedToStaffId: 'staff-ananya',
+      assignedToStaffName: 'Mrs. Ananya Sharma',
+      dueDate: new Date().toISOString().split('T')[0],
+      priority: 'Normal',
+      status: 'Pending',
+      reportNote: '',
+      submittedAt: '',
+      createdAt: new Date().toISOString()
+    }
+  ],
+  studentAttendance: [
+    {
+      id: 'st-att-demo-1',
+      studentId: 'adm-demo-1',
+      studentName: 'Rohan Gupta',
+      teacherId: 'staff-rajesh',
+      branch: 'Palahipatti Main Campus (Sindhora Rd)',
+      date: new Date().toISOString().split('T')[0],
+      status: 'Present',
+      reason: '',
+      recordedAt: new Date().toISOString()
+    },
+    {
+      id: 'st-att-demo-2',
+      studentId: 'adm-demo-3',
+      studentName: 'Vikas Maurya',
+      teacherId: 'staff-amit',
+      branch: 'Babatpur City Center',
+      date: new Date().toISOString().split('T')[0],
+      status: 'Present',
+      reason: '',
+      recordedAt: new Date().toISOString()
+    }
   ]
 };
 
@@ -882,7 +962,9 @@ export const connectOnlineMongoDB = async () => {
             { model: ReviewModel, data: defaultData.reviews, name: 'reviews' },
             { model: SocialLinkModel, data: defaultData.socialLinks, name: 'socialLinks' },
             { model: BranchAdmissionModel, data: defaultData.branchAdmissions, name: 'branchAdmissions' },
-            { model: StaffAttendanceModel, data: defaultData.staffAttendance, name: 'staffAttendance' }
+            { model: StaffAttendanceModel, data: defaultData.staffAttendance, name: 'staffAttendance' },
+            { model: TeacherTaskModel, data: defaultData.teacherTasks, name: 'teacherTasks' },
+            { model: StudentAttendanceModel, data: defaultData.studentAttendance, name: 'studentAttendance' }
           ];
 
           for (const item of collectionsToCheck) {

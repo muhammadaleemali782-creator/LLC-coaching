@@ -335,6 +335,34 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(body)
       }),
-    getStats: () => request<{ success: boolean; branches: string[]; summary: any; branchStats: any[]; teacherStats: any[]; leaveReasons: any[] }>('/staff/stats')
+    getStats: () => request<{ success: boolean; branches: string[]; summary: any; branchStats: any[]; teacherStats: any[]; leaveReasons: any[] }>('/staff/stats'),
+    resetPassword: (body: { staffId: string; newPassword: string }) =>
+      request<{ success: boolean; message: string }>('/staff/reset-password', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      }),
+    getTasks: (params?: { teacherId?: string }) => {
+      const q = new URLSearchParams(params as any).toString();
+      return request<{ success: boolean; data: any[] }>(`/staff/tasks${q ? `?${q}` : ''}`);
+    },
+    createTask: (body: { title: string; description?: string; assignedToStaffId: string; assignedToStaffName?: string; dueDate?: string; priority?: string }) =>
+      request<{ success: boolean; message: string; data: any }>('/staff/tasks', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      }),
+    submitTaskReport: (body: { taskId: string; reportNote: string; status?: string }) =>
+      request<{ success: boolean; message: string; data: any }>('/staff/tasks/report', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      }),
+    getStudentAttendance: (params?: { teacherId?: string; date?: string; branch?: string }) => {
+      const q = new URLSearchParams(params as any).toString();
+      return request<{ success: boolean; data: any[] }>(`/staff/student-attendance${q ? `?${q}` : ''}`);
+    },
+    markStudentAttendance: (body: { records: Array<{ studentId: string; studentName: string; teacherId: string; branch: string; date?: string; status: string; reason?: string }> }) =>
+      request<{ success: boolean; message: string }>('/staff/student-attendance', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      })
   }
 };
