@@ -41,7 +41,7 @@ with open(manifest_path, "w", encoding="utf-8") as f:
         android:theme="@android:style/Theme.NoTitleBar"
         android:hardwareAccelerated="true"
         android:largeHeap="true"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="false">
 
         <activity
             android:name=".MainActivity"
@@ -113,7 +113,7 @@ public class MainActivity extends Activity {
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            s.setSafeBrowsingEnabled(false);
+            s.setSafeBrowsingEnabled(true);
         }
 
         progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
@@ -272,35 +272,35 @@ cmd = [ZIPALIGN, "-f", "-p", "4", unaligned_apk, aligned_apk]
 print("Running zipalign...")
 subprocess.check_call(cmd)
 
-# 8. Create debug keystore if not exists
-keystore_path = os.path.join(BUILD_DIR, "debug.keystore")
+# 8. Create official release keystore if not exists
+keystore_path = os.path.join(BUILD_DIR, "release.keystore")
 if not os.path.exists(keystore_path):
     cmd = [
         KEYTOOL, "-genkeypair",
         "-keystore", keystore_path,
-        "-alias", "androiddebugkey",
-        "-keypass", "android",
-        "-storepass", "android",
-        "-dname", "CN=Android Debug,O=Android,C=US",
+        "-alias", "lccreleasekey",
+        "-keypass", "lcccoaching2026",
+        "-storepass", "lcccoaching2026",
+        "-dname", "CN=Learning Coaching Center, OU=Education, O=LCC Varanasi, L=Varanasi, ST=Uttar Pradesh, C=IN",
         "-validity", "10000",
         "-keyalg", "RSA",
         "-keysize", "2048"
     ]
-    print("Generating debug keystore...")
+    print("Generating official release keystore...")
     subprocess.check_call(cmd)
 
-# 9. Sign APK with apksigner
+# 9. Sign APK with apksigner using Release Keystore
 final_apk = os.path.join(OUT_DIR, "LCC-Coaching-v1.0.apk")
 cmd = [
     APKSIGNER, "sign",
     "--ks", keystore_path,
-    "--ks-pass", "pass:android",
-    "--key-pass", "pass:android",
-    "--ks-key-alias", "androiddebugkey",
+    "--ks-pass", "pass:lcccoaching2026",
+    "--key-pass", "pass:lcccoaching2026",
+    "--ks-key-alias", "lccreleasekey",
     "--out", final_apk,
     aligned_apk
 ]
-print("Signing APK...")
+print("Signing APK with release key...")
 subprocess.check_call(cmd, shell=True)
 
 print("\nSUCCESS! APK generated at:")
