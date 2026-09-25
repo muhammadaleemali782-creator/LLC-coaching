@@ -386,7 +386,7 @@ export const Navbar: React.FC = () => {
       <>
         {headerOrder.map(partKey => headerPartsMap[partKey] || null)}
       {/* Mobile Bottom Dock (Strict 5-column grid, 100% width, zero overflow) */}
-      <div className="xl:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#020617]/95 border-t border-slate-800/80 py-1.5 px-1 backdrop-blur-xl grid grid-cols-5 items-center shadow-2xl transition-colors">
+      <div className="xl:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#020617]/95 border-t border-slate-800/80 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] px-1 backdrop-blur-xl grid grid-cols-5 items-center shadow-2xl transition-colors">
         <button
           type="button"
           onClick={() => navigateTo('home')}

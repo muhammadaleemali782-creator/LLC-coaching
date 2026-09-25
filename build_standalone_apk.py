@@ -2,6 +2,7 @@ import os
 import subprocess
 import shutil
 import zipfile
+from PIL import Image
 
 BASE_DIR = r"C:\Users\suppo\.gemini\antigravity\scratch\lcc-coaching"
 BUILD_DIR = os.path.join(BASE_DIR, "build_apk_tmp")
@@ -30,14 +31,16 @@ with open(manifest_path, "w", encoding="utf-8") as f:
     f.write('''<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.lcccoaching.app"
-    android:versionCode="1"
-    android:versionName="1.0.0">
+    android:versionCode="2"
+    android:versionName="2.0.0">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:label="LCC Coaching"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:theme="@android:style/Theme.NoTitleBar"
         android:hardwareAccelerated="true"
         android:largeHeap="true"
@@ -85,7 +88,7 @@ public class MainActivity extends Activity {
 
     private WebView webView;
     private ProgressBar progressBar;
-    private static final String APP_URL = "https://lcc-edu.vercel.app/";
+    private static final String APP_URL = "https://lccedu.vercel.app/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,15 +100,21 @@ public class MainActivity extends Activity {
 
         webView = new WebView(this);
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        webView.setVerticalScrollBarEnabled(false);
+        webView.setHorizontalScrollBarEnabled(false);
+
+        // Clear stale WebView cache to ensure fresh responsive UI
+        webView.clearCache(true);
 
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
-        s.setAllowFileAccess(true);
-        s.setAllowContentAccess(true);
+        s.setAllowFileAccess(false);
+        s.setAllowContentAccess(false);
         s.setUseWideViewPort(true);
-        s.setLoadWithOverviewMode(true);
+        s.setLoadWithOverviewMode(false);
         s.setTextZoom(100);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
@@ -200,12 +209,30 @@ public class MainActivity extends Activity {
 }
 ''')
 
-# 3. Create dummy res folder
+# 3. Create res folder with launcher icons from official logo
 res_dir = os.path.join(BUILD_DIR, "res")
 values_dir = os.path.join(res_dir, "values")
 os.makedirs(values_dir, exist_ok=True)
 with open(os.path.join(values_dir, "strings.xml"), "w", encoding="utf-8") as f:
     f.write('<resources><string name="app_name">LCC Coaching</string></resources>')
+
+# Generate mipmap launcher icons from official logo
+logo_path = os.path.join(BASE_DIR, "frontend", "public", "logo.jpg")
+if os.path.exists(logo_path):
+    img = Image.open(logo_path)
+    densities = {
+        'mipmap-mdpi': 48,
+        'mipmap-hdpi': 72,
+        'mipmap-xhdpi': 96,
+        'mipmap-xxhdpi': 144,
+        'mipmap-xxxhdpi': 192,
+    }
+    for folder, size in densities.items():
+        d = os.path.join(res_dir, folder)
+        os.makedirs(d, exist_ok=True)
+        resized = img.resize((size, size), Image.Resampling.LANCZOS)
+        resized.save(os.path.join(d, 'ic_launcher.png'), 'PNG')
+    print("Official LCC launcher icons generated successfully.")
 
 # Compile resources with aapt2
 res_zip = os.path.join(BUILD_DIR, "res.zip")
