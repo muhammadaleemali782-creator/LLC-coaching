@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
     private SwipeRefreshLayout swipeRefreshLayout;
 
     // Default production endpoint or local dev URL
-    private static final String APP_URL = "https://lcc-coaching.vercel.app/";
+    private static final String APP_URL = "https://lcc-edu.vercel.app/";
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -57,8 +57,9 @@ public class MainActivity extends AppCompatActivity {
         settings.setDatabaseEnabled(true);
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
-        settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setTextZoom(100);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setSupportZoom(false);

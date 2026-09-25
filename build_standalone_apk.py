@@ -85,7 +85,7 @@ public class MainActivity extends Activity {
 
     private WebView webView;
     private ProgressBar progressBar;
-    private static final String APP_URL = "https://lcc-coaching.vercel.app/";
+    private static final String APP_URL = "https://lcc-edu.vercel.app/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,8 +104,9 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         s.setAllowFileAccess(true);
         s.setAllowContentAccess(true);
-        s.setLoadWithOverviewMode(true);
         s.setUseWideViewPort(true);
+        s.setLoadWithOverviewMode(true);
+        s.setTextZoom(100);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
         s.setSupportZoom(false);

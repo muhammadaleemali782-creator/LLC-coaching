@@ -108,50 +108,50 @@ export const Hero: React.FC = () => {
                     <span className="text-[10px] bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded">NEW</span>
                   </div>
 
-                  <ul className="space-y-1.5 text-xs font-bold text-slate-700">
+                  <ul className="space-y-2 text-xs font-bold text-slate-700">
                     <li>
                       <button
                         onClick={() => navigateTo('admission', 'admission-section')}
-                        className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-blue-50 hover:text-[#0B3B95] transition-colors flex items-center gap-2 border border-slate-100"
+                        className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-[#0B3B95] transition-colors flex items-center gap-2.5 border border-slate-100 bg-slate-50/60"
                       >
-                        <span className="text-blue-600 text-sm">🏛️</span>
-                        <span className="truncate">Admissions Open 2026-27</span>
+                        <span className="text-blue-600 text-base shrink-0">🏛️</span>
+                        <span className="font-bold text-xs text-slate-800 leading-snug">Admissions Open 2026-27</span>
                       </button>
                     </li>
                     <li>
                       <button
                         onClick={() => navigateTo('courses', 'courses-section')}
-                        className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-blue-50 hover:text-[#0B3B95] transition-colors flex items-center gap-2 border border-slate-100"
+                        className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-[#0B3B95] transition-colors flex items-center gap-2.5 border border-slate-100 bg-slate-50/60"
                       >
-                        <span className="text-emerald-600 text-sm">📚</span>
-                        <span className="truncate">Classes 1–12 School Batches</span>
+                        <span className="text-emerald-600 text-base shrink-0">📚</span>
+                        <span className="font-bold text-xs text-slate-800 leading-snug">Classes 1–12 School Batches</span>
                       </button>
                     </li>
                     <li>
                       <button
                         onClick={() => navigateTo('courses', 'courses-section')}
-                        className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-blue-50 hover:text-[#0B3B95] transition-colors flex items-center gap-2 border border-slate-100"
+                        className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-[#0B3B95] transition-colors flex items-center gap-2.5 border border-slate-100 bg-slate-50/60"
                       >
-                        <span className="text-purple-600 text-sm">💻</span>
-                        <span className="truncate">Computer DCA / ADCA Diploma</span>
+                        <span className="text-purple-600 text-base shrink-0">💻</span>
+                        <span className="font-bold text-xs text-slate-800 leading-snug">Computer DCA / ADCA Diploma</span>
                       </button>
                     </li>
                     <li>
                       <button
                         onClick={() => navigateTo('courses', 'courses-section')}
-                        className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-blue-50 hover:text-[#0B3B95] transition-colors flex items-center gap-2 border border-slate-100"
+                        className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-[#0B3B95] transition-colors flex items-center gap-2.5 border border-slate-100 bg-slate-50/60"
                       >
-                        <span className="text-amber-600 text-sm">🗣️</span>
-                        <span className="truncate">Fluent Spoken English Course</span>
+                        <span className="text-amber-600 text-base shrink-0">🗣️</span>
+                        <span className="font-bold text-xs text-slate-800 leading-snug">Fluent Spoken English Course</span>
                       </button>
                     </li>
                     <li>
                       <button
                         onClick={() => navigateTo('study-material', 'study-material-section')}
-                        className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-blue-50 hover:text-[#0B3B95] transition-colors flex items-center gap-2 border border-slate-100"
+                        className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-[#0B3B95] transition-colors flex items-center gap-2.5 border border-slate-100 bg-slate-50/60"
                       >
-                        <span className="text-rose-600 text-sm">📥</span>
-                        <span className="truncate">Free Study Notes & DPP Vault</span>
+                        <span className="text-rose-600 text-base shrink-0">📥</span>
+                        <span className="font-bold text-xs text-slate-800 leading-snug">Free Study Notes & DPP Vault</span>
                       </button>
                     </li>
                   </ul>

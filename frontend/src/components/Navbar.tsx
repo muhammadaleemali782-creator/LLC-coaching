@@ -385,19 +385,21 @@ export const Navbar: React.FC = () => {
     return (
       <>
         {headerOrder.map(partKey => headerPartsMap[partKey] || null)}
-      {/* Mobile Bottom Dock (Optimized for Android APK & Mobile Viewports) */}
-      <div className="xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-800/90 py-2 px-2 backdrop-blur-xl flex items-center justify-around shadow-2xl transition-colors">
+      {/* Mobile Bottom Dock (Strict 5-column grid, 100% width, zero overflow) */}
+      <div className="xl:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#020617]/95 border-t border-slate-800/80 py-1.5 px-1 backdrop-blur-xl grid grid-cols-5 items-center shadow-2xl transition-colors">
         <button
+          type="button"
           onClick={() => navigateTo('home')}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer px-2 py-1 rounded-xl ${
-            activeView === 'home' ? 'text-primary-400 bg-primary-950/60' : 'text-slate-400 hover:text-white'
+          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer py-1 rounded-xl appearance-none bg-transparent border-0 select-none ${
+            activeView === 'home' ? 'text-blue-400 font-black' : 'text-slate-400 hover:text-white'
           }`}
         >
-          <Sparkles className="w-4 h-4" />
-          <span>Home</span>
+          <Sparkles className="w-5 h-5 shrink-0" />
+          <span className="truncate w-full text-center">Home</span>
         </button>
 
         <button
+          type="button"
           onClick={() => {
             if (currentStudent) {
               navigateTo('student-portal');
@@ -405,42 +407,44 @@ export const Navbar: React.FC = () => {
               setIsStudentAuthModalOpen(true);
             }
           }}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer px-2.5 py-1 rounded-xl ${
-            activeView === 'student-portal' ? 'text-amber-300 bg-amber-950/60' : 'text-slate-400 hover:text-white'
+          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer py-1 rounded-xl appearance-none bg-transparent border-0 select-none ${
+            activeView === 'student-portal' ? 'text-amber-400 font-black' : 'text-slate-400 hover:text-white'
           }`}
         >
-          <User className="w-4 h-4 text-amber-400" />
-          <span>Student</span>
+          <User className="w-5 h-5 shrink-0" />
+          <span className="truncate w-full text-center">Student</span>
         </button>
 
         <button
+          type="button"
           onClick={() => navigateTo('staff-portal')}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer px-2.5 py-1 rounded-xl ${
-            activeView === 'staff-portal' ? 'text-indigo-300 bg-indigo-950/60' : 'text-slate-400 hover:text-white'
+          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer py-1 rounded-xl appearance-none bg-transparent border-0 select-none ${
+            activeView === 'staff-portal' ? 'text-indigo-400 font-black' : 'text-slate-400 hover:text-white'
           }`}
         >
-          <Users className="w-4 h-4 text-indigo-400" />
-          <span>Faculty</span>
+          <Users className="w-5 h-5 shrink-0" />
+          <span className="truncate w-full text-center">Faculty</span>
         </button>
 
         <button
+          type="button"
           onClick={() => navigateTo('admin-panel')}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer px-2.5 py-1 rounded-xl ${
-            activeView === 'admin-panel' ? 'text-emerald-300 bg-emerald-950/60' : 'text-slate-400 hover:text-white'
+          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer py-1 rounded-xl appearance-none bg-transparent border-0 select-none ${
+            activeView === 'admin-panel' ? 'text-emerald-400 font-black' : 'text-slate-400 hover:text-white'
           }`}
         >
-          <Shield className="w-4 h-4 text-emerald-400" />
-          <span>Admin</span>
+          <Shield className="w-5 h-5 shrink-0" />
+          <span className="truncate w-full text-center">Admin</span>
         </button>
 
         <a
           href={`https://wa.me/${cleanPhone}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex flex-col items-center gap-0.5 text-[10px] font-bold text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded-xl cursor-pointer"
+          className="flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold text-emerald-400 hover:text-emerald-300 py-1 rounded-xl cursor-pointer select-none"
         >
-          <MessageSquare className="w-4 h-4" />
-          <span>Chat</span>
+          <MessageSquare className="w-5 h-5 shrink-0" />
+          <span className="truncate w-full text-center">Chat</span>
         </a>
       </div>
     </>
