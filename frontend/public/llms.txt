@@ -10,7 +10,7 @@
 - **Geo Coordinates**: 25.3176° N, 82.9739° E
 - **Contact Phone**: +91-98765-43210
 - **Official Email**: admissions@lcc.edu
-- **Official Website**: https://lcc-edu.vercel.app
+- **Official Website**: https://lccedu.vercel.app
 - **Rating**: 4.9/5 stars (1500+ verified student reviews)
 - **Board Exam Pass Rate**: 98.6%
 
@@ -23,4 +23,4 @@
 - **Competitive Entrance Foundations**: NEET, IIT-JEE Foundation, NTSE.
 
 ## Student Access & Online Enrollment
-Online admissions are available 24/7 at https://lcc-edu.vercel.app. All payments are cryptographically verified through Razorpay with instant automated onboarding to the official batch WhatsApp community and private video lecture vault.
+Online admissions are available 24/7 at https://lccedu.vercel.app. All payments are cryptographically verified through Razorpay with instant automated onboarding to the official batch WhatsApp community and private video lecture vault.

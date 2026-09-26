@@ -22,18 +22,18 @@
 
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://lcc-edu.vercel.app/" />
+    <meta property="og:url" content="https://lccedu.vercel.app/" />
     <meta property="og:title" content="Learning Coaching Center (L.C.C.) Varanasi — Top-Rated Coaching Institute" />
     <meta property="og:description" content="Ranked among the best coaching centers in Varanasi for Class 9-12 Boards, NEET/JEE, Computer Diplomas, and English speaking. Directed by Aman Arora with a 98.6% board exam pass rate." />
-    <meta property="og:image" content="https://lcc-edu.vercel.app/logo.jpg" />
+    <meta property="og:image" content="https://lccedu.vercel.app/logo.jpg" />
     <meta property="og:site_name" content="Learning Coaching Center (L.C.C.)" />
 
     <!-- Twitter Card -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://lcc-edu.vercel.app/" />
+    <meta property="twitter:url" content="https://lccedu.vercel.app/" />
     <meta property="twitter:title" content="Learning Coaching Center (L.C.C.) Varanasi — Empowering Tomorrow's Leaders" />
     <meta property="twitter:description" content="Top 10 Coaching Institute in Varanasi for Board Exams, Competitive Exams, Computer Education, and Career Excellence." />
-    <meta property="twitter:image" content="https://lcc-edu.vercel.app/logo.jpg" />
+    <meta property="twitter:image" content="https://lccedu.vercel.app/logo.jpg" />
 
     <!-- Google & LLM Structured Data (JSON-LD) for Search, Maps & AI Ranking -->
     <script type="application/ld+json">
@@ -41,20 +41,21 @@
       "@context": "https://schema.org",
       "@graph": [
         {
-          "@type": "EducationalOrganization",
-          "@id": "https://lcc-edu.vercel.app/#organization",
+          "@type": ["EducationalOrganization", "LocalBusiness"],
+          "@id": "https://lccedu.vercel.app/#organization",
           "name": "Learning Coaching Center (L.C.C.)",
           "alternateName": ["LCC", "LLC", "LCC Coaching", "LLC Coaching", "LCC Varanasi", "LCC Coaching Varanasi", "Learning Coaching Center Varanasi", "Aman Arora Coaching"],
-          "url": "https://lcc-edu.vercel.app/",
-          "logo": "https://lcc-edu.vercel.app/logo.jpg",
-          "image": "https://lcc-edu.vercel.app/logo.jpg",
+          "url": "https://lccedu.vercel.app/",
+          "logo": "https://lccedu.vercel.app/logo.jpg",
+          "image": "https://lccedu.vercel.app/logo.jpg",
+          "priceRange": "₹₹",
           "description": "Learning Coaching Center (L.C.C.) is a premier academic coaching institute in Varanasi, Uttar Pradesh providing classroom and online training for 9th to 12th Board examinations, NEET, IIT-JEE Foundation, DCA computer diplomas, and career development.",
           "founder": {
             "@type": "Person",
             "name": "Aman Arora",
             "jobTitle": "Director & Lead Academician"
           },
-          "telephone": "+91-98765-43210",
+          "telephone": "+91-9250703092",
           "email": "admissions@lcc.edu",
           "address": {
             "@type": "PostalAddress",
@@ -69,6 +70,14 @@
             "latitude": 25.3176,
             "longitude": 82.9739
           },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+              "opens": "07:00",
+              "closes": "20:00"
+            }
+          ],
           "areaServed": ["Varanasi", "Kanpur", "Lucknow", "Uttar Pradesh", "India"],
           "aggregateRating": {
             "@type": "AggregateRating",
@@ -78,8 +87,38 @@
           }
         },
         {
+          "@type": "Course",
+          "name": "Class 9th & 10th Board Exam Foundation",
+          "description": "Comprehensive coaching for CBSE and UP Board Class 9 & 10 in Science, Mathematics, English, and Social Science.",
+          "provider": {
+            "@type": "Organization",
+            "name": "Learning Coaching Center (L.C.C.)",
+            "sameAs": "https://lccedu.vercel.app/"
+          }
+        },
+        {
+          "@type": "Course",
+          "name": "Class 11th & 12th Science & Commerce",
+          "description": "Physics, Chemistry, Maths, Biology (PCM/PCB) and Commerce (Accountancy, Economics) Board & Competitive Exam coaching.",
+          "provider": {
+            "@type": "Organization",
+            "name": "Learning Coaching Center (L.C.C.)",
+            "sameAs": "https://lccedu.vercel.app/"
+          }
+        },
+        {
+          "@type": "Course",
+          "name": "Computer DCA & ADCA Diploma",
+          "description": "1:1 computer lab practicals for DCA, ADCA, Tally Prime, and office productivity certifications.",
+          "provider": {
+            "@type": "Organization",
+            "name": "Learning Coaching Center (L.C.C.)",
+            "sameAs": "https://lccedu.vercel.app/"
+          }
+        },
+        {
           "@type": "FAQPage",
-          "@id": "https://lcc-edu.vercel.app/#faq",
+          "@id": "https://lccedu.vercel.app/#faq",
           "mainEntity": [
             {
               "@type": "Question",
@@ -110,7 +149,7 @@
               "name": "How to enroll in online batches at LCC?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Students can visit https://lcc-edu.vercel.app, login with their student account, pay securely via Razorpay, and get instant access to official WhatsApp batch groups and private lecture playlists."
+                "text": "Students can visit https://lccedu.vercel.app, login with their student account, pay securely via Razorpay, and get instant access to official WhatsApp batch groups and private lecture playlists."
               }
             }
           ]
@@ -167,7 +206,37 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   </head>
   <body class="bg-white text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
-    <div id="root"></div>
+    <div id="root">
+      <!-- Search Engine & Crawler Pre-render Content (Instantly Replaced on React Mount) -->
+      <header style="padding: 24px 16px; background-color: #0B3B95; color: #ffffff; text-align: center; font-family: system-ui, -apple-system, sans-serif;">
+        <h1 style="font-size: 24px; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px;">Learning Coaching Center (L.C.C.) — Top Coaching in Varanasi</h1>
+        <p style="font-size: 14px; margin: 0; color: #e2e8f0;">Premier Academic & Career Coaching Institute | Directed by Aman Arora | Admissions Open 2026–27</p>
+      </header>
+      <main style="max-width: 900px; margin: 24px auto; padding: 0 20px; font-family: system-ui, -apple-system, sans-serif; color: #1e293b; line-height: 1.6;">
+        <section style="margin-bottom: 24px;">
+          <h2 style="font-size: 18px; font-weight: 700; color: #0B3B95; margin-bottom: 8px;">About Learning Coaching Center (LCC / LLC Varanasi)</h2>
+          <p style="font-size: 14px; margin: 0 0 12px 0;">Learning Coaching Center (widely recognized as L.C.C. or LLC Coaching) is Varanasi's premier academic coaching institute located in the Education Hub near City Central. We deliver high-yield classroom teaching and digital learning for CBSE and UP Board school students (Classes 1st to 12th), Computer Certification Diplomas (DCA, ADCA, Tally Prime), and Fluent Spoken English training.</p>
+        </section>
+        <section style="margin-bottom: 24px;">
+          <h2 style="font-size: 18px; font-weight: 700; color: #0B3B95; margin-bottom: 8px;">Courses & Batches Offered</h2>
+          <ul style="font-size: 14px; padding-left: 20px; margin: 0;">
+            <li style="margin-bottom: 6px;"><strong>Classes 1st–10th Foundation:</strong> Comprehensive coaching in Mathematics, Science, English, and Social Studies with regular DPPs.</li>
+            <li style="margin-bottom: 6px;"><strong>Classes 11th–12th Science & Commerce:</strong> Board Exam and competitive foundations in Physics, Chemistry, Maths, Biology (PCM/PCB) and Accountancy.</li>
+            <li style="margin-bottom: 6px;"><strong>Computer Diploma Courses:</strong> Government-recognized DCA, ADCA, and Tally Prime with 1:1 computer lab practicals.</li>
+            <li style="margin-bottom: 6px;"><strong>Fluent Spoken English & Communication:</strong> Pronunciation, vocabulary, public speaking, and personality development.</li>
+          </ul>
+        </section>
+        <section style="margin-bottom: 24px;">
+          <h2 style="font-size: 18px; font-weight: 700; color: #0B3B95; margin-bottom: 8px;">Director Mentorship & Student Results</h2>
+          <p style="font-size: 14px; margin: 0;">Under the leadership of <strong>Director Aman Arora</strong>, L.C.C. has maintained a 98.6% board exam pass rate with 1500+ top-ranking students across Varanasi, Kanpur, and Uttar Pradesh.</p>
+        </section>
+        <footer style="border-top: 1px solid #e2e8f0; padding-top: 16px; font-size: 13px; color: #64748b;">
+          <p style="margin: 0 0 4px 0;"><strong>Campus Address:</strong> Near City Central, Main Market Road, Education Hub, Varanasi, UP 221001</p>
+          <p style="margin: 0 0 4px 0;"><strong>Admission Helpline:</strong> +91 9250703092 | <strong>Email:</strong> admissions@lcc.edu</p>
+          <p style="margin: 0;"><strong>Official Website:</strong> <a href="https://lccedu.vercel.app/" style="color: #0B3B95; text-decoration: underline;">https://lccedu.vercel.app/</a></p>
+        </footer>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
