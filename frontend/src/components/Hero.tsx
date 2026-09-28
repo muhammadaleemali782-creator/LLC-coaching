@@ -90,6 +90,50 @@ export const Hero: React.FC = () => {
     <section className="bg-slate-100/70 border-b border-slate-200/90 pb-8 sm:pb-12 pt-3 sm:pt-4 px-2 sm:px-4 lg:px-6">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
 
+        {/* PHYSICS WALLAH (PW) STYLE QUICK LEARNING HUB (Mobile-First 4x2 Grid) */}
+        <div className="lg:hidden bg-white dark:bg-slate-900 rounded-2xl p-3 sm:p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2.5 transition-colors">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+              <span className="p-1 rounded-lg bg-blue-100 dark:bg-blue-900/60 text-[#0066FF] dark:text-blue-400">⚡</span>
+              <span>Learning Hub</span>
+            </div>
+            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-900 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live Batches
+            </span>
+          </div>
+
+          <div className="grid grid-cols-4 gap-2 text-center">
+            {[
+              { label: 'Batches', icon: '🎯', desc: 'Classes 1–12', onClick: () => navigateTo('batches', 'batches-section'), color: 'from-amber-400 to-orange-500' },
+              { label: 'Study Vault', icon: '📚', desc: 'Free Notes', onClick: () => navigateTo('study-material', 'study-material-section'), color: 'from-blue-500 to-indigo-600' },
+              { label: 'Syllabus', icon: '📝', desc: 'Exam Topics', onClick: () => navigateTo('syllabus', 'syllabus-section'), color: 'from-emerald-400 to-teal-600' },
+              { label: 'Classes', icon: '🎥', desc: 'Lectures', onClick: () => navigateTo('videos', 'videos-section'), color: 'from-rose-500 to-red-600' },
+              { label: 'Notices', icon: '📢', desc: 'Exams & News', onClick: () => navigateTo('notices', 'notices-section'), color: 'from-purple-500 to-violet-600' },
+              { label: 'Toppers', icon: '🏆', desc: 'Merit List', onClick: () => navigateTo('reviews', 'reviews-section'), color: 'from-yellow-400 to-amber-600' },
+              { label: 'Gurus', icon: '👨‍🏫', desc: 'Faculty Team', onClick: () => navigateTo('home', 'about-section'), color: 'from-cyan-500 to-blue-600' },
+              { label: 'Ask Doubt', icon: '💬', desc: '1:1 WhatsApp', onClick: () => window.open(`https://wa.me/919250703092`, '_blank'), color: 'from-emerald-500 to-green-600' }
+            ].map((tile, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={tile.onClick}
+                className="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-blue-50 dark:hover:bg-slate-800 transition-all border border-slate-100 dark:border-slate-800/80 active:scale-95 group cursor-pointer"
+              >
+                <div className={`w-10 h-10 rounded-2xl bg-gradient-to-tr ${tile.color} text-white flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform`}>
+                  <span>{tile.icon}</span>
+                </div>
+                <span className="text-[11px] font-black text-slate-800 dark:text-slate-200 mt-1.5 leading-tight truncate w-full">
+                  {tile.label}
+                </span>
+                <span className="text-[9px] font-medium text-slate-400 dark:text-slate-400 leading-none truncate w-full mt-0.5">
+                  {tile.desc}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* UNIVERSITY SLIDER + QUICK LINKS + DIRECTOR SIDEBAR GRID (CUSTOMIZABLE & RESHUFFLEABLE) */}
         {(() => {
           const heroColumnsOrder = (websiteSettings?.heroColumnsOrder && websiteSettings.heroColumnsOrder.length > 0)

@@ -385,8 +385,94 @@ export const Navbar: React.FC = () => {
     return (
       <>
         {headerOrder.map(partKey => headerPartsMap[partKey] || null)}
-      {/* Mobile Bottom Dock (Strict 5-column grid, 100% width, zero overflow) */}
-      <div className="xl:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#020617]/95 border-t border-slate-800/80 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] px-1 backdrop-blur-xl grid grid-cols-5 items-center shadow-2xl transition-colors">
+      {/* Physics Wallah (PW) App-Style Mobile Header */}
+      <div className="xl:hidden bg-gradient-to-r from-[#0052CC] via-[#0066FF] to-[#0A2540] text-white px-3.5 py-2.5 flex items-center justify-between shadow-md sticky top-0 z-40 transition-colors">
+        <div className="flex items-center gap-2.5">
+          <div
+            onClick={() => {
+              if (currentStudent) {
+                navigateTo('student-portal');
+              } else {
+                setIsStudentAuthModalOpen(true);
+              }
+            }}
+            className="w-9 h-9 rounded-full bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center cursor-pointer shadow-md ring-2 ring-white/30 shrink-0"
+            title="Student Profile"
+          >
+            {currentStudent ? (currentStudent.name || 'S').charAt(0).toUpperCase() : <User className="w-4 h-4" />}
+          </div>
+          <div className="leading-tight">
+            <div className="text-xs font-black text-white flex items-center gap-1">
+              <span>{currentStudent ? `Hi, ${currentStudent.name.split(' ')[0]}!` : 'Hello, Learner!'}</span>
+              <span>👋</span>
+            </div>
+            <div className="text-[10px] font-semibold text-blue-100 flex items-center gap-1.5">
+              <span>L.C.C. Live Learning</span>
+              <span className="inline-flex items-center gap-1 text-[9px] bg-emerald-500/30 text-emerald-300 font-bold px-1.5 py-0.2 rounded-full border border-emerald-400/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Active
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => navigateTo('notices', 'notices-section')}
+            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white relative cursor-pointer"
+            title="Notifications"
+          >
+            <Bell className="w-4 h-4" />
+            {importantNoticesCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            )}
+          </button>
+
+          <a
+            href={`https://wa.me/${cleanPhone}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black px-2.5 py-1.5 rounded-full flex items-center gap-1 shadow-sm transition-all"
+            title="Ask Doubts on WhatsApp"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>Doubts</span>
+          </a>
+
+          {/* Quick Drawer Menu */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-1.5 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors cursor-pointer"
+          >
+            {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+
+      {/* PW Horizontal Target Exam / Class Goal Strip */}
+      <div className="xl:hidden bg-slate-900 border-b border-slate-800 px-2.5 py-1.5 overflow-x-auto scrollbar-none flex items-center gap-1.5 text-[11px] font-bold text-slate-300">
+        {[
+          { label: '🎯 All Batches', view: 'batches' as const, anchor: 'batches-section', bg: 'bg-blue-600 text-white' },
+          { label: '📚 Class 9-10th', view: 'courses' as const, anchor: 'courses-section', bg: 'bg-slate-800 text-slate-200' },
+          { label: '🔬 Class 11-12th', view: 'courses' as const, anchor: 'courses-section', bg: 'bg-slate-800 text-slate-200' },
+          { label: '🩺 NEET / Foundation', view: 'courses' as const, anchor: 'courses-section', bg: 'bg-slate-800 text-slate-200' },
+          { label: '💻 Computer DCA', view: 'courses' as const, anchor: 'courses-section', bg: 'bg-slate-800 text-slate-200' },
+          { label: '🗣️ Spoken English', view: 'courses' as const, anchor: 'courses-section', bg: 'bg-slate-800 text-slate-200' },
+          { label: '📥 Free DPPs', view: 'study-material' as const, anchor: 'study-material-section', bg: 'bg-slate-800 text-slate-200' },
+        ].map((pill, idx) => (
+          <button
+            key={idx}
+            onClick={() => navigateTo(pill.view, pill.anchor)}
+            className={`whitespace-nowrap px-3 py-1 rounded-full text-[11px] font-bold transition-all shrink-0 cursor-pointer border border-white/10 active:scale-95 ${pill.bg}`}
+          >
+            {pill.label}
+          </button>
+        ))}
+      </div>
+
+      {/* PW-Style Mobile Bottom App Dock */}
+      <div className="xl:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0B1528]/95 border-t border-slate-800/90 py-1 pb-[max(0.4rem,env(safe-area-inset-bottom))] px-1 backdrop-blur-xl grid grid-cols-5 items-center shadow-2xl transition-colors">
+        {/* 1. Home */}
         <button
           type="button"
           onClick={() => navigateTo('home')}
@@ -394,10 +480,58 @@ export const Navbar: React.FC = () => {
             activeView === 'home' ? 'text-blue-400 font-black' : 'text-slate-400 hover:text-white'
           }`}
         >
-          <Sparkles className="w-5 h-5 shrink-0" />
-          <span className="truncate w-full text-center">Home</span>
+          <div className={`p-1 rounded-xl transition-all ${activeView === 'home' ? 'bg-blue-600/30' : ''}`}>
+            <Sparkles className="w-5 h-5 shrink-0" />
+          </div>
+          <span className="truncate w-full text-center text-[10px]">Home</span>
         </button>
 
+        {/* 2. Batches (Core PW Tab) */}
+        <button
+          type="button"
+          onClick={() => navigateTo('batches', 'batches-section')}
+          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer py-1 rounded-xl appearance-none bg-transparent border-0 select-none ${
+            activeView === 'batches' || activeView === 'courses' ? 'text-amber-400 font-black' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <div className={`p-1 rounded-xl transition-all ${activeView === 'batches' || activeView === 'courses' ? 'bg-amber-500/30' : ''}`}>
+            <BookOpen className="w-5 h-5 shrink-0" />
+          </div>
+          <span className="truncate w-full text-center text-[10px]">Batches</span>
+        </button>
+
+        {/* 3. Study Vault (PW Notes & DPPs) */}
+        <button
+          type="button"
+          onClick={() => navigateTo('study-material', 'study-material-section')}
+          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer py-1 rounded-xl appearance-none bg-transparent border-0 select-none ${
+            activeView === 'study-material' ? 'text-emerald-400 font-black' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <div className={`p-1 rounded-xl transition-all ${activeView === 'study-material' ? 'bg-emerald-500/30' : ''}`}>
+            <FileText className="w-5 h-5 shrink-0" />
+          </div>
+          <span className="truncate w-full text-center text-[10px]">Vault</span>
+        </button>
+
+        {/* 4. Notices (PW Announcements & Timetable) */}
+        <button
+          type="button"
+          onClick={() => navigateTo('notices', 'notices-section')}
+          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer py-1 rounded-xl appearance-none bg-transparent border-0 select-none relative ${
+            activeView === 'notices' ? 'text-rose-400 font-black' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <div className={`p-1 rounded-xl transition-all relative ${activeView === 'notices' ? 'bg-rose-500/30' : ''}`}>
+            <Bell className="w-5 h-5 shrink-0" />
+            {importantNoticesCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            )}
+          </div>
+          <span className="truncate w-full text-center text-[10px]">Notices</span>
+        </button>
+
+        {/* 5. My Study / Student Portal */}
         <button
           type="button"
           onClick={() => {
@@ -408,44 +542,16 @@ export const Navbar: React.FC = () => {
             }
           }}
           className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer py-1 rounded-xl appearance-none bg-transparent border-0 select-none ${
-            activeView === 'student-portal' ? 'text-amber-400 font-black' : 'text-slate-400 hover:text-white'
+            activeView === 'student-portal' ? 'text-indigo-400 font-black' : 'text-slate-400 hover:text-white'
           }`}
         >
-          <User className="w-5 h-5 shrink-0" />
-          <span className="truncate w-full text-center">Student</span>
+          <div className={`p-1 rounded-xl transition-all ${activeView === 'student-portal' ? 'bg-indigo-500/30' : ''}`}>
+            <User className="w-5 h-5 shrink-0" />
+          </div>
+          <span className="truncate w-full text-center text-[10px]">
+            {currentStudent ? (currentStudent.name.split(' ')[0]) : 'My Study'}
+          </span>
         </button>
-
-        <button
-          type="button"
-          onClick={() => navigateTo('staff-portal')}
-          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer py-1 rounded-xl appearance-none bg-transparent border-0 select-none ${
-            activeView === 'staff-portal' ? 'text-indigo-400 font-black' : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <Users className="w-5 h-5 shrink-0" />
-          <span className="truncate w-full text-center">Faculty</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => navigateTo('admin-panel')}
-          className={`flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold transition-all cursor-pointer py-1 rounded-xl appearance-none bg-transparent border-0 select-none ${
-            activeView === 'admin-panel' ? 'text-emerald-400 font-black' : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <Shield className="w-5 h-5 shrink-0" />
-          <span className="truncate w-full text-center">Admin</span>
-        </button>
-
-        <a
-          href={`https://wa.me/${cleanPhone}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold text-emerald-400 hover:text-emerald-300 py-1 rounded-xl cursor-pointer select-none"
-        >
-          <MessageSquare className="w-5 h-5 shrink-0" />
-          <span className="truncate w-full text-center">Chat</span>
-        </a>
       </div>
     </>
   );
