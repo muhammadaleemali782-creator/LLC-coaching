@@ -31,8 +31,8 @@ with open(manifest_path, "w", encoding="utf-8") as f:
     f.write('''<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.lcccoaching.app"
-    android:versionCode="2"
-    android:versionName="2.0.0">
+    android:versionCode="3"
+    android:versionName="2.1.0">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -44,7 +44,8 @@ with open(manifest_path, "w", encoding="utf-8") as f:
         android:theme="@android:style/Theme.NoTitleBar"
         android:hardwareAccelerated="true"
         android:largeHeap="true"
-        android:usesCleartextTraffic="false">
+        android:usesCleartextTraffic="false"
+        android:allowBackup="false">
 
         <activity
             android:name=".MainActivity"
@@ -73,39 +74,43 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
     private WebView webView;
     private ProgressBar progressBar;
+    private LinearLayout errorLayout;
     private static final String APP_URL = "https://lccedu.vercel.app/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Hardware Layer acceleration for 1GB RAM devices
-        RelativeLayout layout = new RelativeLayout(this);
-        layout.setBackgroundColor(Color.parseColor("#020617"));
+        RelativeLayout rootLayout = new RelativeLayout(this);
+        rootLayout.setBackgroundColor(Color.parseColor("#020617"));
 
+        // 3GB RAM Optimized WebView configuration:
+        // No redundant offscreen hardware layer buffers, direct window compositor rendering
         webView = new WebView(this);
-        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
-
-        // Clear stale WebView cache to ensure fresh responsive UI
-        webView.clearCache(true);
+        webView.setBackgroundColor(Color.parseColor("#020617"));
 
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
@@ -114,15 +119,17 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
         s.setUseWideViewPort(true);
-        s.setLoadWithOverviewMode(false);
+        s.setLoadWithOverviewMode(true);
         s.setTextZoom(100);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
         s.setSupportZoom(false);
+        // Fast HTTP disk caching (prevents RAM spikes from re-parsing assets every launch)
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
+        s.setRenderPriority(WebSettings.RenderPriority.HIGH);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            s.setSafeBrowsingEnabled(true);
+            s.setSafeBrowsingEnabled(false); // Eliminates background safe browsing memory overhead on low RAM
         }
 
         progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
@@ -136,22 +143,84 @@ public class MainActivity extends Activity {
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         );
 
-        layout.addView(webView, wvParams);
-        layout.addView(progressBar, pbParams);
-        setContentView(layout);
+        // Friendly Offline / Network Error Recovery Layout
+        errorLayout = new LinearLayout(this);
+        errorLayout.setOrientation(LinearLayout.VERTICAL);
+        errorLayout.setGravity(Gravity.CENTER);
+        errorLayout.setBackgroundColor(Color.parseColor("#020617"));
+        errorLayout.setVisibility(View.GONE);
+
+        TextView errTitle = new TextView(this);
+        errTitle.setText("Internet Connection Needed");
+        errTitle.setTextColor(Color.WHITE);
+        errTitle.setTextSize(18);
+        errTitle.setGravity(Gravity.CENTER);
+        errTitle.setPadding(0, 0, 0, 16);
+
+        TextView errSub = new TextView(this);
+        errSub.setText("Please check your internet or Wi-Fi to load L.C.C. Coaching Portal.");
+        errSub.setTextColor(Color.parseColor("#94a3b8"));
+        errSub.setTextSize(14);
+        errSub.setGravity(Gravity.CENTER);
+        errSub.setPadding(40, 0, 40, 32);
+
+        Button retryBtn = new Button(this);
+        retryBtn.setText("Retry Connection");
+        retryBtn.setTextColor(Color.WHITE);
+        retryBtn.setBackgroundColor(Color.parseColor("#2563eb"));
+        retryBtn.setPadding(32, 16, 32, 16);
+        retryBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                errorLayout.setVisibility(View.GONE);
+                if (webView != null) {
+                    webView.reload();
+                }
+            }
+        });
+
+        errorLayout.addView(errTitle);
+        errorLayout.addView(errSub);
+        errorLayout.addView(retryBtn);
+
+        rootLayout.addView(webView, wvParams);
+        rootLayout.addView(progressBar, pbParams);
+        rootLayout.addView(errorLayout, wvParams);
+        setContentView(rootLayout);
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 progressBar.setVisibility(View.VISIBLE);
+                errorLayout.setVisibility(View.GONE);
             }
+
             @Override
             public void onPageFinished(WebView view, String url) {
                 progressBar.setVisibility(View.GONE);
             }
+
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                progressBar.setVisibility(View.GONE);
+                if (request.isForMainFrame()) {
+                    progressBar.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                }
+            }
+
+            // Prevent app crashes when Android OS terminates WebView sandboxed renderer on low RAM
+            @Override
+            public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+                if (webView != null) {
+                    ViewGroup parent = (ViewGroup) webView.getParent();
+                    if (parent != null) {
+                        parent.removeView(webView);
+                    }
+                    webView.destroy();
+                    webView = null;
+                }
+                recreate();
+                return true;
             }
         });
 
@@ -182,11 +251,43 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (webView != null) {
+            webView.onPause();
+            webView.pauseTimers(); // Freezes JS timers & CSS paint loops to save RAM and battery
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (webView != null) {
+            webView.onResume();
+            webView.resumeTimers();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (webView != null) {
+            webView.stopLoading();
+            webView.setWebChromeClient(null);
+            webView.setWebViewClient(null);
+            webView.destroy();
+            webView = null;
+        }
+        super.onDestroy();
+    }
+
+    @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        if (level >= ComponentCallbacks2.TRIM_MEMORY_MODERATE && webView != null) {
-            webView.freeMemory();
-            webView.clearCache(false);
+        if (webView != null) {
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+                webView.freeMemory();
+                webView.clearCache(false);
+            }
         }
     }
 
@@ -195,7 +296,7 @@ public class MainActivity extends Activity {
         super.onLowMemory();
         if (webView != null) {
             webView.freeMemory();
-            webView.clearCache(true);
+            webView.clearCache(false);
         }
     }
 
