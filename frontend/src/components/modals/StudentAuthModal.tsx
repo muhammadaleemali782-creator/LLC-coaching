@@ -4,8 +4,8 @@ import { User, Mail, Lock, Phone, X, GraduationCap, ArrowRight, Loader2, KeyRoun
 import { ForgotPasswordModal } from './ForgotPasswordModal';
 
 export const StudentAuthModal: React.FC = () => {
-  const { isStudentAuthModalOpen, setIsStudentAuthModalOpen, loginStudent, registerStudent, updateStudentPassword, navigateTo, showToast } = useApp();
-  const [tab, setTab] = useState<'login' | 'register'>('login');
+  const { isStudentAuthModalOpen, setIsStudentAuthModalOpen, loginStudent, loginStaff, registerStudent, updateStudentPassword, navigateTo, showToast } = useApp();
+  const [tab, setTab] = useState<'student' | 'staff' | 'register'>('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -47,7 +47,23 @@ export const StudentAuthModal: React.FC = () => {
       return;
     }
 
-    if (tab === 'login') {
+    if (tab === 'staff') {
+      if (!email || !password) {
+        showToast('Please enter both staff email and password.', 'warning');
+        setIsLoading(false);
+        return;
+      }
+      const success = await loginStaff(email.trim(), password);
+      setIsLoading(false);
+      if (success) {
+        setIsStudentAuthModalOpen(false);
+        setEmail('');
+        setPassword('');
+      }
+      return;
+    }
+
+    if (tab === 'student') {
       if (!email || !password) {
         showToast('Please enter both student email and password.', 'warning');
         setIsLoading(false);
@@ -56,7 +72,6 @@ export const StudentAuthModal: React.FC = () => {
       const success = await loginStudent(email.trim(), password);
       setIsLoading(false);
       if (success) {
-        // If the user's password was temporary or needs reset, prompt right here
         const savedSession = localStorage.getItem('lcc_student_session');
         const userObj = savedSession ? JSON.parse(savedSession) : null;
         if (userObj?.mustChangePassword || userObj?.tempPassword === password) {
@@ -108,8 +123,8 @@ export const StudentAuthModal: React.FC = () => {
               className="w-10 h-10 rounded-xl object-contain bg-white shadow-sm border border-white/20"
             />
             <div>
-              <h3 className="text-sm sm:text-base font-black">L.C.C. Learning Portal</h3>
-              <span className="text-[11px] text-blue-100 font-medium">Academic, Tests & Counseling Desk</span>
+              <h3 className="text-sm sm:text-base font-black">L.C.C. Learning & Campus Portal</h3>
+              <span className="text-[11px] text-blue-100 font-medium">Students, Faculty & Academic Desk</span>
             </div>
           </div>
 
@@ -168,14 +183,15 @@ export const StudentAuthModal: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    style={{ backgroundColor: '#0066FF', color: '#ffffff' }}
+                    className="w-full py-3 rounded-xl bg-[#0066FF] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {isLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin text-white" />
                     ) : (
                       <>
-                        <span>SET PASSWORD & ENTER PORTAL</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <span className="text-white font-black">SET PASSWORD & ENTER PORTAL</span>
+                        <ArrowRight className="w-3.5 h-3.5 text-white" />
                       </>
                     )}
                   </button>
@@ -183,33 +199,58 @@ export const StudentAuthModal: React.FC = () => {
               </form>
             ) : (
               <>
-                {/* Tab Selector */}
-                <div className="flex rounded-2xl bg-slate-100 p-1 border border-slate-200">
+                {/* 3-Tab Selector: Student | Teacher / Staff | New Registration */}
+                <div className="flex rounded-2xl bg-slate-100 p-1 border border-slate-200 gap-1">
                   <button
                     type="button"
-                    onClick={() => setTab('login')}
-                    className={`flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                      tab === 'login'
+                    onClick={() => setTab('student')}
+                    style={tab === 'student' ? { backgroundColor: '#0066FF', color: '#ffffff' } : { color: '#475569' }}
+                    className={`flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                      tab === 'student'
                         ? 'bg-[#0066FF] text-white shadow-sm'
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    Sign In
+                    <User className="w-3.5 h-3.5" />
+                    <span>Student</span>
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTab('staff')}
+                    style={tab === 'staff' ? { backgroundColor: '#4f46e5', color: '#ffffff' } : { color: '#475569' }}
+                    className={`flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                      tab === 'staff'
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <GraduationCap className="w-3.5 h-3.5" />
+                    <span>Teacher / Staff</span>
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => setTab('register')}
-                    className={`flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                    style={tab === 'register' ? { backgroundColor: '#0066FF', color: '#ffffff' } : { color: '#475569' }}
+                    className={`flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1 ${
                       tab === 'register'
                         ? 'bg-[#0066FF] text-white shadow-sm'
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    New Registration
+                    <span>Register</span>
                   </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-3">
+                  {tab === 'staff' && (
+                    <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center gap-2.5 text-xs text-indigo-900 font-semibold">
+                      <GraduationCap className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span>Faculty & Teacher desk login. Access your assigned branch & attendance.</span>
+                    </div>
+                  )}
+
                   {tab === 'register' && (
                     <>
                       <div>
@@ -264,14 +305,14 @@ export const StudentAuthModal: React.FC = () => {
 
                   <div>
                     <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                      Registered Email Address *
+                      {tab === 'staff' ? 'Staff Registered Email *' : 'Registered Email Address *'}
                     </label>
                     <div className="relative">
                       <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
                         type="email"
                         required
-                        placeholder="name@example.com"
+                        placeholder={tab === 'staff' ? 'faculty@lcc.edu' : 'name@example.com'}
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                         className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#0066FF]"
@@ -282,7 +323,7 @@ export const StudentAuthModal: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <label className="text-[11px] font-bold text-slate-700">Password *</label>
-                      {tab === 'login' && (
+                      {tab === 'student' && (
                         <button
                           type="button"
                           onClick={() => setIsForgotOpen(true)}
@@ -309,14 +350,28 @@ export const StudentAuthModal: React.FC = () => {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full py-3 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                      style={{
+                        backgroundColor: tab === 'staff' ? '#4f46e5' : '#0066FF',
+                        color: '#ffffff'
+                      }}
+                      className={`w-full py-3 rounded-xl text-white font-black text-xs uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 ${
+                        tab === 'staff'
+                          ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/25'
+                          : 'bg-[#0066FF] hover:bg-blue-700 shadow-blue-500/25'
+                      }`}
                     >
                       {isLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
                       ) : (
                         <>
-                          <span>{tab === 'login' ? 'SIGN IN TO PORTAL' : 'CREATE STUDENT ACCOUNT'}</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
+                          <span className="text-white font-black">
+                            {tab === 'staff'
+                              ? 'SIGN IN AS TEACHER / STAFF'
+                              : tab === 'student'
+                              ? 'SIGN IN TO STUDENT PORTAL'
+                              : 'CREATE STUDENT ACCOUNT'}
+                          </span>
+                          <ArrowRight className="w-3.5 h-3.5 text-white" />
                         </>
                       )}
                     </button>
@@ -335,7 +390,7 @@ export const StudentAuthModal: React.FC = () => {
         isOpen={isForgotOpen}
         onClose={() => setIsForgotOpen(false)}
         onSuccess={() => {
-          setTab('login');
+          setTab('student');
           showToast('Password updated! Please enter your new password to sign in.', 'success');
         }}
       />

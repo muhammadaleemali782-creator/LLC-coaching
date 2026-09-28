@@ -100,21 +100,11 @@ export const Navbar: React.FC = () => {
             href={`https://wa.me/${cleanPhone}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors whitespace-nowrap"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 py-0.5 rounded-full flex items-center gap-1 transition-colors whitespace-nowrap shadow-xs"
           >
             <MessageSquare className="w-3 h-3 shrink-0" />
             <span>WhatsApp</span>
           </a>
-
-          <button
-            type="button"
-            onClick={() => navigateTo('staff-portal')}
-            className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap shadow-xs"
-            title="Employee & Teacher Portal"
-          >
-            <Users className="w-3 h-3 text-slate-950" />
-            <span>Staff Portal</span>
-          </button>
         </div>
       </div>
     </div>
@@ -268,24 +258,15 @@ export const Navbar: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => setIsStudentAuthModalOpen(true)}
-                className="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1 cursor-pointer"
-                title="Student Portal Login"
-              >
-                <User className="w-3 h-3 text-slate-950" />
-                <span className="whitespace-nowrap font-black">Student</span>
-              </button>
-              <button
-                onClick={() => navigateTo('staff-portal')}
-                className="hidden sm:flex px-3 py-1.5 sm:py-2 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] sm:text-xs font-bold items-center gap-1 cursor-pointer transition-all"
-                title="Employee & Teacher Portal"
-              >
-                <Users className="w-3 h-3 text-amber-300" />
-                <span className="whitespace-nowrap">Staff</span>
-              </button>
-            </div>
+            <button
+              onClick={() => setIsStudentAuthModalOpen(true)}
+              style={{ backgroundColor: '#fbbf24', color: '#020617' }}
+              className="px-4 py-1.5 sm:py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-md transition-all flex items-center gap-1.5 cursor-pointer border border-amber-300"
+              title="Student & Staff Portal Login"
+            >
+              <User className="w-3.5 h-3.5 text-slate-950 shrink-0" />
+              <span className="whitespace-nowrap font-black">Portal Login</span>
+            </button>
           )}
 
           {/* Mobile Hamburger Toggle */}
@@ -350,21 +331,11 @@ export const Navbar: React.FC = () => {
                       }
                       setIsMobileMenuOpen(false);
                     }}
-                    className="w-full py-3 rounded-2xl bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider text-center shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                    style={{ backgroundColor: '#fbbf24', color: '#020617' }}
+                    className="w-full py-3 rounded-2xl bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider text-center shadow-md flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <User className="w-4 h-4" />
-                    <span>{currentStudent ? `Student Portal (${currentStudent.name})` : 'Student Portal'}</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      navigateTo('staff-portal');
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs uppercase tracking-wider text-center flex items-center justify-center gap-2 cursor-pointer transition-colors"
-                  >
-                    <Users className="w-4 h-4 text-amber-300" />
-                    <span>Staff & Teacher Portal</span>
+                    <User className="w-4 h-4 text-slate-950" />
+                    <span>{currentStudent ? `Student Portal (${currentStudent.name})` : 'Student & Staff Portal'}</span>
                   </button>
                 </>
               )}

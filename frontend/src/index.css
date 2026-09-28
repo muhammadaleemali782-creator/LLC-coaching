@@ -17,7 +17,6 @@ html, body {
 }
 
 button {
-  background-color: transparent;
   -webkit-appearance: none;
   appearance: none;
 }
