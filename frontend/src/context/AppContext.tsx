@@ -277,7 +277,8 @@ const INITIAL_SETTINGS: WebsiteSettings = {
   maintenanceMode: false,
   razorpayKeyId: 'rzp_live_TbWh7wBlq0NQuz',
   visualOverrides: {},
-  sectionOrder: []
+  sectionOrder: [],
+  enableScreenshotProtection: false
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

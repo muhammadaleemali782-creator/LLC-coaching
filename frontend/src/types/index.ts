@@ -261,6 +261,7 @@ export interface WebsiteSettings {
   sectionOrder?: string[];
   heroColumnsOrder?: string[];
   headerOrder?: string[];
+  enableScreenshotProtection?: boolean;
 }
 
 // Staff & Branch Admission Management Types

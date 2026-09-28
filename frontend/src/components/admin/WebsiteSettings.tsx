@@ -29,7 +29,8 @@ export const WebsiteSettings: React.FC = () => {
     defaultWhatsappRedirectUrl: websiteSettings.defaultWhatsappRedirectUrl || '',
     defaultPlaylistRedirectUrl: websiteSettings.defaultPlaylistRedirectUrl || '',
     heroPosterUrl: websiteSettings.heroPosterUrl || '',
-    directorPhotoUrl: websiteSettings.directorPhotoUrl || '/assets/founder.png'
+    directorPhotoUrl: websiteSettings.directorPhotoUrl || '/assets/founder.png',
+    enableScreenshotProtection: !!websiteSettings.enableScreenshotProtection
   });
 
   useEffect(() => {
@@ -53,7 +54,8 @@ export const WebsiteSettings: React.FC = () => {
       defaultWhatsappRedirectUrl: websiteSettings.defaultWhatsappRedirectUrl || '',
       defaultPlaylistRedirectUrl: websiteSettings.defaultPlaylistRedirectUrl || '',
       heroPosterUrl: websiteSettings.heroPosterUrl || '',
-      directorPhotoUrl: websiteSettings.directorPhotoUrl || ''
+      directorPhotoUrl: websiteSettings.directorPhotoUrl || '',
+      enableScreenshotProtection: !!websiteSettings.enableScreenshotProtection
     });
   }, [websiteSettings]);
 
@@ -402,6 +404,53 @@ export const WebsiteSettings: React.FC = () => {
                 />
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Anti-Screenshot & Screen Recording Protection Card */}
+        <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="flex items-center gap-2">
+              <Shield className={`w-5 h-5 ${form.enableScreenshotProtection ? 'text-red-400' : 'text-slate-400'}`} />
+              <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                Screenshot & Screen Recording Protection (स्क्रीनशॉट / वीडियो रिकॉर्डिंग कंट्रोल)
+              </h3>
+            </div>
+            <span className={`text-[11px] font-black uppercase px-2.5 py-1 rounded-full ${
+              form.enableScreenshotProtection
+                ? 'bg-red-950/80 border border-red-800 text-red-400'
+                : 'bg-emerald-950/80 border border-emerald-800 text-emerald-400'
+            }`}>
+              {form.enableScreenshotProtection ? '🔒 Active (Black Screen On)' : '🔓 Off (Screenshots Allowed)'}
+            </span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/80 border border-slate-800/80 rounded-2xl p-4">
+            <div className="space-y-1 max-w-xl">
+              <h4 className="text-xs font-bold text-white">
+                {form.enableScreenshotProtection
+                  ? 'Protection is ON: Website ka screenshot ya screen recording lene par black screen dikhegi.'
+                  : 'Protection is OFF: Koi bhi website ka screenshot ya screen recording aasaani se le sakta hai.'}
+              </h4>
+              <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                Ise OFF karne par aap aur visitor bina kisi rukawat ke screenshot ya video le sakte hain. Jab chaho tab ON karke media ko protect kar sakte ho. (Note: Admin par yeh kabhi rok nahi lagata).
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                const newVal = !form.enableScreenshotProtection;
+                setForm(prev => ({ ...prev, enableScreenshotProtection: newVal }));
+              }}
+              className={`px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shrink-0 shadow-lg ${
+                form.enableScreenshotProtection
+                  ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30'
+                  : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30'
+              }`}
+            >
+              {form.enableScreenshotProtection ? 'Turn OFF Protection' : 'Turn ON Protection'}
+            </button>
           </div>
         </div>
 

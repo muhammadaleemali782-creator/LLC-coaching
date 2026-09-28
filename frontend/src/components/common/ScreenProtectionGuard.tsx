@@ -1,12 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { ShieldAlert, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import { useApp } from '../../context/AppContext';
 
 export const ScreenProtectionGuard: React.FC = () => {
+  const { websiteSettings, isAdminAuthenticated } = useApp();
   const [isBlackout, setIsBlackout] = useState(false);
   const [isWindowBlurred, setIsWindowBlurred] = useState(false);
 
+  // Active ONLY when enabled in Admin Panel AND current user is NOT the Admin
+  const isProtectionActive = Boolean(websiteSettings?.enableScreenshotProtection) && !isAdminAuthenticated;
+
   useEffect(() => {
+    if (!isProtectionActive) {
+      setIsBlackout(false);
+      setIsWindowBlurred(false);
+      return;
+    }
+
     // 1. Intercept PrintScreen and screenshot key combos
     const handleKeyDown = (e: KeyboardEvent) => {
       // PrintScreen key
@@ -51,7 +62,6 @@ export const ScreenProtectionGuard: React.FC = () => {
 
     // 2. Detect Focus Loss / Window Blur (Snipping tool / Screen recorder overlay focus steal)
     const handleBlur = () => {
-      // Blur indicates user switched away, opened snipping tool, or started screen recording overlay
       setIsWindowBlurred(true);
     };
 
@@ -91,9 +101,9 @@ export const ScreenProtectionGuard: React.FC = () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('contextmenu', handleContextMenu);
     };
-  }, []);
+  }, [isProtectionActive]);
 
-  if (!isBlackout && !isWindowBlurred) {
+  if (!isProtectionActive || (!isBlackout && !isWindowBlurred)) {
     return null;
   }
 

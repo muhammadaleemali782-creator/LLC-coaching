@@ -171,13 +171,54 @@ export const GallerySection: React.FC = () => {
                   )}
                 </div>
 
-                <div className="p-6 space-y-2 bg-white">
-                  <h3 className="text-base font-extrabold text-slate-900 group-hover:text-[#0066FF] transition-colors leading-snug line-clamp-1">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 font-medium">
-                    {item.description}
-                  </p>
+                <div className="p-5 sm:p-6 space-y-3 bg-white flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900 group-hover:text-[#0066FF] transition-colors leading-snug line-clamp-1">
+                      {item.title}
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500 leading-relaxed line-clamp-2 font-medium">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  {/* Separate Action Buttons for Picture */}
+                  <div className="pt-3 border-t border-slate-100 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActivePhotoIndex(index);
+                      }}
+                      className="flex-1 py-2 px-3 rounded-xl bg-blue-50 hover:bg-[#0066FF] text-[#0066FF] hover:text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                      <span>View Photo</span>
+                    </button>
+
+                    {item.allowDownload !== false ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownload(item);
+                        }}
+                        disabled={isDownloading}
+                        className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                        title="Download Photo"
+                      >
+                        <Download className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Download</span>
+                      </button>
+                    ) : (
+                      <span
+                        className="py-2 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 text-xs font-bold flex items-center justify-center gap-1 cursor-not-allowed select-none"
+                        title="Download restricted by Admin"
+                      >
+                        <Lock className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Locked</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
