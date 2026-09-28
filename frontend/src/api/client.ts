@@ -317,6 +317,11 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(body)
       }),
+    update: (id: string, body: { name?: string; phone?: string; branch?: string; designation?: string }) =>
+      request<{ success: boolean; message: string; data: any }>(`/staff/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(body)
+      }),
     getAttendance: (params?: { date?: string; branch?: string; staffId?: string }) => {
       const q = new URLSearchParams(params as any).toString();
       return request<{ success: boolean; data: any[] }>(`/staff/attendance${q ? `?${q}` : ''}`);

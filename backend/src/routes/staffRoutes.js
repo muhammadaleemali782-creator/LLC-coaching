@@ -12,7 +12,8 @@ import {
   createTeacherTask,
   submitTeacherTaskReport,
   getStudentAttendance,
-  markStudentAttendance
+  markStudentAttendance,
+  updateStaff
 } from '../controllers/staffController.js';
 
 const router = express.Router();
@@ -20,6 +21,7 @@ const router = express.Router();
 // Staff accounts & directory
 router.get('/', getStaffList);
 router.post('/', createStaff);
+router.put('/:id', updateStaff);
 router.post('/reset-password', resetStaffPassword);
 
 // Staff Attendance

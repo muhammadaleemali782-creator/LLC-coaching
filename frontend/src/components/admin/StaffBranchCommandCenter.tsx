@@ -43,6 +43,7 @@ export const StaffBranchCommandCenter: React.FC = () => {
     teacherTasks,
     studentAttendanceRecords,
     adminCreateTeacher,
+    adminUpdateTeacher,
     adminResetTeacherPassword,
     assignTaskToTeacher,
     refreshStaffData,
@@ -54,6 +55,20 @@ export const StaffBranchCommandCenter: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<'overview' | 'students' | 'leave-reasons'>('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Modal State: Share Credentials / WhatsApp Invite
+  const [shareCredentialsTeacher, setShareCredentialsTeacher] = useState<{
+    name: string;
+    email: string;
+    phone?: string;
+    branch: string;
+    password?: string;
+  } | null>(null);
+
+  // Modal State: Edit / Assign Branch
+  const [editingBranchTeacher, setEditingBranchTeacher] = useState<StaffMember | null>(null);
+  const [editBranchValue, setEditBranchValue] = useState('');
+  const [isUpdatingBranch, setIsUpdatingBranch] = useState(false);
+
   // Selected Teacher for Dossier Modal
   const [selectedTeacherForDossier, setSelectedTeacherForDossier] = useState<StaffMember | null>(null);
   const [dossierTab, setDossierTab] = useState<'tasks' | 'attendance' | 'admissions' | 'students'>('tasks');
@@ -63,7 +78,7 @@ export const StaffBranchCommandCenter: React.FC = () => {
   const [newTeacherName, setNewTeacherName] = useState('');
   const [newTeacherEmail, setNewTeacherEmail] = useState('');
   const [newTeacherPhone, setNewTeacherPhone] = useState('');
-  const [newTeacherBranch, setNewTeacherBranch] = useState(COACHING_BRANCHES[1]);
+  const [newTeacherBranch, setNewTeacherBranch] = useState('Palahipatti Main Campus (Sindhora Rd)');
   const [newTeacherDesignation, setNewTeacherDesignation] = useState('Senior Mathematics Faculty');
   const [newTeacherPassword, setNewTeacherPassword] = useState('Staff@123');
   const [isCreatingTeacher, setIsCreatingTeacher] = useState(false);
@@ -91,20 +106,37 @@ export const StaffBranchCommandCenter: React.FC = () => {
     showToast('Branch and staff command data synced!', 'success');
   };
 
+  // Dynamically derive all known branches from defaults + staffList
+  const allKnownBranches = Array.from(
+    new Set([
+      'Palahipatti Main Campus (Sindhora Rd)',
+      'Sindhora Market Branch',
+      'Babatpur City Center',
+      ...(staffList.map(s => s.branch?.trim()).filter(Boolean) as string[])
+    ])
+  );
+
   // Filter staff based on selected branch and search query
   const filteredStaff = staffList.filter(s => {
-    const matchesBranch = selectedBranch === 'All Branches' || s.branch === selectedBranch;
+    const matchesBranch =
+      selectedBranch === 'All Branches' ||
+      s.branch === selectedBranch ||
+      (selectedBranch === 'Unassigned' && !s.branch);
     const matchesSearch =
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (s.phone && s.phone.includes(searchQuery)) ||
+      (s.branch && s.branch.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (s.designation && s.designation.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesBranch && matchesSearch;
   });
 
   // Filter admissions based on selected branch
   const filteredAdmissions = branchAdmissions.filter(adm => {
-    const matchesBranch = selectedBranch === 'All Branches' || adm.branch === selectedBranch;
+    const matchesBranch =
+      selectedBranch === 'All Branches' ||
+      adm.branch === selectedBranch ||
+      (selectedBranch === 'Unassigned' && !adm.branch);
     const matchesSearch =
       adm.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (adm.phone && adm.phone.includes(searchQuery)) ||
@@ -180,23 +212,51 @@ export const StaffBranchCommandCenter: React.FC = () => {
       showToast('Name, Email, and Password are required.', 'warning');
       return;
     }
+    const finalBranch = newTeacherBranch.trim() || allKnownBranches[0] || 'Palahipatti Main Campus (Sindhora Rd)';
+    const finalPassword = newTeacherPassword.trim() || 'Staff@123';
     setIsCreatingTeacher(true);
     const success = await adminCreateTeacher({
       name: newTeacherName.trim(),
       email: newTeacherEmail.trim().toLowerCase(),
       phone: newTeacherPhone.trim(),
-      branch: newTeacherBranch,
+      branch: finalBranch,
       designation: newTeacherDesignation.trim(),
-      password: newTeacherPassword.trim()
+      password: finalPassword
     });
     if (success) {
       setIsCreateModalOpen(false);
+      // Auto-open Share Credentials Modal with prominent branch name for Director to send!
+      setShareCredentialsTeacher({
+        name: newTeacherName.trim(),
+        email: newTeacherEmail.trim().toLowerCase(),
+        phone: newTeacherPhone.trim(),
+        branch: finalBranch,
+        password: finalPassword
+      });
       setNewTeacherName('');
       setNewTeacherEmail('');
       setNewTeacherPhone('');
       setNewTeacherPassword('Staff@123');
     }
     setIsCreatingTeacher(false);
+  };
+
+  // Handle Update Branch Submit
+  const handleUpdateBranch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBranchTeacher || !editBranchValue.trim()) {
+      showToast('Please enter or select a branch name.', 'warning');
+      return;
+    }
+    setIsUpdatingBranch(true);
+    const success = await adminUpdateTeacher(editingBranchTeacher.id, {
+      branch: editBranchValue.trim()
+    });
+    if (success) {
+      setEditingBranchTeacher(null);
+      setEditBranchValue('');
+    }
+    setIsUpdatingBranch(false);
   };
 
   // Handle Reset Password Submit
@@ -280,42 +340,6 @@ export const StaffBranchCommandCenter: React.FC = () => {
           </div>
         </div>
 
-        {/* ONE-TAP BRANCH SELECTOR TABS */}
-        <div className="mt-6 pt-6 border-t border-slate-800">
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
-            <Building className="w-4 h-4 text-primary-400" />
-            One-Tap Branch Selector:
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
-            {COACHING_BRANCHES.map(branchName => {
-              const count = branchName === 'All Branches'
-                ? staffList.length
-                : staffList.filter(s => s.branch === branchName).length;
-              return (
-                <button
-                  key={branchName}
-                  type="button"
-                  onClick={() => setSelectedBranch(branchName)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                    selectedBranch === branchName
-                      ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25 ring-2 ring-primary-400/30'
-                      : 'bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700/60'
-                  }`}
-                >
-                  <span>{branchName}</span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                    selectedBranch === branchName
-                      ? 'bg-primary-950 text-white'
-                      : 'bg-slate-700 text-slate-300'
-                  }`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Search Bar */}
         <div className="mt-4 pt-4 border-t border-slate-800/60">
           <div className="relative max-w-md">
@@ -324,7 +348,7 @@ export const StaffBranchCommandCenter: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search faculty by name, email, phone, or designation..."
+              placeholder="Search faculty by name, email, phone, or branch..."
               className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-primary-500"
             />
           </div>
@@ -333,11 +357,18 @@ export const StaffBranchCommandCenter: React.FC = () => {
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Faculty Count</p>
+        <div
+          onClick={() => setSelectedBranch('All Branches')}
+          className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg cursor-pointer hover:border-primary-500/50 transition-colors"
+          title="Click to view all faculty"
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Faculty Count</p>
+            <Users className="w-3.5 h-3.5 text-primary-400" />
+          </div>
           <p className="text-3xl font-black text-primary-400 mt-1">{filteredStaff.length}</p>
           <span className="text-[10px] text-primary-300 bg-primary-950/70 border border-primary-800/60 px-2 py-0.5 rounded-full font-semibold mt-2 inline-block">
-            {selectedBranch === 'All Branches' ? 'All Campuses' : 'Branch Staff'}
+            {selectedBranch === 'All Branches' ? 'All Campuses' : selectedBranch}
           </span>
         </div>
 
@@ -379,6 +410,95 @@ export const StaffBranchCommandCenter: React.FC = () => {
           <span className="text-[10px] text-amber-300 bg-amber-950/70 border border-amber-800/60 px-2 py-0.5 rounded-full font-semibold mt-2 inline-block">
             Inquiry Leads
           </span>
+        </div>
+      </div>
+
+      {/* BRANCH-WISE FACULTY COUNT & INTERACTIVE FILTER TRACK */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Building className="w-4 h-4 text-primary-400" />
+            <span className="text-xs font-black uppercase tracking-wider text-slate-200">
+              Branch-Wise Faculty Count (Click any branch to view its teachers)
+            </span>
+          </div>
+          {selectedBranch !== 'All Branches' && (
+            <button
+              type="button"
+              onClick={() => setSelectedBranch('All Branches')}
+              className="text-[11px] font-bold text-primary-400 hover:text-primary-300 bg-primary-950/70 border border-primary-800/80 px-2.5 py-1 rounded-lg cursor-pointer transition-colors w-fit flex items-center gap-1.5"
+            >
+              <span>Viewing: {selectedBranch}</span>
+              <span className="text-slate-400">• Clear Filter (Show All)</span>
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+          {/* All Campuses Pill */}
+          <button
+            type="button"
+            onClick={() => setSelectedBranch('All Branches')}
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 border ${
+              selectedBranch === 'All Branches'
+                ? 'bg-primary-600 text-white border-primary-500 shadow-md shadow-primary-500/25 scale-[1.02]'
+                : 'bg-slate-950/80 text-slate-300 hover:text-white hover:bg-slate-800 border-slate-800'
+            }`}
+          >
+            <span>All Campuses</span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+              selectedBranch === 'All Branches' ? 'bg-primary-950 text-white' : 'bg-slate-800 text-primary-400 border border-primary-900/60'
+            }`}>
+              {staffList.length} Teachers
+            </span>
+          </button>
+
+          {/* Dynamic Branch Pills */}
+          {allKnownBranches.map(branchName => {
+            const count = staffList.filter(s => s.branch === branchName).length;
+            const isSelected = selectedBranch === branchName;
+            return (
+              <button
+                key={branchName}
+                type="button"
+                onClick={() => setSelectedBranch(branchName)}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 border ${
+                  isSelected
+                    ? 'bg-primary-600 text-white border-primary-500 shadow-md shadow-primary-500/25 scale-[1.02]'
+                    : 'bg-slate-950/80 text-slate-300 hover:text-white hover:bg-slate-800 border-slate-800'
+                }`}
+              >
+                <Building className="w-3.5 h-3.5 text-primary-400" />
+                <span>{branchName.replace(/\(.*?\)/g, '').trim()}</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+                  isSelected ? 'bg-primary-950 text-white' : 'bg-slate-800 text-slate-300'
+                }`}>
+                  {count} {count === 1 ? 'Teacher' : 'Teachers'}
+                </span>
+              </button>
+            );
+          })}
+
+          {/* Unassigned Teachers Pill (if any) */}
+          {staffList.some(s => !s.branch) && (
+            <button
+              type="button"
+              onClick={() => setSelectedBranch('Unassigned')}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 border ${
+                selectedBranch === 'Unassigned'
+                  ? 'bg-amber-600 text-white border-amber-500 shadow-md shadow-amber-500/25 scale-[1.02]'
+                  : 'bg-amber-950/40 text-amber-300 hover:bg-amber-900/60 border-amber-800/80'
+              }`}
+            >
+              <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+              <span>Unassigned Branch</span>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+                selectedBranch === 'Unassigned' ? 'bg-amber-950 text-white' : 'bg-amber-900/60 text-amber-300'
+              }`}>
+                {staffList.filter(s => !s.branch).length}
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -531,8 +651,34 @@ export const StaffBranchCommandCenter: React.FC = () => {
                       </div>
                     </td>
 
-                    <td className="py-4 px-3">
-                      <span className="font-medium text-slate-300">{staff.branch}</span>
+                    <td className="py-4 px-3" onClick={e => e.stopPropagation()}>
+                      {staff.branch ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingBranchTeacher(staff);
+                            setEditBranchValue(staff.branch || '');
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-primary-950/70 text-slate-200 hover:text-primary-300 border border-slate-700/80 hover:border-primary-500/60 transition-all text-xs font-bold text-left cursor-pointer"
+                          title="Click to edit/change branch"
+                        >
+                          <Building className="w-3.5 h-3.5 text-primary-400 shrink-0" />
+                          <span className="truncate max-w-[150px]">{staff.branch}</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingBranchTeacher(staff);
+                            setEditBranchValue(allKnownBranches[0] || 'Palahipatti Main Campus (Sindhora Rd)');
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-950/40 hover:bg-amber-950/70 text-amber-300 border border-dashed border-amber-600/80 transition-all text-xs font-bold cursor-pointer"
+                          title="Click to assign branch"
+                        >
+                          <Plus className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                          <span>Assign Branch</span>
+                        </button>
+                      )}
                     </td>
 
                     <td className="py-4 px-3 text-center">
@@ -579,6 +725,24 @@ export const StaffBranchCommandCenter: React.FC = () => {
 
                     <td className="py-4 px-3 text-right" onClick={e => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShareCredentialsTeacher({
+                              name: staff.name,
+                              email: staff.email,
+                              phone: staff.phone || '',
+                              branch: staff.branch || 'Palahipatti Main Campus (Sindhora Rd)',
+                              password: '(Existing password)'
+                            });
+                          }}
+                          className="bg-emerald-950/70 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-800/80 px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                          title="Share Login Details with Teacher on WhatsApp"
+                        >
+                          <Send className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="hidden sm:inline">Share Details</span>
+                        </button>
+
                         <button
                           type="button"
                           onClick={() => {
@@ -1161,34 +1325,56 @@ export const StaffBranchCommandCenter: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                    Branch Campus
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                    Branch Campus (Type Custom or Pick) *
                   </label>
-                  <select
-                    value={newTeacherBranch}
-                    onChange={e => setNewTeacherBranch(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-primary-500"
-                  >
-                    {COACHING_BRANCHES.filter(b => b !== 'All Branches').map(b => (
-                      <option key={b} value={b}>{b}</option>
-                    ))}
-                  </select>
+                  <span className="text-[10px] text-primary-400 font-bold">Write any branch freely</span>
                 </div>
+                <input
+                  type="text"
+                  list="newTeacherBranchList"
+                  value={newTeacherBranch}
+                  onChange={e => setNewTeacherBranch(e.target.value)}
+                  placeholder="e.g. Palahipatti Main Campus, Lanka, DLW, Babatpur..."
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-primary-500"
+                  required
+                />
+                <datalist id="newTeacherBranchList">
+                  {allKnownBranches.map(b => (
+                    <option key={b} value={b} />
+                  ))}
+                </datalist>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {allKnownBranches.map(b => (
+                    <button
+                      key={b}
+                      type="button"
+                      onClick={() => setNewTeacherBranch(b)}
+                      className={`text-[10px] px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                        newTeacherBranch === b
+                          ? 'bg-primary-600 text-white border-primary-500 font-bold shadow-xs'
+                          : 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600'
+                      }`}
+                    >
+                      {b.replace(/\(.*?\)/g, '').trim()}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                    Designation
-                  </label>
-                  <input
-                    type="text"
-                    value={newTeacherDesignation}
-                    onChange={e => setNewTeacherDesignation(e.target.value)}
-                    placeholder="e.g. Senior Faculty - Physics"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-primary-500"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Designation / Subject Specialization
+                </label>
+                <input
+                  type="text"
+                  value={newTeacherDesignation}
+                  onChange={e => setNewTeacherDesignation(e.target.value)}
+                  placeholder="e.g. Senior Faculty - Physics & Mathematics"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-primary-500"
+                />
               </div>
 
               <div>
@@ -1371,6 +1557,170 @@ export const StaffBranchCommandCenter: React.FC = () => {
                 >
                   <Send className="w-4 h-4" />
                   <span>{isAssigningTask ? 'Assigning...' : 'Assign Task'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* MODAL 5: SHARE TEACHER CREDENTIALS & INVITE MODAL */}
+      {shareCredentialsTeacher && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border-2 border-emerald-500/50 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative space-y-6">
+            <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-950 text-emerald-400 border border-emerald-800 px-2.5 py-0.5 rounded-full inline-block mb-1.5 shadow-xs">
+                  ✅ Teacher Account Active
+                </span>
+                <h3 className="text-xl font-black text-white">Faculty Onboarding & Portal Access</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Send these portal credentials to the teacher directly</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShareCredentialsTeacher(null)}
+                className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Prominent Details Card */}
+            <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-5 space-y-3.5 text-xs font-mono">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
+                <span className="text-slate-400 font-sans font-semibold">Teacher Name:</span>
+                <span className="text-white font-bold font-sans text-sm">{shareCredentialsTeacher.name}</span>
+              </div>
+
+              {/* BRANCH NAME PROMINENTLY DISPLAYED */}
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-primary-950/80 border-2 border-primary-500/70 shadow-inner">
+                <span className="text-primary-300 font-sans font-bold flex items-center gap-1.5 text-xs">
+                  <Building className="w-4 h-4 text-primary-400" />
+                  Assigned Branch Campus:
+                </span>
+                <span className="text-white font-black font-sans text-sm bg-primary-900/80 px-3 py-1 rounded-lg border border-primary-600/60">
+                  {shareCredentialsTeacher.branch || 'Palahipatti Main Campus'}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400 font-sans font-semibold">Login Email:</span>
+                <span className="text-emerald-400 font-bold">{shareCredentialsTeacher.email}</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400 font-sans font-semibold">Password:</span>
+                <span className="text-amber-300 font-bold bg-slate-900 px-3 py-1 rounded-lg border border-slate-800">
+                  {shareCredentialsTeacher.password || 'Staff@123'}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400 font-sans font-semibold">Faculty Portal URL:</span>
+                <span className="text-blue-400 underline font-sans font-bold">https://lccedu.vercel.app</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <a
+                href={`https://api.whatsapp.com/send?${shareCredentialsTeacher.phone ? `phone=${shareCredentialsTeacher.phone.replace(/[^0-9]/g, '')}&` : ''}text=${encodeURIComponent(
+                  `*L.C.C. (Learning Coaching Center) Faculty Onboarding*\n\nNamaste *${shareCredentialsTeacher.name}* ji,\nAapka faculty account create kar diya gaya hai.\n\n🏢 *Assigned Branch:* ${shareCredentialsTeacher.branch}\n🌐 *Portal Link:* https://lccedu.vercel.app\n📧 *Email:* ${shareCredentialsTeacher.email}\n🔑 *Password:* ${shareCredentialsTeacher.password || 'Staff@123'}\n\nKripya portal par login karke apni daily attendance aur assigned batches verify karein.\n\n— Director Aman Arora, L.C.C.`
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-600/30 transition-all text-center"
+              >
+                <Send className="w-4 h-4" />
+                <span>Send to Teacher via WhatsApp</span>
+              </a>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const msg = `*L.C.C. Faculty Onboarding*\nTeacher: ${shareCredentialsTeacher.name}\nBranch: ${shareCredentialsTeacher.branch}\nPortal: https://lccedu.vercel.app\nEmail: ${shareCredentialsTeacher.email}\nPassword: ${shareCredentialsTeacher.password || 'Staff@123'}`;
+                  navigator.clipboard.writeText(msg);
+                  showToast('Teacher credentials copied to clipboard!', 'success');
+                }}
+                className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 py-3.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all"
+              >
+                <FileText className="w-4 h-4 text-primary-400" />
+                <span>Copy Details</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 6: EDIT / ASSIGN TEACHER BRANCH */}
+      {editingBranchTeacher && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div>
+                <h3 className="text-lg font-black text-white">Assign / Change Branch</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Faculty: {editingBranchTeacher.name}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingBranchTeacher(null)}
+                className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateBranch} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Branch Name (Type Custom or Pick)
+                </label>
+                <input
+                  type="text"
+                  list="editBranchList"
+                  value={editBranchValue}
+                  onChange={e => setEditBranchValue(e.target.value)}
+                  placeholder="e.g. Palahipatti Main Campus, Lanka, DLW..."
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-primary-500"
+                  required
+                />
+                <datalist id="editBranchList">
+                  {allKnownBranches.map(b => (
+                    <option key={b} value={b} />
+                  ))}
+                </datalist>
+
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {allKnownBranches.map(b => (
+                    <button
+                      key={b}
+                      type="button"
+                      onClick={() => setEditBranchValue(b)}
+                      className={`text-[10px] px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                        editBranchValue === b
+                          ? 'bg-primary-600 text-white border-primary-500 font-bold shadow-xs'
+                          : 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600'
+                      }`}
+                    >
+                      {b.replace(/\(.*?\)/g, '').trim()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-800 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingBranchTeacher(null)}
+                  className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdatingBranch}
+                  className="bg-primary-600 hover:bg-primary-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-primary-500/20"
+                >
+                  <span>{isUpdatingBranch ? 'Saving...' : 'Save Branch'}</span>
                 </button>
               </div>
             </form>

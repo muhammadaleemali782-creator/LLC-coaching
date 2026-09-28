@@ -178,6 +178,7 @@ export interface AppContextType {
   markStaffAttendance: (status: 'Present' | 'Absent' | 'On Leave', reason?: string) => Promise<boolean>;
   registerBranchAdmission: (admission: Omit<BranchAdmission, 'id' | 'createdAt'>) => Promise<boolean>;
   adminCreateTeacher: (teacherData: { name: string; email: string; phone?: string; password: string; branch?: string; designation?: string }) => Promise<boolean>;
+  adminUpdateTeacher: (staffId: string, updateData: { name?: string; phone?: string; branch?: string; designation?: string }) => Promise<boolean>;
   adminResetTeacherPassword: (staffId: string, newPassword: string) => Promise<boolean>;
   assignTaskToTeacher: (taskData: { title: string; description?: string; assignedToStaffId: string; assignedToStaffName?: string; dueDate?: string; priority?: string }) => Promise<boolean>;
   submitTeacherWorkReport: (taskId: string, reportNote: string) => Promise<boolean>;
@@ -929,6 +930,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const adminUpdateTeacher = async (staffId: string, updateData: { name?: string; phone?: string; branch?: string; designation?: string }): Promise<boolean> => {
+    try {
+      const res = await api.staff.update(staffId, updateData);
+      showToast(res.message || 'Teacher details updated successfully!', 'success');
+      await refreshStaffData();
+      return true;
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update teacher details.', 'error');
+      return false;
+    }
+  };
+
   const adminResetTeacherPassword = async (staffId: string, newPassword: string): Promise<boolean> => {
     try {
       const res = await api.staff.resetPassword({ staffId, newPassword });
@@ -1651,6 +1664,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         markStaffAttendance,
         registerBranchAdmission,
         adminCreateTeacher,
+        adminUpdateTeacher,
         adminResetTeacherPassword,
         assignTaskToTeacher,
         submitTeacherWorkReport,

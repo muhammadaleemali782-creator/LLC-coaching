@@ -555,3 +555,38 @@ export const markStudentAttendance = async (req, res) => {
   res.json({ success: true, message: `Attendance marked for ${processedRecords.length} students!` });
 };
 
+// 12. Update Staff / Teacher (Branch, Designation, Phone, Name)
+export const updateStaff = async (req, res) => {
+  const { id } = req.params;
+  const { branch, designation, phone, name } = req.body;
+  try {
+    const updateFields = {};
+    if (branch !== undefined) updateFields.branch = branch;
+    if (designation !== undefined) updateFields.designation = designation;
+    if (phone !== undefined) updateFields.phone = phone;
+    if (name !== undefined) updateFields.name = name;
+
+    if (mongoose.connection.readyState === 1) {
+      const updated = await UserModel.findOneAndUpdate(
+        { $or: [{ id }, { _id: mongoose.Types.ObjectId.isValid(id) ? id : null }] },
+        { $set: updateFields },
+        { new: true }
+      ).select('-passwordHash');
+      if (updated) {
+        return res.json({ success: true, message: 'Teacher details updated successfully!', data: updated });
+      }
+    }
+    const db = getDB();
+    const user = (db.users || []).find(u => u.id === id || u._id === id);
+    if (user) {
+      Object.assign(user, updateFields);
+      saveDB(db);
+      const { passwordHash, ...safeUser } = user;
+      return res.json({ success: true, message: 'Teacher details updated successfully!', data: safeUser });
+    }
+    res.status(404).json({ success: false, message: 'Teacher not found' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
