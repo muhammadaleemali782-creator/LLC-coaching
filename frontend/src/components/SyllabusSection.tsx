@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { BookOpen, Download, ChevronDown, ChevronUp, CheckCircle2, Sparkles, Clock, Target, Layers, FileText, Award, ShieldCheck, Flame, BookCheck } from 'lucide-react';
 
@@ -9,12 +9,26 @@ export const SyllabusSection: React.FC = () => {
 
   const classes = ['Class 8', 'Class 9', 'Class 10', 'Class 12', 'Computer / DCA', 'English Speaking'];
 
-  const activeSyllabus = syllabuses.find(s => s.targetClass === selectedClass) || syllabuses[0];
+  const foundSyllabus = Array.isArray(syllabuses) && syllabuses.length > 0
+    ? (syllabuses.find(s => s?.targetClass === selectedClass) || syllabuses[0])
+    : null;
+
+  const activeSyllabus = {
+    id: foundSyllabus?.id || 'default-syllabus',
+    targetClass: foundSyllabus?.targetClass || selectedClass,
+    subject: foundSyllabus?.subject || 'Comprehensive Curriculum',
+    totalMarks: foundSyllabus?.totalMarks || 100,
+    examBoard: foundSyllabus?.examBoard || 'CBSE & State Board',
+    chapters: Array.isArray(foundSyllabus?.chapters) ? foundSyllabus.chapters : []
+  };
 
   const handleDownloadSyllabus = () => {
     showToast(`Downloading official syllabus blueprint for ${selectedClass}`, 'success');
     const element = document.createElement('a');
-    const file = new Blob([`L.C.C. (Learning Coaching Center) Official Syllabus Blueprint\nClass: ${activeSyllabus.targetClass}\nSubject: ${activeSyllabus.subject}\nTotal Marks: ${activeSyllabus.totalMarks} Marks\nExam Board: ${activeSyllabus.examBoard}\n\nChapter Breakdown:\n${activeSyllabus.chapters.map((c, i) => `${i + 1}. ${c.name} [${c.weightage}] - Est. ${c.estimatedHours} Hours\n   Topics: ${c.subtopics.join(', ')}`).join('\n\n')}\n\nDirector: Aman Arora\nHelpline: +91 98765 43210`], { type: 'text/plain' });
+    const chaptersText = (activeSyllabus.chapters || []).map((c, i) =>
+      `${i + 1}. ${c?.name || 'Unit'} [${c?.weightage || 'Marks'}] - Est. ${c?.estimatedHours || 5} Hours\n   Topics: ${(c?.subtopics || []).join(', ')}`
+    ).join('\n\n');
+    const file = new Blob([`L.C.C. (Learning Coaching Center) Official Syllabus Blueprint\nClass: ${activeSyllabus.targetClass}\nSubject: ${activeSyllabus.subject}\nTotal Marks: ${activeSyllabus.totalMarks} Marks\nExam Board: ${activeSyllabus.examBoard}\n\nChapter Breakdown:\n${chaptersText || 'Full details available at center office.'}\n\nDirector: Aman Arora\nHelpline: +91 98765 43210`], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
     element.download = `syllabus_${selectedClass.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
     document.body.appendChild(element);
@@ -109,7 +123,14 @@ export const SyllabusSection: React.FC = () => {
 
           {/* Redesigned 3D Chapter Accordion Cards */}
           <div className="space-y-3.5">
-            {activeSyllabus.chapters.map((ch, idx) => {
+            {activeSyllabus.chapters.length === 0 ? (
+              <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+                <BookOpen className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                <p className="text-sm font-bold text-slate-600">Curriculum for {activeSyllabus.targetClass} is being updated according to latest board guidelines.</p>
+                <p className="text-xs text-slate-400 mt-1">Visit our institute center or contact helpline for print modules.</p>
+              </div>
+            ) : (
+              activeSyllabus.chapters.map((ch, idx) => {
               const isOpen = openChapterIdx === idx;
               return (
                 <div
@@ -159,7 +180,7 @@ export const SyllabusSection: React.FC = () => {
                           Key Focus Concepts:
                         </span>
                         <div className="flex flex-wrap items-center gap-2">
-                          {ch.subtopics.map((t, i) => (
+                          {(ch.subtopics || []).map((t, i) => (
                             <span
                               key={i}
                               className="px-3 py-1 rounded-xl bg-blue-50 text-[#0066FF] text-xs font-bold border border-blue-200 shadow-2xs"
@@ -193,7 +214,7 @@ export const SyllabusSection: React.FC = () => {
                   )}
                 </div>
               );
-            })}
+            }))}
           </div>
 
         </div>

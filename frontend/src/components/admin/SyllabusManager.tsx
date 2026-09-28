@@ -168,18 +168,18 @@ export const SyllabusManager: React.FC = () => {
 
       {/* Grid of Syllabuses */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {syllabuses.map(s => (
+        {(syllabuses || []).map(s => (
           <div key={s.id} className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl flex flex-col justify-between">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-black uppercase">
                   {s.targetClass} • {s.subject}
                 </span>
-                <span className="text-xs text-slate-400 font-mono">{s.examBoard}</span>
+                <span className="text-xs text-slate-400 font-mono">{s.examBoard || 'CBSE & State Board'}</span>
               </div>
 
               <div className="space-y-3 pt-2">
-                {s.chapters.map((ch, idx) => (
+                {(s.chapters || []).map((ch, idx) => (
                   <div key={idx} className="p-4 bg-slate-900 border border-slate-800 rounded-2xl space-y-2">
                     <div className="flex items-center justify-between">
                       <h4 className="text-xs font-black text-white">{ch.name}</h4>
@@ -188,7 +188,7 @@ export const SyllabusManager: React.FC = () => {
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-1.5 pt-1">
-                      {ch.subtopics.map((sub, i) => (
+                      {(ch.subtopics || []).map((sub, i) => (
                         <span key={i} className="px-2 py-0.5 rounded-md bg-slate-800 text-[10px] text-slate-300 font-medium">
                           {sub}
                         </span>
