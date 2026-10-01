@@ -125,6 +125,9 @@ export interface Student {
   phone: string;
   targetClass?: string;
   classEnrolled?: string;
+  enrolledClass?: string;
+  selectedSubjects?: string[];
+  avatar?: string;
   avatarUrl?: string;
   enrolledCourses: string[];
   completedLessons?: string[];

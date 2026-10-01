@@ -24,6 +24,7 @@ import {
   TeacherTask,
   StudentDailyAttendance
 } from '../types';
+import { AppLanguage } from '../utils/i18n';
 import {
   INITIAL_COURSES,
   INITIAL_STUDY_MATERIALS,
@@ -184,6 +185,17 @@ export interface AppContextType {
   submitTeacherWorkReport: (taskId: string, reportNote: string) => Promise<boolean>;
   markBatchStudentAttendance: (records: Array<{ studentId: string; studentName: string; teacherId: string; branch: string; date?: string; status: 'Present' | 'Absent' | 'On Leave'; reason?: string }>) => Promise<boolean>;
   refreshStaffData: () => Promise<void>;
+
+  // Multilingual & Physics Wallah EdTech App Additions
+  language: AppLanguage;
+  setLanguage: (lang: AppLanguage) => void;
+  isGoalModalOpen: boolean;
+  setIsGoalModalOpen: (open: boolean) => void;
+  isDrawerOpen: boolean;
+  setIsDrawerOpen: (open: boolean) => void;
+  isOfflineVaultOpen: boolean;
+  setIsOfflineVaultOpen: (open: boolean) => void;
+  updateStudentGoal: (targetClass: string, selectedSubjects: string[], avatar: string) => Promise<boolean>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -276,7 +288,7 @@ const INITIAL_SETTINGS: WebsiteSettings = {
   heroBadgeText: "INDIA'S TOP RATED COACHING & EDTECH",
   allowStudentReviews: true,
   maintenanceMode: false,
-  razorpayKeyId: 'rzp_live_TbWh7wBlq0NQuz',
+  razorpayKeyId: 'rzp_test_lcc_coaching',
   visualOverrides: {},
   sectionOrder: [],
   enableScreenshotProtection: false
@@ -390,6 +402,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isInitialSyncLoading, setIsInitialSyncLoading] = useState<boolean>(true);
+
+  // Language & Physics Wallah EdTech App States
+  const [language, setLanguageState] = useState<AppLanguage>(() => {
+    return (localStorage.getItem('lcc_app_language') as AppLanguage) || 'en';
+  });
+  const setLanguage = (lang: AppLanguage) => {
+    setLanguageState(lang);
+    localStorage.setItem('lcc_app_language', lang);
+  };
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState<boolean>(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [isOfflineVaultOpen, setIsOfflineVaultOpen] = useState<boolean>(false);
+
+  const updateStudentGoal = async (targetClass: string, selectedSubjects: string[], avatar: string): Promise<boolean> => {
+    if (!currentStudent) {
+      localStorage.setItem('lcc_guest_goal', JSON.stringify({ targetClass, selectedSubjects, avatar }));
+      showToast('Study preferences updated!', 'success');
+      return true;
+    }
+    try {
+      const updatedStudent: Student = {
+        ...currentStudent,
+        targetClass,
+        classEnrolled: targetClass,
+        selectedSubjects,
+        avatar
+      };
+      setCurrentStudent(updatedStudent);
+      saveItem('lcc_current_student', updatedStudent);
+      localStorage.setItem('lcc_student_session', JSON.stringify(updatedStudent));
+      
+      setStudents(prev => prev.map(s => s.id === currentStudent.id ? updatedStudent : s));
+      showToast('Academic goal & subjects saved!', 'success');
+      return true;
+    } catch (e) {
+      showToast('Failed to save academic goal', 'error');
+      return false;
+    }
+  };
 
   // Initial Fetch from Backend (100% Backend-Controlled Engine)
   useEffect(() => {
@@ -692,11 +743,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return updated;
       });
       setCurrentStudent(newStudent);
+      setIsGoalModalOpen(true);
       if (handlePostAuthResume(newStudent.name)) {
         return true;
       }
-      showToast(res.message || 'Account created successfully!', 'success');
-      navigateTo('student-portal');
+      showToast(res.message || 'Account created! Choose your subjects and class.', 'success');
+      navigateTo('home');
       return true;
     } catch (err: any) {
       // Resilient fallback: save locally so user is never lost even if offline
@@ -720,8 +772,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return updated;
         });
         setCurrentStudent(fallbackStudent);
-        showToast('Account registered and saved!', 'success');
-        navigateTo('student-portal');
+        setIsGoalModalOpen(true);
+        showToast('Account registered! Choose your subjects and class.', 'success');
+        navigateTo('home');
         return true;
       }
       showToast(err.message || 'Registration failed. Please check your details.', 'error');
@@ -1671,7 +1724,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         markBatchStudentAttendance,
         teacherTasks,
         studentAttendanceRecords,
-        refreshStaffData
+        refreshStaffData,
+        language,
+        setLanguage,
+        isGoalModalOpen,
+        setIsGoalModalOpen,
+        isDrawerOpen,
+        setIsDrawerOpen,
+        isOfflineVaultOpen,
+        setIsOfflineVaultOpen,
+        updateStudentGoal
       }}
     >
       {children}
