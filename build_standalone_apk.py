@@ -102,15 +102,14 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         RelativeLayout rootLayout = new RelativeLayout(this);
-        rootLayout.setBackgroundColor(Color.parseColor("#020617"));
+        rootLayout.setBackgroundColor(Color.WHITE);
 
         // 3GB RAM Optimized WebView configuration:
-        // No redundant offscreen hardware layer buffers, direct window compositor rendering
         webView = new WebView(this);
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
-        webView.setBackgroundColor(Color.parseColor("#020617"));
+        webView.setBackgroundColor(Color.WHITE);
 
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
@@ -121,15 +120,22 @@ public class MainActivity extends Activity {
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
         s.setTextZoom(100);
+        s.setDefaultFontSize(14);
+        s.setDefaultFixedFontSize(13);
+        s.setMinimumFontSize(8);
+        s.setMinimumLogicalFontSize(8);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
         s.setSupportZoom(false);
-        // Fast HTTP disk caching (prevents RAM spikes from re-parsing assets every launch)
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
         s.setRenderPriority(WebSettings.RenderPriority.HIGH);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            s.setForceDark(WebSettings.FORCE_DARK_OFF);
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            s.setSafeBrowsingEnabled(false); // Eliminates background safe browsing memory overhead on low RAM
+            s.setSafeBrowsingEnabled(false);
         }
 
         progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);

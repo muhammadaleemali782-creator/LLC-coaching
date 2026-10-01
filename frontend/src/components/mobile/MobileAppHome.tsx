@@ -131,29 +131,29 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
 
       {/* ═══════════ TOP APP BAR ═══════════ */}
       <div
-        className="sticky top-0 z-30 px-4 py-3 flex items-center justify-between shadow-sm"
+        className="sticky top-0 z-30 px-3 py-2.5 flex items-center justify-between shadow-sm"
         style={{ background: 'linear-gradient(135deg, #0052CC 0%, #0066FF 60%, #1a73e8 100%)' }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 min-w-0">
           <button
             type="button"
             onClick={onOpenDrawer}
-            className="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shrink-0"
+            className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer shrink-0"
             style={{ backgroundColor: '#fbbf24', color: '#1e293b' }}
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-4 h-4" />
           </button>
-          <div>
-            <div className="text-sm font-bold text-white leading-tight">
+          <div className="min-w-0">
+            <div className="text-xs font-bold text-white leading-tight truncate">
               {currentStudent ? `Hi, ${currentStudent.name.split(' ')[0]}` : 'L.C.C. Learning'}
             </div>
-            <div className="text-[11px] font-medium text-blue-100 leading-tight">
+            <div className="text-[10px] font-medium text-blue-100 leading-tight truncate">
               {t.appSubtitle}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 shrink-0">
           {/* Language pills */}
           <div className="flex items-center rounded-full overflow-hidden border border-white/30" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
             {languages.map(l => (
@@ -161,7 +161,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                 key={l.id}
                 type="button"
                 onClick={() => setLanguage(l.id)}
-                className="px-2 py-1 text-[10px] font-bold cursor-pointer transition-all"
+                className="px-1.5 py-0.5 text-[9px] font-bold cursor-pointer transition-all"
                 style={{
                   backgroundColor: language === l.id ? '#fbbf24' : 'transparent',
                   color: language === l.id ? '#1e293b' : 'rgba(255,255,255,0.8)'
@@ -176,10 +176,10 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           <button
             type="button"
             onClick={() => navigateTo('notices', 'notices-section')}
-            className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer relative"
+            className="w-7 h-7 rounded-full flex items-center justify-center cursor-pointer relative shrink-0"
             style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
           >
-            <Bell className="w-4 h-4 text-white" />
+            <Bell className="w-3.5 h-3.5 text-white" />
             {notices.filter(n => n.isImportant).length > 0 && (
               <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full" style={{ backgroundColor: '#ef4444' }} />
             )}
@@ -188,23 +188,23 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
       </div>
 
       {/* ═══════════ GOAL STRIP ═══════════ */}
-      <div className="px-3 pt-3">
+      <div className="px-3 pt-2.5">
         <div
-          className="p-3 rounded-2xl flex items-center justify-between gap-2 shadow-sm"
+          className="p-2.5 rounded-xl flex items-center justify-between gap-2 shadow-sm"
           style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
         >
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
             <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+              className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
               style={{ backgroundColor: '#eff6ff', color: '#0066FF' }}
             >
-              <Target className="w-4 h-4" />
+              <Target className="w-3.5 h-3.5" />
             </div>
             <div className="min-w-0">
-              <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#94a3b8' }}>
+              <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#94a3b8' }}>
                 {t.activeGoal}
               </div>
-              <div className="text-xs font-bold truncate" style={{ color: '#1e293b' }}>
+              <div className="text-[11px] font-bold truncate" style={{ color: '#1e293b' }}>
                 {studentGoal} • {studentSubjects.slice(0, 2).join(', ')}
               </div>
             </div>
@@ -212,7 +212,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           <button
             type="button"
             onClick={onOpenGoalModal}
-            className="px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider cursor-pointer shrink-0"
+            className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider cursor-pointer shrink-0"
             style={{ backgroundColor: '#eff6ff', color: '#0066FF', border: '1px solid #bfdbfe' }}
           >
             {t.changeGoal}
@@ -567,23 +567,22 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
 
       {/* ═══════════ BOTTOM NAVIGATION DOCK ═══════════ */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around px-2 shadow-2xl"
+        className="fixed bottom-0 left-0 right-0 z-40 grid grid-cols-5 items-center shadow-2xl"
         style={{
           backgroundColor: '#ffffff',
           borderTop: '1px solid #e2e8f0',
-          paddingTop: '8px',
-          paddingBottom: 'max(8px, env(safe-area-inset-bottom))'
+          paddingTop: '6px',
+          paddingBottom: 'max(6px, env(safe-area-inset-bottom))'
         }}
       >
         {/* Home */}
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="flex flex-col items-center gap-0.5 cursor-pointer"
-          style={{ minWidth: '52px' }}
+          className="flex flex-col items-center justify-center gap-0.5 cursor-pointer py-1"
         >
           <Home className="w-5 h-5" style={{ color: '#0066FF' }} />
-          <span className="text-[10px] font-bold" style={{ color: '#0066FF' }}>{t.navHome}</span>
+          <span className="text-[10px] font-bold truncate max-w-full" style={{ color: '#0066FF' }}>{t.navHome}</span>
         </button>
 
         {/* My Batches */}
@@ -596,22 +595,20 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
               setIsStudentAuthModalOpen(true);
             }
           }}
-          className="flex flex-col items-center gap-0.5 cursor-pointer"
-          style={{ minWidth: '52px' }}
+          className="flex flex-col items-center justify-center gap-0.5 cursor-pointer py-1"
         >
           <BookOpen className="w-5 h-5" style={{ color: '#64748b' }} />
-          <span className="text-[10px] font-semibold" style={{ color: '#64748b' }}>{t.myBatches}</span>
+          <span className="text-[10px] font-semibold truncate max-w-full" style={{ color: '#64748b' }}>{t.myBatches}</span>
         </button>
 
         {/* Offline Vault */}
         <button
           type="button"
           onClick={onOpenOfflineVault}
-          className="flex flex-col items-center gap-0.5 cursor-pointer"
-          style={{ minWidth: '52px' }}
+          className="flex flex-col items-center justify-center gap-0.5 cursor-pointer py-1"
         >
           <DownloadCloud className="w-5 h-5" style={{ color: '#64748b' }} />
-          <span className="text-[10px] font-semibold" style={{ color: '#64748b' }}>{t.offlineVault}</span>
+          <span className="text-[10px] font-semibold truncate max-w-full" style={{ color: '#64748b' }}>{t.offlineVault}</span>
         </button>
 
         {/* Ask Doubt (WhatsApp) */}
@@ -619,22 +616,20 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           href={`https://wa.me/91${contactPhone}?text=Hello%20Aman%20Sir%2C%20I%20have%20a%20doubt.`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex flex-col items-center gap-0.5 cursor-pointer"
-          style={{ minWidth: '52px' }}
+          className="flex flex-col items-center justify-center gap-0.5 cursor-pointer py-1"
         >
           <MessageSquare className="w-5 h-5" style={{ color: '#059669' }} />
-          <span className="text-[10px] font-semibold" style={{ color: '#059669' }}>{t.askDoubt}</span>
+          <span className="text-[10px] font-semibold truncate max-w-full" style={{ color: '#059669' }}>{t.askDoubt}</span>
         </a>
 
         {/* Profile */}
         <button
           type="button"
           onClick={onOpenDrawer}
-          className="flex flex-col items-center gap-0.5 cursor-pointer"
-          style={{ minWidth: '52px' }}
+          className="flex flex-col items-center justify-center gap-0.5 cursor-pointer py-1"
         >
           <User className="w-5 h-5" style={{ color: '#64748b' }} />
-          <span className="text-[10px] font-semibold" style={{ color: '#64748b' }}>Profile</span>
+          <span className="text-[10px] font-semibold truncate max-w-full" style={{ color: '#64748b' }}>Profile</span>
         </button>
       </div>
 
