@@ -12,9 +12,6 @@ import {
   X,
   Target,
   ArrowRight,
-  GraduationCap,
-  Sparkles,
-  Award,
   ChevronRight
 } from 'lucide-react';
 import { getTranslation, AppLanguage } from '../../utils/i18n';
@@ -52,14 +49,14 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
 
   if (!isOpen) return null;
 
-  const languages: { id: AppLanguage; label: string; icon: string }[] = [
-    { id: 'en', label: 'English', icon: '🇬🇧' },
-    { id: 'hinglish', label: 'Hinglish', icon: '🇮🇳' },
-    { id: 'hi', label: 'हिंदी', icon: '🕉️' },
-    { id: 'mr', label: 'मराठी', icon: '🚩' }
+  const languages: { id: AppLanguage; label: string; short: string }[] = [
+    { id: 'en', label: 'English', short: 'EN' },
+    { id: 'hinglish', label: 'Hinglish', short: 'HI' },
+    { id: 'hi', label: 'हिंदी', short: 'हि' },
+    { id: 'mr', label: 'मराठी', short: 'मर' }
   ];
 
-  const studentAvatar = currentStudent?.avatar || '🎓';
+  const studentAvatar = currentStudent?.avatar || '';
   const studentGoal = currentStudent?.targetClass || currentStudent?.classEnrolled || 'Class 10';
   const studentSubjects = currentStudent?.selectedSubjects?.join(', ') || 'Maths, Science';
 
@@ -68,49 +65,61 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/65 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+        className="fixed inset-0"
+        style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
       />
 
       {/* Drawer Panel */}
-      <div className="relative w-[85%] max-w-[320px] bg-white dark:bg-slate-900 h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200 text-slate-900 dark:text-white">
-        
+      <div
+        className="relative h-full shadow-2xl flex flex-col z-10"
+        style={{ width: '85%', maxWidth: '320px', backgroundColor: '#ffffff', color: '#1e293b' }}
+      >
+
         {/* Profile Header */}
-        <div className="p-4 bg-gradient-to-br from-[#0052CC] via-[#0066FF] to-[#0A2540] text-white">
+        <div
+          className="p-4 text-white"
+          style={{ background: 'linear-gradient(135deg, #0052CC 0%, #0066FF 60%, #1a73e8 100%)' }}
+        >
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl shadow-md ring-2 ring-white/30">
-                {studentAvatar}
+              <div
+                className="w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-bold shadow-md"
+                style={{ backgroundColor: '#fbbf24', color: '#1e293b' }}
+              >
+                {currentStudent ? currentStudent.name.charAt(0).toUpperCase() : <User className="w-6 h-6" />}
               </div>
-              <div className="leading-tight">
-                <h4 className="text-sm font-black truncate max-w-[170px]">
+              <div>
+                <h4 className="text-sm font-bold truncate" style={{ maxWidth: '170px' }}>
                   {currentStudent ? currentStudent.name : t.hiLearner}
                 </h4>
-                <p className="text-[11px] text-blue-100 font-medium mt-0.5">
+                <p className="text-[11px] font-medium mt-0.5" style={{ color: '#bfdbfe' }}>
                   {currentStudent ? (currentStudent.phone || currentStudent.email) : 'L.C.C. Learning App'}
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl cursor-pointer"
+              style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4 text-white" />
             </button>
           </div>
 
-          {/* Goal Chip in Header */}
-          <div className="mt-3.5 pt-3 border-t border-white/15 flex items-center justify-between bg-white/10 p-2.5 rounded-xl">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300">
+          {/* Goal Chip */}
+          <div
+            className="mt-3 p-2.5 rounded-xl flex items-center justify-between"
+            style={{ backgroundColor: 'rgba(255,255,255,0.12)', borderTop: '1px solid rgba(255,255,255,0.15)' }}
+          >
+            <div className="flex items-center gap-1.5 text-xs font-bold" style={{ color: '#fbbf24' }}>
               <Target className="w-3.5 h-3.5" />
-              <span className="truncate max-w-[150px]">{studentGoal}</span>
+              <span className="truncate" style={{ maxWidth: '150px' }}>{studentGoal}</span>
             </div>
             <button
               type="button"
-              onClick={() => {
-                onClose();
-                onOpenGoalModal();
-              }}
-              className="px-2 py-0.5 rounded-lg bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider hover:bg-amber-300 cursor-pointer shadow-xs"
+              onClick={() => { onClose(); onOpenGoalModal(); }}
+              className="px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider cursor-pointer shadow-sm"
+              style={{ backgroundColor: '#fbbf24', color: '#1e293b' }}
             >
               {t.changeGoal}
             </button>
@@ -119,10 +128,10 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
 
         {/* Scrollable Navigation Links */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs font-bold">
-          
+
           {/* Section: My Learning */}
           <div className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block px-2 mb-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider block px-2 mb-1.5" style={{ color: '#94a3b8' }}>
               {t.myLearning}
             </span>
 
@@ -135,47 +144,55 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
                 }
                 onClose();
               }}
-              className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors text-left cursor-pointer"
+              className="w-full flex items-center justify-between p-2.5 rounded-xl transition-colors text-left cursor-pointer"
+              style={{ backgroundColor: 'transparent' }}
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-900/60 text-[#0066FF] flex items-center justify-center">
+                <div
+                  className="w-8 h-8 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: '#eff6ff', color: '#0066FF' }}
+                >
                   <BookOpen className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="block text-slate-900 dark:text-white font-black">{t.myLearning}</span>
-                  <span className="text-[10px] text-slate-400 font-medium">Enrolled batches & attendance</span>
+                  <span className="block font-bold" style={{ color: '#1e293b' }}>{t.myLearning}</span>
+                  <span className="text-[10px] font-medium" style={{ color: '#94a3b8' }}>Enrolled batches & attendance</span>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-400" />
+              <ChevronRight className="w-4 h-4" style={{ color: '#94a3b8' }} />
             </button>
 
             <button
-              onClick={() => {
-                onClose();
-                onOpenOfflineVault();
-              }}
-              className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors text-left cursor-pointer"
+              onClick={() => { onClose(); onOpenOfflineVault(); }}
+              className="w-full flex items-center justify-between p-2.5 rounded-xl transition-colors text-left cursor-pointer"
+              style={{ backgroundColor: 'transparent' }}
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 flex items-center justify-center">
+                <div
+                  className="w-8 h-8 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: '#ecfdf5', color: '#059669' }}
+                >
                   <DownloadCloud className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="block text-slate-900 dark:text-white font-black">{t.offlineVault}</span>
-                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                  <span className="block font-bold" style={{ color: '#1e293b' }}>{t.offlineVault}</span>
+                  <span className="text-[10px] font-semibold" style={{ color: '#059669' }}>
                     {offlineCount > 0 ? `${offlineCount} notes ready offline` : t.offlineReady}
                   </span>
                 </div>
               </div>
-              <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+              <span
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: '#ecfdf5', color: '#065f46' }}
+              >
                 {offlineCount}
               </span>
             </button>
           </div>
 
           {/* Section: Language Switcher */}
-          <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block px-2 mb-1 flex items-center gap-1">
+          <div className="space-y-1.5 pt-2" style={{ borderTop: '1px solid #f1f5f9' }}>
+            <span className="text-[10px] font-bold uppercase tracking-wider block px-2 mb-1 flex items-center gap-1" style={{ color: '#94a3b8' }}>
               <Globe className="w-3 h-3" />
               <span>{t.selectLanguage}</span>
             </span>
@@ -188,13 +205,14 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
                     key={lang.id}
                     type="button"
                     onClick={() => setLanguage(lang.id)}
-                    className={`py-2 px-2.5 rounded-xl border text-[11px] font-black flex items-center gap-1.5 transition-all cursor-pointer ${
-                      isSelected
-                        ? 'border-[#0066FF] bg-[#0066FF] text-white shadow-xs'
-                        : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-                    }`}
+                    className="py-2 px-2.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                    style={{
+                      backgroundColor: isSelected ? '#0066FF' : '#f8fafc',
+                      color: isSelected ? '#ffffff' : '#475569',
+                      border: isSelected ? '1px solid #0066FF' : '1px solid #e2e8f0'
+                    }}
                   >
-                    <span>{lang.icon}</span>
+                    <span>{lang.short}</span>
                     <span>{lang.label}</span>
                   </button>
                 );
@@ -203,8 +221,8 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
           </div>
 
           {/* Section: Doubts & Support */}
-          <div className="space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block px-2 mb-1">
+          <div className="space-y-1 pt-2" style={{ borderTop: '1px solid #f1f5f9' }}>
+            <span className="text-[10px] font-bold uppercase tracking-wider block px-2 mb-1" style={{ color: '#94a3b8' }}>
               Doubt Support
             </span>
 
@@ -214,10 +232,11 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center justify-between p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition-colors"
+              className="w-full flex items-center justify-between p-2.5 rounded-xl transition-colors"
+              style={{ backgroundColor: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0' }}
             >
               <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-emerald-600 fill-current" />
+                <MessageSquare className="w-4 h-4" style={{ color: '#059669' }} />
                 <span>1:1 WhatsApp Teacher Doubt</span>
               </div>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -226,18 +245,16 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
 
           {/* Section: Staff & Admin Switching */}
           {(isAdminAuthenticated || currentStaff) && (
-            <div className="space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block px-2 mb-1">
+            <div className="space-y-1 pt-2" style={{ borderTop: '1px solid #f1f5f9' }}>
+              <span className="text-[10px] font-bold uppercase tracking-wider block px-2 mb-1" style={{ color: '#94a3b8' }}>
                 Management
               </span>
 
               {isAdminAuthenticated && (
                 <button
-                  onClick={() => {
-                    navigateTo('admin-panel');
-                    onClose();
-                  }}
-                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800 font-black cursor-pointer"
+                  onClick={() => { navigateTo('admin-panel'); onClose(); }}
+                  className="w-full flex items-center gap-2.5 p-2 rounded-xl font-bold cursor-pointer"
+                  style={{ color: '#059669' }}
                 >
                   <Shield className="w-4 h-4" />
                   <span>{t.adminDesk}</span>
@@ -246,11 +263,9 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
 
               {currentStaff && (
                 <button
-                  onClick={() => {
-                    navigateTo('staff-portal');
-                    onClose();
-                  }}
-                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-slate-800 font-black cursor-pointer"
+                  onClick={() => { navigateTo('staff-portal'); onClose(); }}
+                  className="w-full flex items-center gap-2.5 p-2 rounded-xl font-bold cursor-pointer"
+                  style={{ color: '#4f46e5' }}
                 >
                   <Users className="w-4 h-4" />
                   <span>{t.staffPortal} ({currentStaff.name})</span>
@@ -262,26 +277,21 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
         </div>
 
         {/* Footer with Auth Action */}
-        <div className="p-3 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800">
+        <div className="p-3" style={{ backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
           {currentStudent ? (
             <button
-              onClick={() => {
-                logoutStudent();
-                onClose();
-              }}
-              className="w-full py-2.5 rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer hover:bg-red-100"
+              onClick={() => { logoutStudent(); onClose(); }}
+              className="w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+              style={{ backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>{t.logout}</span>
             </button>
           ) : (
             <button
-              onClick={() => {
-                setIsStudentAuthModalOpen(true);
-                onClose();
-              }}
+              onClick={() => { setIsStudentAuthModalOpen(true); onClose(); }}
+              className="w-full py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
               style={{ backgroundColor: '#0066FF', color: '#ffffff' }}
-              className="w-full py-2.5 rounded-xl bg-[#0066FF] text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
             >
               <User className="w-3.5 h-3.5" />
               <span>{t.portalLogin}</span>
