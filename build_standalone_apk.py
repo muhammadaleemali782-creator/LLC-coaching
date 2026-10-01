@@ -25,23 +25,39 @@ os.environ["PATH"] = os.path.join(JAVA_HOME, "bin") + os.pathsep + os.environ.ge
 os.makedirs(BUILD_DIR, exist_ok=True)
 os.makedirs(OUT_DIR, exist_ok=True)
 
-# 1. Write AndroidManifest.xml
+# 1. Write AndroidManifest.xml targeting modern Android (API 34)
+# Explicit targetSdkVersion=34 eliminates:
+# - Google Play Protect "built for an older version" warning
+# - Legacy permission requests (Phone, Files/Media)
+# - 320x480 screen compatibility letterboxing mode
 manifest_path = os.path.join(BUILD_DIR, "AndroidManifest.xml")
 with open(manifest_path, "w", encoding="utf-8") as f:
     f.write('''<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.lcccoaching.app"
-    android:versionCode="3"
-    android:versionName="2.1.0">
+    android:versionCode="5"
+    android:versionName="2.2.0">
+
+    <uses-sdk
+        android:minSdkVersion="24"
+        android:targetSdkVersion="34" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <supports-screens
+        android:smallScreens="true"
+        android:normalScreens="true"
+        android:largeScreens="true"
+        android:xlargeScreens="true"
+        android:anyDensity="true"
+        android:resizeable="true" />
 
     <application
         android:label="LCC Coaching"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
-        android:theme="@android:style/Theme.NoTitleBar"
+        android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
         android:hardwareAccelerated="true"
         android:largeHeap="true"
         android:usesCleartextTraffic="false"
@@ -96,15 +112,26 @@ public class MainActivity extends Activity {
     private ProgressBar progressBar;
     private LinearLayout errorLayout;
     private static final String APP_URL = "https://lccedu.vercel.app/";
+    private static final String LOCAL_FALLBACK_URL = "file:///android_asset/www/index.html";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Native status bar & navigation bar styling
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(Color.parseColor("#0052CC"));
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            getWindow().setNavigationBarColor(Color.WHITE);
+            getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            );
+        }
+
         RelativeLayout rootLayout = new RelativeLayout(this);
         rootLayout.setBackgroundColor(Color.WHITE);
 
-        // 3GB RAM Optimized WebView configuration:
         webView = new WebView(this);
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         webView.setVerticalScrollBarEnabled(false);
@@ -115,8 +142,10 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
-        s.setAllowFileAccess(false);
-        s.setAllowContentAccess(false);
+        s.setAllowFileAccess(true);
+        s.setAllowContentAccess(true);
+        s.setAllowFileAccessFromFileURLs(true);
+        s.setAllowUniversalAccessFromFileURLs(true);
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
         s.setTextZoom(100);
@@ -149,31 +178,31 @@ public class MainActivity extends Activity {
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         );
 
-        // Friendly Offline / Network Error Recovery Layout
+        // Friendly Offline / Network Error Recovery Layout (White modern theme)
         errorLayout = new LinearLayout(this);
         errorLayout.setOrientation(LinearLayout.VERTICAL);
         errorLayout.setGravity(Gravity.CENTER);
-        errorLayout.setBackgroundColor(Color.parseColor("#020617"));
+        errorLayout.setBackgroundColor(Color.WHITE);
         errorLayout.setVisibility(View.GONE);
 
         TextView errTitle = new TextView(this);
-        errTitle.setText("Internet Connection Needed");
-        errTitle.setTextColor(Color.WHITE);
+        errTitle.setText("Connection Needed");
+        errTitle.setTextColor(Color.parseColor("#0f172a"));
         errTitle.setTextSize(18);
         errTitle.setGravity(Gravity.CENTER);
-        errTitle.setPadding(0, 0, 0, 16);
+        errTitle.setPadding(0, 0, 0, 12);
 
         TextView errSub = new TextView(this);
-        errSub.setText("Please check your internet or Wi-Fi to load L.C.C. Coaching Portal.");
-        errSub.setTextColor(Color.parseColor("#94a3b8"));
-        errSub.setTextSize(14);
+        errSub.setText("Please check your internet connection to access the latest batches and live lectures.");
+        errSub.setTextColor(Color.parseColor("#64748b"));
+        errSub.setTextSize(13);
         errSub.setGravity(Gravity.CENTER);
-        errSub.setPadding(40, 0, 40, 32);
+        errSub.setPadding(32, 0, 32, 24);
 
         Button retryBtn = new Button(this);
         retryBtn.setText("Retry Connection");
         retryBtn.setTextColor(Color.WHITE);
-        retryBtn.setBackgroundColor(Color.parseColor("#2563eb"));
+        retryBtn.setBackgroundColor(Color.parseColor("#0066FF"));
         retryBtn.setPadding(32, 16, 32, 16);
         retryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -214,7 +243,6 @@ public class MainActivity extends Activity {
                 }
             }
 
-            // Prevent app crashes when Android OS terminates WebView sandboxed renderer on low RAM
             @Override
             public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
                 if (webView != null) {
@@ -261,7 +289,7 @@ public class MainActivity extends Activity {
         super.onPause();
         if (webView != null) {
             webView.onPause();
-            webView.pauseTimers(); // Freezes JS timers & CSS paint loops to save RAM and battery
+            webView.pauseTimers();
         }
     }
 
@@ -347,7 +375,7 @@ cmd = [AAPT2, "compile", "--dir", res_dir, "-o", res_zip]
 print("Running AAPT2 compile...")
 subprocess.check_call(cmd)
 
-# Link resources and generate base APK
+# Link resources and generate base APK with targetSdkVersion=34 and minSdkVersion=24
 unaligned_apk = os.path.join(BUILD_DIR, "unaligned.apk")
 gen_dir = os.path.join(BUILD_DIR, "gen")
 os.makedirs(gen_dir, exist_ok=True)
@@ -356,11 +384,13 @@ cmd = [
     "-I", ANDROID_JAR,
     "-o", unaligned_apk,
     "--manifest", manifest_path,
+    "--min-sdk-version", "24",
+    "--target-sdk-version", "34",
     "--java", gen_dir,
     "--auto-add-overlay",
     res_zip
 ]
-print("Running AAPT2 link...")
+print("Running AAPT2 link (API 34)...")
 subprocess.check_call(cmd)
 
 # 4. Compile Java files
@@ -391,14 +421,29 @@ for root, _, files in os.walk(classes_dir):
         if fl.endswith(".class"):
             class_files.append(os.path.join(root, fl))
 
-cmd = [D8, "--output", dex_dir, "--min-api", "21", "--lib", ANDROID_JAR] + class_files
+cmd = [D8, "--output", dex_dir, "--min-api", "24", "--lib", ANDROID_JAR] + class_files
 print("Running d8...")
 subprocess.check_call(cmd, shell=True)
 
-# 6. Add classes.dex into unaligned.apk
+# 6. Add classes.dex AND full web assets bundle into unaligned.apk
+# Bundling production web assets makes the APK a real, self-contained standalone app
 dex_file = os.path.join(dex_dir, "classes.dex")
-with zipfile.ZipFile(unaligned_apk, 'a') as z:
+dist_dir = os.path.join(BASE_DIR, "frontend", "dist")
+
+print("Packaging classes.dex and bundled web assets into APK...")
+with zipfile.ZipFile(unaligned_apk, 'a', zipfile.ZIP_DEFLATED) as z:
     z.write(dex_file, "classes.dex")
+    if os.path.exists(dist_dir):
+        for root, _, files in os.walk(dist_dir):
+            for fl in files:
+                if fl.endswith(".apk"):
+                    continue
+                abs_p = os.path.join(root, fl)
+                rel_p = os.path.relpath(abs_p, dist_dir)
+                z.write(abs_p, os.path.join("assets", "www", rel_p))
+
+    # Packaging dist bundle is sufficient as it already contains public assets
+    pass
 
 # 7. Zipalign APK
 aligned_apk = os.path.join(BUILD_DIR, "aligned.apk")
@@ -437,6 +482,7 @@ cmd = [
 print("Signing APK with release key...")
 subprocess.check_call(cmd, shell=True)
 
-print("\nSUCCESS! APK generated at:")
+size_mb = os.path.getsize(final_apk) / (1024 * 1024)
+print("\nSUCCESS! Standalone APK generated at:")
 print(final_apk)
-print(f"File size: {os.path.getsize(final_apk) / 1024:.2f} KB")
+print(f"File size: {size_mb:.2f} MB")
