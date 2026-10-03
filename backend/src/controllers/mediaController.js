@@ -168,7 +168,7 @@ export const createVideo = async (req, res) => {
 
   let finalVideoId = req.body.videoId || req.body.youtubeId;
   if (platform === 'youtube' && !finalVideoId) {
-    finalVideoId = extractYouTubeId(finalUrl) || 'dQw4w9WgXcQ';
+    finalVideoId = extractYouTubeId(finalUrl) || 'X_1C9_W3sHw';
   } else if (!finalVideoId) {
     finalVideoId = `vid-${Date.now()}`;
   }

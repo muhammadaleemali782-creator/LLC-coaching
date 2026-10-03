@@ -176,27 +176,23 @@ const MainContent: React.FC = () => {
           <Navbar />
         </div>
 
-        <main className={activeView !== 'admin-panel' ? 'pb-32 xl:pb-16' : ''}>
+        <main className={activeView !== 'admin-panel' ? 'pb-0 lg:pb-16' : ''}>
           {activeView === 'home' && (
-            isInitialSyncLoading && !websiteSettings?.instituteName ? (
-              <SkeletonHomeScreen />
-            ) : (
-              <>
-                {/* Mobile View: Dedicated Physics Wallah Mobile App Experience */}
-                <div className="block lg:hidden w-full max-w-full overflow-x-hidden">
-                  <MobileAppHome
-                    onOpenDrawer={() => setIsDrawerOpen(true)}
-                    onOpenGoalModal={() => setIsGoalModalOpen(true)}
-                    onOpenOfflineVault={() => setIsOfflineVaultOpen(true)}
-                  />
-                </div>
+            <>
+              {/* Mobile View: Dedicated Physics Wallah Mobile App Experience */}
+              <div className="block lg:hidden w-full max-w-full overflow-x-hidden">
+                <MobileAppHome
+                  onOpenDrawer={() => setIsDrawerOpen(true)}
+                  onOpenGoalModal={() => setIsGoalModalOpen(true)}
+                  onOpenOfflineVault={() => setIsOfflineVaultOpen(true)}
+                />
+              </div>
 
-                {/* Desktop View: Grand Educational Institute Web Experience */}
-                <div className="hidden lg:block">
-                  {currentSectionOrder.map(secKey => sectionMap[secKey] || null)}
-                </div>
-              </>
-            )
+              {/* Desktop View: Grand Educational Institute Web Experience */}
+              <div className="hidden lg:block">
+                {currentSectionOrder.map(secKey => sectionMap[secKey] || null)}
+              </div>
+            </>
           )}
 
           {activeView === 'courses' && (

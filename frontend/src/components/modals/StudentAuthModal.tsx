@@ -4,7 +4,20 @@ import { User, Mail, Lock, Phone, X, GraduationCap, ArrowRight, Loader2, KeyRoun
 import { ForgotPasswordModal } from './ForgotPasswordModal';
 
 export const StudentAuthModal: React.FC = () => {
-  const { isStudentAuthModalOpen, setIsStudentAuthModalOpen, setIsGoalModalOpen, loginStudent, loginStaff, registerStudent, updateStudentPassword, navigateTo, showToast } = useApp();
+  const {
+    isStudentAuthModalOpen,
+    setIsStudentAuthModalOpen,
+    setIsGoalModalOpen,
+    loginStudent,
+    loginStaff,
+    registerStudent,
+    updateStudentPassword,
+    navigateTo,
+    showToast,
+    currentStudent,
+    currentStaff,
+    isAdminAuthenticated
+  } = useApp();
   const [tab, setTab] = useState<'student' | 'staff' | 'register'>('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,6 +29,10 @@ export const StudentAuthModal: React.FC = () => {
   const [needsNewPass, setNeedsNewPass] = useState(false);
   const [newPass, setNewPass] = useState('');
   const [confirmNewPass, setConfirmNewPass] = useState('');
+
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const isAuthenticated = Boolean(currentStudent || currentStaff || isAdminAuthenticated);
+  const isStrictLockedOnMobile = isMobile && !isAuthenticated;
 
   if (!isStudentAuthModalOpen) return null;
 
@@ -104,17 +121,26 @@ export const StudentAuthModal: React.FC = () => {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200"
+        onClick={(e) => {
+          if (!isStrictLockedOnMobile && e.target === e.currentTarget) {
+            setIsStudentAuthModalOpen(false);
+          }
+        }}
+      >
         <div className="relative w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]">
           
-          {/* Close Button */}
-          <button
-            onClick={() => setIsStudentAuthModalOpen(false)}
-            className="absolute top-3 right-3 z-30 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition-all active:scale-95 cursor-pointer"
-            title="Close Modal"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          {/* Close Button - Strictly hidden on mobile until authenticated */}
+          {!isStrictLockedOnMobile && (
+            <button
+              onClick={() => setIsStudentAuthModalOpen(false)}
+              className="absolute top-3 right-3 z-30 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition-all active:scale-95 cursor-pointer"
+              title="Close Modal"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
 
           {/* Compact Blue Header */}
           <div className="px-5 py-4 bg-[#0066FF] text-white flex items-center gap-3">

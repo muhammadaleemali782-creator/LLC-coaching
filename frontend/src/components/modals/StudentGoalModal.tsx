@@ -104,8 +104,9 @@ export const StudentGoalModal: React.FC<StudentGoalModalProps> = ({ isOpen, onCl
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleSave}
             className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+            title="Save and Continue"
           >
             <X className="w-4 h-4" />
           </button>

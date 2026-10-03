@@ -324,7 +324,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(() => loadSaved('lcc_study_materials', INITIAL_STUDY_MATERIALS));
   const [syllabuses, setSyllabuses] = useState<SyllabusItem[]>(() => loadSaved('lcc_syllabus', INITIAL_SYLLABUS));
   const [notices, setNotices] = useState<Notice[]>(() => loadSaved('lcc_notices', INITIAL_NOTICES));
-  const [videos, setVideos] = useState<VideoLecture[]>(() => loadSaved('lcc_videos', INITIAL_VIDEOS));
+  const [videos, setVideos] = useState<VideoLecture[]>(() => {
+    const saved = loadSaved<VideoLecture[]>('lcc_videos', INITIAL_VIDEOS);
+    const hasDummyRick = saved.some(v => v.youtubeId === 'kJQP7kiw5Fk' || v.youtubeId === 'dQw4w9WgXcQ' || v.videoId === 'dQw4w9WgXcQ');
+    if (hasDummyRick) {
+      localStorage.setItem('lcc_videos', JSON.stringify(INITIAL_VIDEOS));
+      return INITIAL_VIDEOS;
+    }
+    return saved && saved.length > 0 ? saved : INITIAL_VIDEOS;
+  });
   const [instagramPosts, setInstagramPosts] = useState<InstagramPost[]>(() => {
     const saved = loadSaved<InstagramPost[]>('lcc_instagram', []);
     return saved && saved.length > 0 ? saved : INITIAL_INSTAGRAM_POSTS;
