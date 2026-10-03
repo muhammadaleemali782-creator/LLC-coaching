@@ -13,10 +13,17 @@ import {
   Home,
   User,
   Menu,
-  Play
+  Play,
+  GraduationCap,
+  X,
+  Heart,
+  Sparkles,
+  Search,
+  ExternalLink
 } from 'lucide-react';
 import { getTranslation, AppLanguage } from '../../utils/i18n';
 import { saveOfflineDoc, isDocOffline } from '../../utils/offlineStorage';
+import { Course, VideoLecture, GalleryItem, InstagramPost } from '../../types';
 
 interface MobileAppHomeProps {
   onOpenDrawer: () => void;
@@ -31,48 +38,58 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
 }) => {
   const {
     currentStudent,
+    currentStaff,
     courses,
     studyMaterials,
     videos,
     instagramPosts,
+    galleryItems,
     notices,
     websiteSettings,
     language,
     setLanguage,
     setSelectedCourseForPayment,
+    setSelectedVideoForPlayer,
     setIsStudentAuthModalOpen,
     navigateTo,
     showToast
   } = useApp();
 
   const t = getTranslation(language);
-  const studentGoal = currentStudent?.targetClass || currentStudent?.classEnrolled || 'Class 10';
-  const studentSubjects = currentStudent?.selectedSubjects || ['Mathematics', 'Science'];
-  const studentAvatar = currentStudent?.avatar || '🎓';
+  const studentGoal = currentStudent?.targetClass || currentStudent?.classEnrolled || 'Class 9-10';
+  const studentSubjects = currentStudent?.selectedSubjects || ['Mathematics', 'Science', 'English'];
   const contactPhone = (websiteSettings?.contactPhone || '9250703092').replace(/[^0-9]/g, '');
 
-  // Featured Announcement Slides
+  // In-app Modal States (Zero redirection outside the app)
+  const [isAllBatchesOpen, setIsAllBatchesOpen] = useState(false);
+  const [isAllVideosOpen, setIsAllVideosOpen] = useState(false);
+  const [isAllGalleryOpen, setIsAllGalleryOpen] = useState(false);
+  const [selectedPhotoForModal, setSelectedPhotoForModal] = useState<any | null>(null);
+  const [batchCategoryFilter, setBatchCategoryFilter] = useState<string>('all');
+  const [galleryCategoryFilter, setGalleryCategoryFilter] = useState<string>('all');
+
+  // Featured Announcement Slides (High-Res Local & Real Campus Photos)
   const defaultSlides = [
     {
       id: 's1',
       title: 'Admissions Open 2026-27',
       subtitle: 'Classes 1–12, NEET/JEE & DCA Coaching',
       tag: 'NEW SESSION',
-      img: websiteSettings?.heroPosterUrl || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=60'
+      img: websiteSettings?.heroPosterUrl || '/assets/hero_poster.jpg'
     },
     {
       id: 's2',
-      title: 'Computer Lab & DCA Diplomas',
-      subtitle: 'Tally Prime, ADCA & Govt Certified',
-      tag: 'TECH ACADEMY',
-      img: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=60'
+      title: 'Interactive Smart Classrooms',
+      subtitle: 'Concept Mastery with Director Aman Arora',
+      tag: 'CAMPUS LIFE',
+      img: '/assets/discussion.jpg'
     },
     {
       id: 's3',
-      title: 'Spoken English Championship',
-      subtitle: 'Build Confidence with Mentor Aman Arora',
-      tag: 'ENGLISH MASTERY',
-      img: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=60'
+      title: 'Debate Stage & English Speaking',
+      subtitle: 'Fluency & Public Articulation Bootcamps',
+      tag: 'SKILL MASTERY',
+      img: '/assets/debate.jpg'
     }
   ];
 
@@ -161,10 +178,14 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           </button>
           <div className="min-w-0">
             <div className="text-xs font-bold text-white leading-tight truncate">
-              {currentStudent ? `Hi, ${currentStudent.name.split(' ')[0]}` : 'L.C.C. Learning'}
+              {currentStaff
+                ? `Faculty: ${currentStaff.name.split(' ')[0]}`
+                : currentStudent
+                ? `Hi, ${currentStudent.name.split(' ')[0]}`
+                : 'L.C.C. Learning'}
             </div>
             <div className="text-[10px] font-medium text-blue-100 leading-tight truncate">
-              {t.appSubtitle}
+              {currentStaff ? (currentStaff.designation || 'Faculty Desk') : t.appSubtitle}
             </div>
           </div>
         </div>
@@ -203,6 +224,44 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
         </div>
       </div>
 
+      {/* ═══════════ STAFF / FACULTY DESK BANNER ═══════════ */}
+      {currentStaff && (
+        <div className="px-3 pt-2.5">
+          <div
+            className="p-3 rounded-2xl flex items-center justify-between gap-2 shadow-sm text-white"
+            style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)', border: '1px solid #4338ca' }}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div
+                className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: '#fbbf24' }}
+              >
+                <GraduationCap className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[9px] font-black uppercase tracking-wider block" style={{ color: '#fbbf24' }}>
+                  FACULTY DESK ACTIVE
+                </span>
+                <h4 className="text-xs font-bold leading-tight truncate">
+                  {currentStaff.name} ({currentStaff.designation || 'Teacher'})
+                </h4>
+                <p className="text-[10px] opacity-80 truncate">
+                  {currentStaff.branch}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigateTo('staff-portal')}
+              className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider shrink-0 cursor-pointer shadow-sm active:scale-95"
+              style={{ backgroundColor: '#fbbf24', color: '#1e293b' }}
+            >
+              OPEN DESK
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ═══════════ GOAL STRIP ═══════════ */}
       <div className="px-3 pt-2.5">
         <div
@@ -236,9 +295,9 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
         </div>
       </div>
 
-      {/* ═══════════ CAROUSEL ═══════════ */}
+      {/* ═══════════ CAROUSEL / BANNER SLIDER ═══════════ */}
       <div className="px-3 pt-3">
-        <div className="relative rounded-2xl overflow-hidden shadow-md" style={{ aspectRatio: '16/8' }}>
+        <div className="relative rounded-2xl overflow-hidden shadow-md" style={{ aspectRatio: '16/9', backgroundColor: '#0f172a' }}>
           {defaultSlides.map((slide, idx) => (
             <div
               key={slide.id}
@@ -248,38 +307,40 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
               <img
                 src={slide.img}
                 alt={slide.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-center"
                 loading="lazy"
               />
               <div
-                className="absolute inset-0 p-4 flex flex-col justify-end text-white"
-                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)' }}
+                className="absolute inset-0 p-3 sm:p-4 flex flex-col justify-end text-white"
+                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)' }}
               >
                 <span
-                  className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full w-max mb-1"
+                  className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full w-max mb-1"
                   style={{ backgroundColor: '#fbbf24', color: '#1e293b' }}
                 >
                   {slide.tag}
                 </span>
-                <h3 className="text-sm font-bold leading-snug" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+                <h3 className="text-sm font-bold leading-snug drop-shadow-md">
                   {slide.title}
                 </h3>
-                <p className="text-[11px] mt-0.5" style={{ color: '#d1d5db' }}>
+                <p className="text-[11px] mt-0.5 drop-shadow-sm opacity-90">
                   {slide.subtitle}
                 </p>
               </div>
             </div>
           ))}
-          {/* Dots */}
+          {/* Slider Dots */}
           <div className="absolute bottom-2.5 right-3 z-10 flex gap-1.5">
             {defaultSlides.map((_, i) => (
-              <span
+              <button
                 key={i}
-                className="rounded-full transition-all"
+                type="button"
+                onClick={() => setCurrentSlide(i)}
+                className="rounded-full transition-all cursor-pointer"
                 style={{
                   width: i === currentSlide ? 14 : 6,
                   height: 6,
-                  backgroundColor: i === currentSlide ? '#fbbf24' : 'rgba(255,255,255,0.5)'
+                  backgroundColor: i === currentSlide ? '#fbbf24' : 'rgba(255,255,255,0.6)'
                 }}
               />
             ))}
@@ -295,22 +356,22 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           </h3>
           <button
             type="button"
-            onClick={() => navigateTo('batches', 'batches-section')}
+            onClick={() => setIsAllBatchesOpen(true)}
             className="text-[11px] font-bold flex items-center gap-0.5 cursor-pointer"
             style={{ color: '#0066FF' }}
           >
-            See All <ChevronRight className="w-3.5 h-3.5" />
+            {t.seeAll} <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
           {displayPersonalizedCourses.map(course => (
             <div
               key={course.id}
-              className="shrink-0 rounded-2xl overflow-hidden shadow-sm flex flex-col"
-              style={{ width: '160px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
+              className="shrink-0 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between"
+              style={{ width: '220px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
             >
-              <div className="relative" style={{ aspectRatio: '16/10' }}>
+              <div className="relative" style={{ height: '110px' }}>
                 <img
                   src={course.image}
                   alt={course.title}
@@ -318,101 +379,108 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                   loading="lazy"
                 />
                 <span
-                  className="absolute top-1.5 left-1.5 text-[8px] font-bold uppercase px-1.5 py-0.5 rounded"
-                  style={{ backgroundColor: 'rgba(0,0,0,0.7)', color: '#fbbf24' }}
+                  className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: '#0066FF', color: '#ffffff' }}
                 >
                   {course.targetClass}
                 </span>
-              </div>
-              <div className="p-2 flex flex-col gap-1.5 flex-1">
-                <h4 className="text-[11px] font-bold leading-tight line-clamp-2" style={{ color: '#1e293b' }}>
-                  {course.title}
-                </h4>
-                <div className="mt-auto flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-bold" style={{ color: '#0066FF' }}>₹{course.discountFee}</span>
-                    <span className="text-[10px] line-through ml-1" style={{ color: '#94a3b8' }}>₹{course.fee}</span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedCourseForPayment(course)}
-                  className="w-full py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider cursor-pointer"
-                  style={{ backgroundColor: '#0066FF', color: '#ffffff' }}
+                <span
+                  className="absolute bottom-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded"
+                  style={{ backgroundColor: 'rgba(0,0,0,0.75)', color: '#ffffff' }}
                 >
-                  {t.enrollNow}
-                </button>
+                  ⭐ {course.rating}
+                </span>
+              </div>
+
+              <div className="p-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 className="text-xs font-bold line-clamp-2 leading-tight" style={{ color: '#1e293b' }}>
+                    {course.title}
+                  </h4>
+                  <p className="text-[10px] mt-1" style={{ color: '#94a3b8' }}>
+                    {course.instructor || 'Aman Arora & Senior Council'}
+                  </p>
+                </div>
+
+                <div className="mt-3 pt-2 flex items-center justify-between" style={{ borderTop: '1px solid #f1f5f9' }}>
+                  <div>
+                    <span className="text-xs font-bold" style={{ color: '#0066FF' }}>
+                      ₹{course.discountFee || course.fee}
+                    </span>
+                    {course.discountFee && course.discountFee < course.fee && (
+                      <span className="text-[10px] line-through ml-1" style={{ color: '#94a3b8' }}>
+                        ₹{course.fee}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCourseForPayment(course)}
+                    className="px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer"
+                    style={{ backgroundColor: '#0066FF', color: '#ffffff' }}
+                  >
+                    {t.enrollNow}
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ═══════════ CHAPTER NOTES WITH OFFLINE ═══════════ */}
+      {/* ═══════════ FREE STUDY NOTES & DPPS ═══════════ */}
       <div className="px-3 pt-4 space-y-2.5">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold" style={{ color: '#1e293b' }}>
-            {t.freeNotes}
+            {t.freeNotesDpp}
           </h3>
-          <button
-            type="button"
-            onClick={onOpenOfflineVault}
-            className="text-[11px] font-bold flex items-center gap-0.5 cursor-pointer"
-            style={{ color: '#059669' }}
-          >
-            {t.offlineVault} <ChevronRight className="w-3.5 h-3.5" />
-          </button>
+          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ backgroundColor: '#ecfdf5', color: '#059669' }}>
+            OFFLINE READY
+          </span>
         </div>
 
         <div className="space-y-2">
           {displayPersonalizedNotes.map(mat => {
-            const alreadySaved = isDocOffline(mat.id);
+            const offline = isDocOffline(mat.id);
             return (
               <div
                 key={mat.id}
-                className="rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm"
+                className="p-3 rounded-2xl flex items-center justify-between gap-2 shadow-sm"
                 style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div
                     className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: '#ecfdf5', color: '#059669' }}
+                    style={{ backgroundColor: '#eff6ff', color: '#0066FF' }}
                   >
                     <FileText className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <span
-                      className="text-[9px] font-bold uppercase px-1.5 rounded"
-                      style={{ color: '#059669', backgroundColor: '#ecfdf5' }}
-                    >
-                      {mat.targetClass} • {mat.subject}
-                    </span>
-                    <h4 className="text-xs font-bold truncate mt-0.5" style={{ color: '#1e293b' }}>
+                    <h4 className="text-xs font-bold truncate leading-tight" style={{ color: '#1e293b' }}>
                       {mat.title}
                     </h4>
+                    <p className="text-[10px] mt-0.5" style={{ color: '#94a3b8' }}>
+                      {mat.subject} • {mat.targetClass}
+                    </p>
                   </div>
                 </div>
 
-                <div className="shrink-0">
-                  {alreadySaved ? (
-                    <button
-                      type="button"
-                      onClick={onOpenOfflineVault}
-                      className="px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer"
-                      style={{ backgroundColor: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0' }}
+                <div className="shrink-0 flex items-center gap-1.5">
+                  {offline ? (
+                    <span
+                      className="px-2.5 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1"
+                      style={{ backgroundColor: '#ecfdf5', color: '#059669' }}
                     >
-                      <CheckCircle2 className="w-3 h-3" />
-                      {t.downloaded}
-                    </button>
+                      <CheckCircle2 className="w-3 h-3" /> Saved
+                    </span>
                   ) : (
                     <button
                       type="button"
                       onClick={() => handleSaveOffline(mat)}
-                      className="px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer"
-                      style={{ backgroundColor: '#059669', color: '#ffffff' }}
+                      className="px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                      style={{ backgroundColor: '#f1f5f9', color: '#475569' }}
                     >
-                      <DownloadCloud className="w-3 h-3" />
-                      Save
+                      <DownloadCloud className="w-3 h-3" /> Save
                     </button>
                   )}
                 </div>
@@ -422,7 +490,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
         </div>
       </div>
 
-      {/* ═══════════ VIDEO LECTURES ═══════════ */}
+      {/* ═══════════ VIDEO LECTURES (IN-APP PLAYER) ═══════════ */}
       {videos && videos.length > 0 && (
         <div className="px-3 pt-4 space-y-2.5">
           <div className="flex items-center justify-between">
@@ -431,7 +499,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
             </h3>
             <button
               type="button"
-              onClick={() => navigateTo('videos', 'videos-section')}
+              onClick={() => setIsAllVideosOpen(true)}
               className="text-[11px] font-bold flex items-center gap-0.5 cursor-pointer"
               style={{ color: '#dc2626' }}
             >
@@ -441,12 +509,10 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
 
           <div className="flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
             {videos.slice(0, 5).map((vid: any) => (
-              <a
+              <div
                 key={vid.id}
-                href={vid.youtubeUrl || (vid.youtubeId ? `https://youtube.com/watch?v=${vid.youtubeId}` : '#')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="shrink-0 rounded-2xl overflow-hidden shadow-sm block"
+                onClick={() => setSelectedVideoForPlayer(vid)}
+                className="shrink-0 rounded-2xl overflow-hidden shadow-sm block cursor-pointer transition-transform active:scale-95"
                 style={{ width: '180px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
               >
                 <div className="relative" style={{ aspectRatio: '16/9', backgroundColor: '#1e293b' }}>
@@ -456,16 +522,16 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                  <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}>
                     <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center"
+                      className="w-9 h-9 rounded-full flex items-center justify-center shadow-md"
                       style={{ backgroundColor: '#dc2626' }}
                     >
-                      <Play className="w-4 h-4 text-white fill-white" />
+                      <Play className="w-4 h-4 text-white fill-white ml-0.5" />
                     </div>
                   </div>
                   <span
-                    className="absolute bottom-1 right-1 text-[8px] font-mono px-1 rounded"
+                    className="absolute bottom-1 right-1 text-[8px] font-mono px-1 rounded font-bold"
                     style={{ backgroundColor: 'rgba(0,0,0,0.8)', color: '#ffffff' }}
                   >
                     {vid.duration || 'LIVE'}
@@ -479,22 +545,22 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                     {vid.instructor || 'Aman Arora Sir'}
                   </p>
                 </div>
-              </a>
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* ═══════════ INSTAGRAM REELS ═══════════ */}
+      {/* ═══════════ CAMPUS LIFE & HIGHLIGHTS (IN-APP MODAL) ═══════════ */}
       {instagramPosts && instagramPosts.length > 0 && (
         <div className="px-3 pt-4 space-y-2.5">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold" style={{ color: '#1e293b' }}>
-              Instagram Highlights
+              Campus Life & Topper Highlights
             </h3>
             <button
               type="button"
-              onClick={() => navigateTo('gallery', 'gallery-section')}
+              onClick={() => setIsAllGalleryOpen(true)}
               className="text-[11px] font-bold flex items-center gap-0.5 cursor-pointer"
               style={{ color: '#db2777' }}
             >
@@ -504,17 +570,15 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
 
           <div className="grid grid-cols-3 gap-2">
             {instagramPosts.slice(0, 3).map(post => (
-              <a
+              <div
                 key={post.id}
-                href={post.postUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block rounded-xl overflow-hidden relative shadow-sm"
-                style={{ aspectRatio: '1/1', border: '1px solid #e2e8f0' }}
+                onClick={() => setSelectedPhotoForModal(post)}
+                className="block rounded-xl overflow-hidden relative shadow-sm cursor-pointer transition-transform active:scale-95"
+                style={{ aspectRatio: '1/1', border: '1px solid #e2e8f0', backgroundColor: '#e2e8f0' }}
               >
                 <img
                   src={post.imageUrl}
-                  alt="LCC Instagram"
+                  alt={post.title}
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
@@ -525,7 +589,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                   <span>♥ {post.likes || 120}</span>
                   <span>💬 {post.comments || 15}</span>
                 </div>
-              </a>
+              </div>
             ))}
           </div>
         </div>
@@ -533,12 +597,21 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
 
       {/* ═══════════ ALL COURSES LIST ═══════════ */}
       <div className="px-3 pt-4 space-y-2.5">
-        <h3 className="text-sm font-bold" style={{ color: '#1e293b' }}>
-          {t.exploreAllCourses}
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold" style={{ color: '#1e293b' }}>
+            {t.exploreAllCourses}
+          </h3>
+          <button
+            type="button"
+            onClick={() => setIsAllBatchesOpen(true)}
+            className="text-[11px] font-bold text-[#0066FF] cursor-pointer"
+          >
+            Filter & View
+          </button>
+        </div>
 
         <div className="space-y-2">
-          {courses.slice(0, 6).map(c => (
+          {courses.slice(0, 5).map(c => (
             <div
               key={c.id}
               className="rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm"
@@ -553,7 +626,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                 />
                 <div className="min-w-0">
                   <span
-                    className="text-[9px] font-bold uppercase px-1.5 rounded"
+                    className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded"
                     style={{ color: '#0066FF', backgroundColor: '#eff6ff' }}
                   >
                     {c.targetClass}
@@ -562,8 +635,10 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                     {c.title}
                   </h4>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-[11px] font-bold" style={{ color: '#0066FF' }}>₹{c.discountFee}</span>
-                    <span className="text-[10px] line-through" style={{ color: '#94a3b8' }}>₹{c.fee}</span>
+                    <span className="text-[11px] font-bold" style={{ color: '#0066FF' }}>₹{c.discountFee || c.fee}</span>
+                    {c.discountFee && c.discountFee < c.fee && (
+                      <span className="text-[10px] line-through" style={{ color: '#94a3b8' }}>₹{c.fee}</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -571,7 +646,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedCourseForPayment(c)}
-                className="px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider cursor-pointer shrink-0"
+                className="px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer shrink-0"
                 style={{ backgroundColor: '#0066FF', color: '#ffffff' }}
               >
                 {t.enrollNow}
@@ -580,6 +655,309 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           ))}
         </div>
       </div>
+
+      {/* ═══════════ IN-APP ALL BATCHES MODAL ═══════════ */}
+      {isAllBatchesOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-5"
+            style={{ backgroundColor: '#ffffff', color: '#1e293b' }}
+          >
+            {/* Header */}
+            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0066FF] flex items-center justify-center font-bold">
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black">All Coaching Batches (2026-27)</h3>
+                  <p className="text-[10px] text-slate-500">Tap to enroll or view syllabus</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAllBatchesOpen(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Category Filter Chips */}
+            <div className="p-3 border-b border-slate-100 flex gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+              {[
+                { id: 'all', label: 'All Batches' },
+                { id: 'secondary', label: 'Class 9-10' },
+                { id: 'senior', label: 'Class 11-12' },
+                { id: 'computer', label: 'Computer DCA' },
+                { id: 'language', label: 'Spoken English' },
+                { id: 'primary', label: 'Primary (1-5)' },
+                { id: 'middle', label: 'Middle (6-8)' }
+              ].map(cat => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setBatchCategoryFilter(cat.id)}
+                  className="px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 cursor-pointer transition-all"
+                  style={{
+                    backgroundColor: batchCategoryFilter === cat.id ? '#0066FF' : '#f1f5f9',
+                    color: batchCategoryFilter === cat.id ? '#ffffff' : '#475569'
+                  }}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Courses List */}
+            <div className="p-4 overflow-y-auto space-y-3 flex-1">
+              {courses
+                .filter(c => batchCategoryFilter === 'all' || c.category === batchCategoryFilter)
+                .map(c => (
+                  <div
+                    key={c.id}
+                    className="p-3 rounded-2xl border border-slate-200 bg-white flex flex-col gap-2.5 shadow-sm"
+                  >
+                    <div className="flex gap-3 items-start">
+                      <img
+                        src={c.image}
+                        alt={c.title}
+                        className="w-16 h-16 rounded-xl object-cover shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-50 text-[#0066FF]">
+                          {c.targetClass}
+                        </span>
+                        <h4 className="text-xs font-bold text-slate-900 leading-tight mt-1">
+                          {c.title}
+                        </h4>
+                        <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
+                          {c.instructor}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                      <div>
+                        <span className="text-xs font-bold text-[#0066FF]">₹{c.discountFee || c.fee}</span>
+                        {c.discountFee && c.discountFee < c.fee && (
+                          <span className="text-[10px] line-through text-slate-400 ml-1">₹{c.fee}</span>
+                        )}
+                        <span className="text-[10px] text-slate-400 ml-2">• {c.duration}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAllBatchesOpen(false);
+                          setSelectedCourseForPayment(c);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-[#0066FF] text-white text-[10px] font-bold uppercase tracking-wider cursor-pointer"
+                      >
+                        Enroll Now
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════ IN-APP ALL VIDEOS MODAL ═══════════ */}
+      {isAllVideosOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-5"
+            style={{ backgroundColor: '#ffffff', color: '#1e293b' }}
+          >
+            {/* Header */}
+            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-red-50 text-red-600 flex items-center justify-center font-bold">
+                  <Play className="w-4 h-4 fill-red-600 ml-0.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black">Video Lectures & Masterclasses</h3>
+                  <p className="text-[10px] text-slate-500">Tap to watch directly inside the app</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAllVideosOpen(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Video List */}
+            <div className="p-4 overflow-y-auto space-y-3 flex-1">
+              {videos.map(vid => (
+                <div
+                  key={vid.id}
+                  onClick={() => {
+                    setIsAllVideosOpen(false);
+                    setSelectedVideoForPlayer(vid);
+                  }}
+                  className="p-2.5 rounded-2xl border border-slate-200 bg-white flex gap-3 items-center cursor-pointer shadow-sm active:scale-98 transition-transform"
+                >
+                  <div className="relative w-24 h-16 rounded-xl overflow-hidden shrink-0 bg-slate-900">
+                    <img
+                      src={vid.thumbnail || `https://img.youtube.com/vi/${vid.videoId || vid.youtubeId}/hqdefault.jpg`}
+                      alt={vid.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                      <div className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center">
+                        <Play className="w-3 h-3 text-white fill-white ml-0.5" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[9px] font-bold text-red-600 bg-red-50 px-1.5 py-0.2 rounded">
+                      {vid.targetClass || 'Lecture'}
+                    </span>
+                    <h4 className="text-xs font-bold text-slate-900 leading-tight mt-1 line-clamp-2">
+                      {vid.title}
+                    </h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      {vid.instructor} • {vid.duration || 'Video'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════ IN-APP ALL GALLERY & HIGHLIGHTS MODAL ═══════════ */}
+      {isAllGalleryOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-5"
+            style={{ backgroundColor: '#ffffff', color: '#1e293b' }}
+          >
+            {/* Header */}
+            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center font-bold">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black">Campus Life & Highlights</h3>
+                  <p className="text-[10px] text-slate-500">Tap any photo to view full size</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAllGalleryOpen(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Category Filter Chips */}
+            <div className="p-3 border-b border-slate-100 flex gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+              {[
+                { id: 'all', label: 'All Photos' },
+                { id: 'toppers', label: 'Toppers' },
+                { id: 'classroom', label: 'Classrooms' },
+                { id: 'event', label: 'Events & Labs' },
+                { id: 'students', label: 'Debates & Skills' }
+              ].map(cat => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setGalleryCategoryFilter(cat.id)}
+                  className="px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 cursor-pointer transition-all"
+                  style={{
+                    backgroundColor: galleryCategoryFilter === cat.id ? '#db2777' : '#f1f5f9',
+                    color: galleryCategoryFilter === cat.id ? '#ffffff' : '#475569'
+                  }}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Photo Grid */}
+            <div className="p-4 overflow-y-auto grid grid-cols-2 gap-2.5 flex-1">
+              {(galleryItems && galleryItems.length > 0 ? galleryItems : [])
+                .filter(item => galleryCategoryFilter === 'all' || item.category === galleryCategoryFilter)
+                .map(item => (
+                  <div
+                    key={item.id}
+                    onClick={() => setSelectedPhotoForModal(item)}
+                    className="rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm cursor-pointer active:scale-95 transition-transform"
+                  >
+                    <div style={{ aspectRatio: '4/3' }}>
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="p-2">
+                      <h4 className="text-[11px] font-bold text-slate-900 line-clamp-1">
+                        {item.title}
+                      </h4>
+                      <p className="text-[9px] text-slate-400 mt-0.5">
+                        {item.date || 'LCC Campus'}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════ FULL-SCREEN PHOTO LIGHTBOX MODAL ═══════════ */}
+      {selectedPhotoForModal && (
+        <div
+          onClick={() => setSelectedPhotoForModal(null)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="relative w-full max-w-sm rounded-3xl overflow-hidden bg-slate-900 border border-slate-800 shadow-2xl text-white"
+          >
+            <button
+              type="button"
+              onClick={() => setSelectedPhotoForModal(null)}
+              className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center cursor-pointer shadow-md"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="w-full" style={{ maxHeight: '60vh', backgroundColor: '#000000' }}>
+              <img
+                src={selectedPhotoForModal.imageUrl}
+                alt={selectedPhotoForModal.title}
+                className="w-full h-full object-contain max-h-[60vh] mx-auto"
+              />
+            </div>
+
+            <div className="p-4 space-y-2 bg-slate-900">
+              <h4 className="text-xs sm:text-sm font-bold text-white leading-snug">
+                {selectedPhotoForModal.title}
+              </h4>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                {selectedPhotoForModal.description || 'L.C.C. Learning Coaching Center, Varanasi'}
+              </p>
+              <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
+                <span>{selectedPhotoForModal.date || 'Official L.C.C. Record'}</span>
+                {selectedPhotoForModal.likes && (
+                  <span className="text-pink-400 font-bold">♥ {selectedPhotoForModal.likes} Likes</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ═══════════ BOTTOM NAVIGATION DOCK ═══════════ */}
       <div
@@ -605,7 +983,9 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
         <button
           type="button"
           onClick={() => {
-            if (currentStudent) {
+            if (currentStaff) {
+              navigateTo('staff-portal');
+            } else if (currentStudent) {
               navigateTo('student-portal');
             } else {
               setIsStudentAuthModalOpen(true);
@@ -614,7 +994,9 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           className="flex flex-col items-center justify-center gap-0.5 cursor-pointer py-1"
         >
           <BookOpen className="w-5 h-5" style={{ color: '#64748b' }} />
-          <span className="text-[10px] font-semibold truncate max-w-full" style={{ color: '#64748b' }}>{t.myBatches}</span>
+          <span className="text-[10px] font-semibold truncate max-w-full" style={{ color: '#64748b' }}>
+            {currentStaff ? 'Desk' : t.myBatches}
+          </span>
         </button>
 
         {/* Offline Vault */}

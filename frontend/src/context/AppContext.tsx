@@ -565,6 +565,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     };
     syncBackend();
+
+    // Live sync: Whenever user refocuses app or every 30 seconds, pull latest updates from admin
+    const handleSyncTrigger = () => {
+      syncBackend();
+    };
+    window.addEventListener('focus', handleSyncTrigger);
+    window.addEventListener('online', handleSyncTrigger);
+    const syncInterval = setInterval(syncBackend, 30000);
+
+    return () => {
+      window.removeEventListener('focus', handleSyncTrigger);
+      window.removeEventListener('online', handleSyncTrigger);
+      clearInterval(syncInterval);
+    };
   }, []);
 
   const refreshStaffData = async () => {

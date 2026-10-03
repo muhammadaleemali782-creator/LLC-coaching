@@ -82,10 +82,6 @@ export const StudentAuthModal: React.FC = () => {
         setIsStudentAuthModalOpen(false);
         setEmail('');
         setPassword('');
-        // Trigger quick survey if student has not yet personalized their subjects
-        if (!userObj?.selectedSubjects || userObj.selectedSubjects.length === 0) {
-          setIsGoalModalOpen(true);
-        }
       }
     } else {
       if (!name || !email || !phone || !password) {

@@ -42,6 +42,8 @@ export interface TranslationDictionary {
   navHome: string;
   myBatches: string;
   askDoubt: string;
+  seeAll: string;
+  freeNotesDpp: string;
 }
 
 export const translations: Record<AppLanguage, TranslationDictionary> = {
@@ -83,7 +85,9 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
     staffPortal: 'Staff & Faculty Portal',
     navHome: 'Home',
     myBatches: 'My Batches',
-    askDoubt: 'Ask Doubt'
+    askDoubt: 'Ask Doubt',
+    seeAll: 'See All',
+    freeNotesDpp: 'Free Notes & DPPs'
   },
   hinglish: {
     appName: 'L.C.C. Learning App',
@@ -123,7 +127,9 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
     staffPortal: 'Staff aur Teacher Portal',
     navHome: 'Home',
     myBatches: 'Mere Batches',
-    askDoubt: 'Doubt Pucho'
+    askDoubt: 'Doubt Pucho',
+    seeAll: 'Sabhi Dekho',
+    freeNotesDpp: 'Free Notes aur DPPs'
   },
   hi: {
     appName: 'एल.सी.सी. लर्निंग ऐप',
@@ -163,7 +169,9 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
     staffPortal: 'शिक्षक एवं स्टाफ पोर्टल',
     navHome: 'होम',
     myBatches: 'मेरे बैचेस',
-    askDoubt: 'संदेह पूछें'
+    askDoubt: 'संदेह पूछें',
+    seeAll: 'सभी देखें',
+    freeNotesDpp: 'अध्याय नोट्स और डीपीपी'
   },
   mr: {
     appName: 'एल.सी.सी. लर्निंग अॅप',
@@ -203,7 +211,9 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
     staffPortal: 'स्टाफ आणि शिक्षक पोर्टल',
     navHome: 'मुख्यपृष्ठ',
     myBatches: 'माझे बॅचेस',
-    askDoubt: 'शंका विचारा'
+    askDoubt: 'शंका विचारा',
+    seeAll: 'सर्व पहा',
+    freeNotesDpp: 'धडा नोट्स आणि डीपीपी'
   }
 };
 

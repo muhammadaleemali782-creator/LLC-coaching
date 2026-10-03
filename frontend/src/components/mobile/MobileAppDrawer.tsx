@@ -12,7 +12,8 @@ import {
   X,
   Target,
   ArrowRight,
-  ChevronRight
+  ChevronRight,
+  GraduationCap
 } from 'lucide-react';
 import { getTranslation, AppLanguage } from '../../utils/i18n';
 import { getOfflineDocs } from '../../utils/offlineStorage';
@@ -84,16 +85,26 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
             <div className="flex items-center gap-3">
               <div
                 className="w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-bold shadow-md"
-                style={{ backgroundColor: '#fbbf24', color: '#1e293b' }}
+                style={{ backgroundColor: currentStaff ? '#6366f1' : '#fbbf24', color: currentStaff ? '#ffffff' : '#1e293b' }}
               >
-                {currentStudent ? currentStudent.name.charAt(0).toUpperCase() : <User className="w-6 h-6" />}
+                {currentStaff ? (
+                  <GraduationCap className="w-6 h-6 text-white" />
+                ) : currentStudent ? (
+                  currentStudent.name.charAt(0).toUpperCase()
+                ) : (
+                  <User className="w-6 h-6" />
+                )}
               </div>
               <div>
                 <h4 className="text-sm font-bold truncate" style={{ maxWidth: '170px' }}>
-                  {currentStudent ? currentStudent.name : t.hiLearner}
+                  {currentStaff ? currentStaff.name : currentStudent ? currentStudent.name : t.hiLearner}
                 </h4>
-                <p className="text-[11px] font-medium mt-0.5" style={{ color: '#bfdbfe' }}>
-                  {currentStudent ? (currentStudent.phone || currentStudent.email) : 'L.C.C. Learning App'}
+                <p className="text-[11px] font-medium mt-0.5 truncate" style={{ color: '#bfdbfe', maxWidth: '170px' }}>
+                  {currentStaff
+                    ? `${currentStaff.designation || 'Faculty'} • ${currentStaff.branch?.split(' ')[0] || 'Main'}`
+                    : currentStudent
+                    ? (currentStudent.phone || currentStudent.email)
+                    : 'L.C.C. Learning App'}
                 </p>
               </div>
             </div>
@@ -286,6 +297,15 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>{t.logout}</span>
+            </button>
+          ) : currentStaff ? (
+            <button
+              onClick={() => { logoutStaff(); onClose(); }}
+              className="w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+              style={{ backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Logout Staff Desk</span>
             </button>
           ) : (
             <button
