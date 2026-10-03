@@ -387,7 +387,7 @@ export const StaffDashboard: React.FC = () => {
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-bold shadow-xs hover:bg-slate-800 cursor-pointer transition-all active:scale-95"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-primary-400" />
-            <span>Back to Learning App</span>
+            <span>{typeof window !== 'undefined' && window.innerWidth >= 1024 ? 'Back to Website Home' : 'Back to Learning App'}</span>
           </button>
         </div>
 

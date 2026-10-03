@@ -101,14 +101,16 @@ const MainContent: React.FC = () => {
     setIsOfflineVaultOpen
   } = useApp();
 
-  // On App Open: Immediately prompt Login / Register if user is not authenticated
+  // On Mobile App Open (< 1024px): Immediately prompt Login / Register if user is not authenticated
   React.useEffect(() => {
-    const hasStudent = localStorage.getItem('lcc_student_session');
-    const hasAdmin = localStorage.getItem('lcc_admin_authenticated') === 'true';
-    const hasStaff = localStorage.getItem('lcc_staff_session');
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      const hasStudent = localStorage.getItem('lcc_student_session');
+      const hasAdmin = localStorage.getItem('lcc_admin_authenticated') === 'true';
+      const hasStaff = localStorage.getItem('lcc_staff_session');
 
-    if (!hasStudent && !hasAdmin && !hasStaff) {
-      setIsStudentAuthModalOpen(true);
+      if (!hasStudent && !hasAdmin && !hasStaff) {
+        setIsStudentAuthModalOpen(true);
+      }
     }
   }, [setIsStudentAuthModalOpen]);
 

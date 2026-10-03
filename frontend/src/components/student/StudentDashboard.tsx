@@ -192,7 +192,7 @@ export const StudentDashboard: React.FC = () => {
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white border border-slate-200 text-slate-700 text-xs font-bold shadow-xs hover:bg-slate-50 cursor-pointer transition-all active:scale-95"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-[#0066FF]" />
-            <span>Back to Learning App</span>
+            <span>{typeof window !== 'undefined' && window.innerWidth >= 1024 ? 'Back to Website Home' : 'Back to Learning App'}</span>
           </button>
         </div>
 
