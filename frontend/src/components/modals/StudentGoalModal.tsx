@@ -9,24 +9,34 @@ interface StudentGoalModalProps {
 }
 
 const CLASS_OPTIONS = [
-  { id: 'Class 9', label: 'Class 9th', tag: 'Foundation', icon: '🌱' },
-  { id: 'Class 10', label: 'Class 10th (Board)', tag: 'Board Exam 2026', icon: '🎯' },
-  { id: 'Class 11', label: 'Class 11th', tag: 'Senior School', icon: '🔬' },
-  { id: 'Class 12', label: 'Class 12th (Board)', tag: 'Board & Entrance', icon: '🏆' },
-  { id: 'NEET/JEE', label: 'NEET / JEE Foundation', tag: 'Medical & Engg', icon: '🩺' },
+  { id: 'Class 1-5', label: 'Class 1 to 5 Foundation', tag: 'Junior Champs', icon: '🌱' },
+  { id: 'Class 6-8', label: 'Class 6 to 8 Middle School', tag: 'Core Strong', icon: '📚' },
+  { id: 'Class 9-10', label: 'Class 9 & 10 (Board)', tag: 'Target 95%+', icon: '🎯' },
+  { id: 'Class 11-12', label: 'Class 11 & 12 Science', tag: 'PCM / PCB Boards', icon: '🔬' },
+  { id: 'NEET / JEE', label: 'NEET / JEE Foundation', tag: 'Medical & Engg', icon: '🩺' },
   { id: 'Computer DCA', label: 'Computer DCA / ADCA', tag: 'Govt Certified', icon: '💻' },
   { id: 'Spoken English', label: 'Spoken English Masterclass', tag: 'Fluency & Skills', icon: '🗣️' }
 ];
+
+const CLASS_SUBJECT_DEFAULTS: Record<string, string[]> = {
+  'Class 1-5': ['Mathematics', 'English', 'Hindi'],
+  'Class 6-8': ['Mathematics', 'Science', 'Social Studies', 'English'],
+  'Class 9-10': ['Mathematics', 'Science', 'Social Studies', 'English'],
+  'Class 11-12': ['Science', 'Chemistry', 'Mathematics'],
+  'NEET / JEE': ['Science', 'Chemistry', 'Biology', 'Mathematics'],
+  'Computer DCA': ['Computer'],
+  'Spoken English': ['English']
+};
 
 const SUBJECT_OPTIONS = [
   { id: 'Mathematics', label: 'Mathematics', icon: '📐' },
   { id: 'Science', label: 'Science / Physics', icon: '🔬' },
   { id: 'Chemistry', label: 'Chemistry', icon: '⚗️' },
   { id: 'Biology', label: 'Biology', icon: '🧬' },
-  { id: 'Computer', label: 'Computer & Coding', icon: '💻' },
+  { id: 'Computer', label: 'Computer & Tally Prime', icon: '💻' },
   { id: 'English', label: 'English & Grammar', icon: '🗣️' },
   { id: 'Hindi', label: 'Hindi Literature', icon: '📖' },
-  { id: 'Social Studies', label: 'Social Studies', icon: '🌍' }
+  { id: 'Social Studies', label: 'Social Studies (SST)', icon: '🌍' }
 ];
 
 const AVATAR_OPTIONS = [
@@ -38,18 +48,25 @@ export const StudentGoalModal: React.FC<StudentGoalModalProps> = ({ isOpen, onCl
   const t = getTranslation(language);
 
   const [selectedClass, setSelectedClass] = useState<string>(
-    currentStudent?.targetClass || currentStudent?.classEnrolled || 'Class 10'
+    currentStudent?.targetClass || currentStudent?.classEnrolled || 'Class 9-10'
   );
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>(
     currentStudent?.selectedSubjects && currentStudent.selectedSubjects.length > 0
       ? currentStudent.selectedSubjects
-      : ['Mathematics', 'Science']
+      : ['Mathematics', 'Science', 'English']
   );
   const [selectedAvatar, setSelectedAvatar] = useState<string>(
     currentStudent?.avatar || '🎓'
   );
 
   if (!isOpen) return null;
+
+  const handleClassSelect = (classId: string) => {
+    setSelectedClass(classId);
+    if (CLASS_SUBJECT_DEFAULTS[classId]) {
+      setSelectedSubjects(CLASS_SUBJECT_DEFAULTS[classId]);
+    }
+  };
 
   const toggleSubject = (subjId: string) => {
     if (selectedSubjects.includes(subjId)) {
@@ -110,7 +127,7 @@ export const StudentGoalModal: React.FC<StudentGoalModalProps> = ({ isOpen, onCl
                   <button
                     key={c.id}
                     type="button"
-                    onClick={() => setSelectedClass(c.id)}
+                    onClick={() => handleClassSelect(c.id)}
                     className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                       isSelected
                         ? 'border-[#0066FF] bg-blue-50/80 dark:bg-blue-950/60 ring-2 ring-[#0066FF]/30'

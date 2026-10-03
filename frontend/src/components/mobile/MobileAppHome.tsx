@@ -85,20 +85,36 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
     return () => clearInterval(timer);
   }, [defaultSlides.length]);
 
-  // Personalized Batches
+  // Personalized Batches - matching survey choices
   const matchedCourses = courses.filter(c => {
     const cClass = (c.targetClass || '').toLowerCase();
+    const cTitle = (c.title || '').toLowerCase();
+    const cCat = (c.category || '').toLowerCase();
     const gClass = studentGoal.toLowerCase();
-    return cClass.includes(gClass) || gClass.includes(cClass) || c.category === 'secondary' || c.category === 'senior';
+
+    if (cClass.includes(gClass) || gClass.includes(cClass) || cTitle.includes(gClass) || cCat.includes(gClass)) {
+      return true;
+    }
+    if (gClass.includes('1-5') && (c.category === 'primary' || cClass.includes('1-5'))) return true;
+    if (gClass.includes('6-8') && (c.category === 'middle' || cClass.includes('6-8'))) return true;
+    if ((gClass.includes('9') || gClass.includes('10')) && (c.category === 'secondary' || cClass.includes('9') || cClass.includes('10'))) return true;
+    if ((gClass.includes('11') || gClass.includes('12')) && (c.category === 'senior' || cClass.includes('11') || cClass.includes('12'))) return true;
+    if ((gClass.includes('dca') || gClass.includes('computer')) && (c.category === 'computer' || cTitle.includes('computer') || cTitle.includes('dca'))) return true;
+    if ((gClass.includes('english') || gClass.includes('spoken')) && (cTitle.includes('english') || cTitle.includes('spoken') || cTitle.includes('fluency'))) return true;
+    if ((gClass.includes('neet') || gClass.includes('jee')) && (cTitle.includes('neet') || cTitle.includes('jee') || c.category === 'senior')) return true;
+
+    return false;
   });
   const displayPersonalizedCourses = matchedCourses.length > 0 ? matchedCourses.slice(0, 4) : courses.slice(0, 4);
 
-  // Personalized Study Materials
+  // Personalized Study Materials matching survey class & subjects
   const matchedMaterials = studyMaterials.filter(m => {
     const mClass = (m.targetClass || '').toLowerCase();
+    const mSubj = (m.subject || '').toLowerCase();
     const gClass = studentGoal.toLowerCase();
+
     const matchClass = mClass.includes(gClass) || gClass.includes(mClass);
-    const matchSubj = studentSubjects.some(s => (m.subject || '').toLowerCase().includes(s.toLowerCase()));
+    const matchSubj = studentSubjects.some(s => mSubj.includes(s.toLowerCase()) || s.toLowerCase().includes(mSubj));
     return matchClass || matchSubj;
   });
   const displayPersonalizedNotes = matchedMaterials.length > 0 ? matchedMaterials.slice(0, 4) : studyMaterials.slice(0, 4);

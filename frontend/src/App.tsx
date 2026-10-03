@@ -91,6 +91,9 @@ const MainContent: React.FC = () => {
     notices,
     navigateTo,
     isInitialSyncLoading,
+    currentStudent,
+    currentStaff,
+    setIsStudentAuthModalOpen,
     isGoalModalOpen,
     setIsGoalModalOpen,
     isDrawerOpen,
@@ -98,6 +101,17 @@ const MainContent: React.FC = () => {
     isOfflineVaultOpen,
     setIsOfflineVaultOpen
   } = useApp();
+
+  // On App Open: Immediately prompt Login / Register if user is not authenticated
+  React.useEffect(() => {
+    const hasStudent = localStorage.getItem('lcc_student_session');
+    const hasAdmin = localStorage.getItem('lcc_admin_authenticated') === 'true';
+    const hasStaff = localStorage.getItem('lcc_staff_session');
+
+    if (!hasStudent && !hasAdmin && !hasStaff) {
+      setIsStudentAuthModalOpen(true);
+    }
+  }, [setIsStudentAuthModalOpen]);
 
   // Apply visual overrides across page reloads and dynamic renders permanently
   React.useEffect(() => {

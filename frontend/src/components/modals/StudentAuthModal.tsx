@@ -4,7 +4,7 @@ import { User, Mail, Lock, Phone, X, GraduationCap, ArrowRight, Loader2, KeyRoun
 import { ForgotPasswordModal } from './ForgotPasswordModal';
 
 export const StudentAuthModal: React.FC = () => {
-  const { isStudentAuthModalOpen, setIsStudentAuthModalOpen, loginStudent, loginStaff, registerStudent, updateStudentPassword, navigateTo, showToast } = useApp();
+  const { isStudentAuthModalOpen, setIsStudentAuthModalOpen, setIsGoalModalOpen, loginStudent, loginStaff, registerStudent, updateStudentPassword, navigateTo, showToast } = useApp();
   const [tab, setTab] = useState<'student' | 'staff' | 'register'>('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -82,6 +82,10 @@ export const StudentAuthModal: React.FC = () => {
         setIsStudentAuthModalOpen(false);
         setEmail('');
         setPassword('');
+        // Trigger quick survey if student has not yet personalized their subjects
+        if (!userObj?.selectedSubjects || userObj.selectedSubjects.length === 0) {
+          setIsGoalModalOpen(true);
+        }
       }
     } else {
       if (!name || !email || !phone || !password) {
@@ -93,6 +97,7 @@ export const StudentAuthModal: React.FC = () => {
       setIsLoading(false);
       if (success) {
         setIsStudentAuthModalOpen(false);
+        setIsGoalModalOpen(true);
         setName('');
         setEmail('');
         setPhone('');
