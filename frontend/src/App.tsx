@@ -34,7 +34,6 @@ import { StaffDashboard } from './components/staff/StaffDashboard';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { LiveVisualEditor, applyVisualOverrides, DEFAULT_SECTION_ORDER } from './components/admin/LiveVisualEditor';
 import { ToastContainer } from './components/Toast';
-import { Toaster } from 'sonner';
 import { ScreenProtectionGuard } from './components/common/ScreenProtectionGuard';
 
 // Physics Wallah EdTech App Additions
@@ -171,7 +170,7 @@ const MainContent: React.FC = () => {
       theme === 'dark' ? 'bg-slate-950 text-slate-100 dark' : 'bg-white text-slate-900'
     }`}>
       <div>
-        <div className={activeView === 'home' ? 'hidden lg:block' : ''}>
+        <div className="hidden lg:block">
           <Navbar />
         </div>
 
@@ -336,7 +335,7 @@ const MainContent: React.FC = () => {
       </div>
 
       {activeView !== 'admin-panel' && (
-        <div className={activeView === 'home' ? 'hidden lg:block' : ''}>
+        <div className="hidden lg:block">
           <Footer />
         </div>
       )}
@@ -348,7 +347,6 @@ const MainContent: React.FC = () => {
       <StudentAuthModal />
       <AdminAuthModal />
       <ToastContainer />
-      <Toaster richColors position="top-right" />
       <ScreenProtectionGuard />
 
       {/* Mobile EdTech App Drawer & Modals */}

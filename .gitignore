@@ -36,3 +36,5 @@ __pycache__/
 build_apk_tmp/
 .gradle/
 local.properties
+
+*.png

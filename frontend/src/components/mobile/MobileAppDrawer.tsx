@@ -291,7 +291,7 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
         <div className="p-3" style={{ backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
           {currentStudent ? (
             <button
-              onClick={() => { logoutStudent(); onClose(); }}
+              onClick={() => { logoutStudent(); onClose(); setIsStudentAuthModalOpen(true); }}
               className="w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
               style={{ backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}
             >
@@ -300,7 +300,7 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
             </button>
           ) : currentStaff ? (
             <button
-              onClick={() => { logoutStaff(); onClose(); }}
+              onClick={() => { logoutStaff(); onClose(); setIsStudentAuthModalOpen(true); }}
               className="w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
               style={{ backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}
             >

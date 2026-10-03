@@ -24,7 +24,8 @@ import {
   KeyRound,
   X,
   Check,
-  Loader2
+  Loader2,
+  ArrowLeft
 } from 'lucide-react';
 import { Youtube } from '../SocialIcons';
 import confetti from 'canvas-confetti';
@@ -182,6 +183,18 @@ export const StudentDashboard: React.FC = () => {
             </button>
           </div>
         )}
+
+        {/* Back to Home Button */}
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => navigateTo('home')}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white border border-slate-200 text-slate-700 text-xs font-bold shadow-xs hover:bg-slate-50 cursor-pointer transition-all active:scale-95"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-[#0066FF]" />
+            <span>Back to Learning App</span>
+          </button>
+        </div>
 
         {/* Welcome Header Card */}
         <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-card-clean flex flex-col md:flex-row items-center justify-between gap-6">

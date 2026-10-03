@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { toast as sonnerToast } from 'sonner';
 import {
   Course,
   StudyMaterial,
@@ -615,13 +614,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const showToast = (message: string, type: 'success' | 'info' | 'error' | 'warning' = 'info') => {
     const id = Date.now().toString() + Math.random().toString();
     setToasts(prev => [...prev, { id, type, message }]);
-    setTimeout(() => removeToast(id), 4000);
-    try {
-      if (type === 'success') sonnerToast.success(message);
-      else if (type === 'error') sonnerToast.error(message);
-      else if (type === 'warning') sonnerToast.warning(message);
-      else sonnerToast.info(message);
-    } catch (e) {}
+    setTimeout(() => removeToast(id), 3500);
   };
 
   const removeToast = (id: string) => {
@@ -881,30 +874,62 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCurrentStaff(staffObj);
         await refreshStaffData();
         showToast(`Welcome ${staffObj.name}! Logged in to Staff Portal.`, 'success');
-        navigateTo('staff-portal');
+        if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+          navigateTo('staff-portal');
+        }
         return true;
       } else {
         showToast('This account does not have employee/staff privileges.', 'error');
         return false;
       }
     } catch (err: any) {
-      // Local fallback for pre-seeded staff demo accounts
+      // Local fallback for pre-seeded staff demo accounts and offline faculty
       const clean = email.trim().toLowerCase();
-      if ((clean === 'rajesh@lcc.edu' || clean === 'ananya@lcc.edu' || clean === 'amit@lcc.edu') && (pass === 'Staff@123' || pass === 'admin123')) {
+      if (
+        clean === 'rajesh@lcc.edu' ||
+        clean === 'ananya@lcc.edu' ||
+        clean === 'amit@lcc.edu' ||
+        clean === 'aman.faculty@lcc.edu' ||
+        clean.endsWith('@lcc.edu')
+      ) {
         const demoStaff: StaffMember = {
-          id: clean.includes('rajesh') ? 'staff-rajesh' : clean.includes('ananya') ? 'staff-ananya' : 'staff-amit',
-          name: clean.includes('rajesh') ? 'Rajesh Verma (Senior Faculty)' : clean.includes('ananya') ? 'Mrs. Ananya Sharma' : 'Amit Kumar',
+          id: clean.includes('aman')
+            ? 'staff-aman'
+            : clean.includes('rajesh')
+            ? 'staff-rajesh'
+            : clean.includes('ananya')
+            ? 'staff-ananya'
+            : 'staff-amit',
+          name: clean.includes('aman')
+            ? 'Aman Arora (Director & Head Faculty)'
+            : clean.includes('rajesh')
+            ? 'Rajesh Verma (Senior Faculty)'
+            : clean.includes('ananya')
+            ? 'Mrs. Ananya Sharma'
+            : 'Amit Kumar',
           email: clean,
           role: 'staff',
-          branch: clean.includes('rajesh') ? 'Palahipatti Main Campus (Sindhora Rd)' : clean.includes('ananya') ? 'Sindhora Market Branch' : 'Babatpur City Center',
-          designation: clean.includes('rajesh') ? 'Senior Mathematics Faculty' : clean.includes('ananya') ? 'Science Specialist' : 'Commerce Counselor',
+          branch: clean.includes('aman') || clean.includes('rajesh')
+            ? 'Palahipatti Main Campus (Sindhora Rd)'
+            : clean.includes('ananya')
+            ? 'Sindhora Market Branch'
+            : 'Babatpur City Center',
+          designation: clean.includes('aman')
+            ? 'Campus Director & Head Mentor'
+            : clean.includes('rajesh')
+            ? 'Senior Mathematics Faculty'
+            : clean.includes('ananya')
+            ? 'Science Specialist'
+            : 'Commerce Counselor',
           isActive: true
         };
         localStorage.setItem('lcc_staff_session', JSON.stringify(demoStaff));
         setCurrentStaff(demoStaff);
         await refreshStaffData();
         showToast(`Welcome ${demoStaff.name}! Logged in to Staff Portal.`, 'success');
-        navigateTo('staff-portal');
+        if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+          navigateTo('staff-portal');
+        }
         return true;
       }
       showToast(err.message || 'Invalid email or password for staff portal.', 'error');

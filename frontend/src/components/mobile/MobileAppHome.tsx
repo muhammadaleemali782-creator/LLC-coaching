@@ -170,6 +170,8 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
         <div className="flex items-center gap-2 min-w-0">
           <button
             type="button"
+            id="mobile-drawer-toggle"
+            aria-label="Open App Menu"
             onClick={onOpenDrawer}
             className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer shrink-0"
             style={{ backgroundColor: '#fbbf24', color: '#1e293b' }}
@@ -676,6 +678,8 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
               </div>
               <button
                 type="button"
+                id="close-batches-sheet"
+                aria-label="Close Batches Sheet"
                 onClick={() => setIsAllBatchesOpen(false)}
                 className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center cursor-pointer"
               >
@@ -783,6 +787,8 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
               </div>
               <button
                 type="button"
+                id="close-videos-sheet"
+                aria-label="Close Videos Sheet"
                 onClick={() => setIsAllVideosOpen(false)}
                 className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center cursor-pointer"
               >
@@ -851,6 +857,8 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
               </div>
               <button
                 type="button"
+                id="close-gallery-sheet"
+                aria-label="Close Gallery Sheet"
                 onClick={() => setIsAllGalleryOpen(false)}
                 className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center cursor-pointer"
               >
@@ -927,6 +935,8 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           >
             <button
               type="button"
+              id="close-photo-lightbox"
+              aria-label="Close Photo Lightbox"
               onClick={() => setSelectedPhotoForModal(null)}
               className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center cursor-pointer shadow-md"
             >
@@ -960,7 +970,8 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
       )}
 
       {/* ═══════════ BOTTOM NAVIGATION DOCK ═══════════ */}
-      <div
+      <nav
+        aria-label="Mobile Bottom Navigation"
         className="fixed bottom-0 left-0 right-0 z-40 grid grid-cols-5 items-center shadow-2xl"
         style={{
           backgroundColor: '#ffffff',
@@ -1029,7 +1040,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           <User className="w-5 h-5" style={{ color: '#64748b' }} />
           <span className="text-[10px] font-semibold truncate max-w-full" style={{ color: '#64748b' }}>Profile</span>
         </button>
-      </div>
+      </nav>
 
     </div>
   );

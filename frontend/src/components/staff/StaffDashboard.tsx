@@ -23,6 +23,7 @@ import {
   Send,
   BookOpen,
   ArrowRight,
+  ArrowLeft,
   FileText
 } from 'lucide-react';
 
@@ -377,7 +378,19 @@ export const StaffDashboard: React.FC = () => {
   // IF LOGGED IN: Render Staff Command Dashboard
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Back to Home Button */}
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => navigateTo('home')}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-bold shadow-xs hover:bg-slate-800 cursor-pointer transition-all active:scale-95"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-primary-400" />
+            <span>Back to Learning App</span>
+          </button>
+        </div>
+
         {/* Top Header Card */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
