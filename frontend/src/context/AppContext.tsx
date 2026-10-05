@@ -194,6 +194,8 @@ export interface AppContextType {
   setIsDrawerOpen: (open: boolean) => void;
   isOfflineVaultOpen: boolean;
   setIsOfflineVaultOpen: (open: boolean) => void;
+  isLiveSupportChatOpen: boolean;
+  setIsLiveSupportChatOpen: (open: boolean) => void;
   updateStudentGoal: (targetClass: string, selectedSubjects: string[], avatar: string) => Promise<boolean>;
 }
 
@@ -326,12 +328,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [notices, setNotices] = useState<Notice[]>(() => loadSaved('lcc_notices', INITIAL_NOTICES));
   const [videos, setVideos] = useState<VideoLecture[]>(() => {
     const saved = loadSaved<VideoLecture[]>('lcc_videos', INITIAL_VIDEOS);
-    const hasDummyRick = saved.some(v => v.youtubeId === 'kJQP7kiw5Fk' || v.youtubeId === 'dQw4w9WgXcQ' || v.videoId === 'dQw4w9WgXcQ');
-    if (hasDummyRick) {
+    const cleaned = (saved || []).filter(v => v.id === 'v-1789836144774' || v.id.startsWith('v-17') || (v.id !== 'vid-1' && v.id !== 'vid-2' && v.id !== 'vid-3' && v.id !== 'vid-4' && v.id !== 'vid-5' && v.id !== 'v-1' && v.id !== 'v-2' && v.id !== 'v-3' && v.id !== 'v-4' && v.id !== 'v-5'));
+    if (cleaned.length === 0) {
       localStorage.setItem('lcc_videos', JSON.stringify(INITIAL_VIDEOS));
       return INITIAL_VIDEOS;
     }
-    return saved && saved.length > 0 ? saved : INITIAL_VIDEOS;
+    localStorage.setItem('lcc_videos', JSON.stringify(cleaned));
+    return cleaned;
   });
   const [instagramPosts, setInstagramPosts] = useState<InstagramPost[]>(() => {
     const saved = loadSaved<InstagramPost[]>('lcc_instagram', []);
@@ -421,6 +424,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isGoalModalOpen, setIsGoalModalOpen] = useState<boolean>(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [isOfflineVaultOpen, setIsOfflineVaultOpen] = useState<boolean>(false);
+  const [isLiveSupportChatOpen, setIsLiveSupportChatOpen] = useState<boolean>(false);
 
   const updateStudentGoal = async (targetClass: string, selectedSubjects: string[], avatar: string): Promise<boolean> => {
     if (!currentStudent) {
@@ -1863,6 +1867,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsDrawerOpen,
         isOfflineVaultOpen,
         setIsOfflineVaultOpen,
+        isLiveSupportChatOpen,
+        setIsLiveSupportChatOpen,
         updateStudentGoal
       }}
     >

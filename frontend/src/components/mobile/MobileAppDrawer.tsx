@@ -41,7 +41,8 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
     language,
     setLanguage,
     websiteSettings,
-    setIsStudentAuthModalOpen
+    setIsStudentAuthModalOpen,
+    setIsLiveSupportChatOpen
   } = useApp();
 
   const t = getTranslation(language);
@@ -237,21 +238,21 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
               Doubt Support
             </span>
 
-            <a
-              href={`https://wa.me/91${contactPhone}?text=${encodeURIComponent(
-                `Hello Director Aman Arora Sir, I am student ${currentStudent?.name || ''} from ${studentGoal}. I have a doubt in ${studentSubjects}. Please help.`
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full flex items-center justify-between p-2.5 rounded-xl transition-colors"
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                setIsLiveSupportChatOpen(true);
+              }}
+              className="w-full flex items-center justify-between p-2.5 rounded-xl transition-colors cursor-pointer text-left"
               style={{ backgroundColor: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0' }}
             >
               <div className="flex items-center gap-2">
                 <MessageSquare className="w-4 h-4" style={{ color: '#059669' }} />
-                <span>1:1 WhatsApp Teacher Doubt</span>
+                <span>Live Student & Teacher Doubt Desk</span>
               </div>
               <ArrowRight className="w-3.5 h-3.5" />
-            </a>
+            </button>
           </div>
 
           {/* Section: Staff & Admin Switching */}

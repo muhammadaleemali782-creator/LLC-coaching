@@ -97,6 +97,9 @@ export const StudentAuthModal: React.FC = () => {
           return;
         }
         setIsStudentAuthModalOpen(false);
+        if (isMobile) {
+          navigateTo('home');
+        }
         setEmail('');
         setPassword('');
       }
@@ -122,7 +125,9 @@ export const StudentAuthModal: React.FC = () => {
   return (
     <>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200"
+        className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200 ${
+          !isAuthenticated ? 'bg-white' : 'bg-black/65 backdrop-blur-sm'
+        }`}
         onClick={(e) => {
           if (!isStrictLockedOnMobile && e.target === e.currentTarget) {
             setIsStudentAuthModalOpen(false);
@@ -375,6 +380,7 @@ export const StudentAuthModal: React.FC = () => {
 
                   <div className="pt-2">
                     <button
+                      id="auth-submit-btn"
                       type="submit"
                       disabled={isLoading}
                       style={{

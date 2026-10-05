@@ -41,6 +41,7 @@ export const Navbar: React.FC = () => {
     setColorTheme,
     theme,
     toggleTheme,
+    setIsLiveSupportChatOpen,
     showToast
   } = useApp();
 
@@ -96,15 +97,14 @@ export const Navbar: React.FC = () => {
             <span className="hidden xs:inline">{contactPhone}</span>
             <span className="xs:hidden">Call</span>
           </a>
-          <a
-            href={`https://wa.me/${cleanPhone}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 py-0.5 rounded-full flex items-center gap-1 transition-colors whitespace-nowrap shadow-xs"
+          <button
+            type="button"
+            onClick={() => setIsLiveSupportChatOpen(true)}
+            className="bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 py-0.5 rounded-full flex items-center gap-1 transition-colors whitespace-nowrap shadow-xs cursor-pointer"
           >
             <MessageSquare className="w-3 h-3 shrink-0" />
-            <span>WhatsApp</span>
-          </a>
+            <span>Live Helpdesk</span>
+          </button>
         </div>
       </div>
     </div>
@@ -399,16 +399,15 @@ export const Navbar: React.FC = () => {
             )}
           </button>
 
-          <a
-            href={`https://wa.me/${cleanPhone}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black px-2.5 py-1.5 rounded-full flex items-center gap-1 shadow-sm transition-all"
-            title="Ask Doubts on WhatsApp"
+          <button
+            type="button"
+            onClick={() => setIsLiveSupportChatOpen(true)}
+            className="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black px-2.5 py-1.5 rounded-full flex items-center gap-1 shadow-sm transition-all cursor-pointer"
+            title="Live Student Doubt & Helpdesk"
           >
             <MessageSquare className="w-3.5 h-3.5" />
             <span>Doubts</span>
-          </a>
+          </button>
 
           {/* Quick Drawer Menu */}
           <button

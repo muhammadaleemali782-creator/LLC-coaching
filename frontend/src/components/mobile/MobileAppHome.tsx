@@ -52,6 +52,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
     setSelectedCourseForPayment,
     setSelectedVideoForPlayer,
     setIsStudentAuthModalOpen,
+    setIsLiveSupportChatOpen,
     navigateTo,
     showToast
   } = useApp();
@@ -69,50 +70,15 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
   const [batchCategoryFilter, setBatchCategoryFilter] = useState<string>('all');
   const [galleryCategoryFilter, setGalleryCategoryFilter] = useState<string>('all');
 
-  // Featured Announcement Slides (ALL Website Campus Photos + Admin Gallery Uploads)
+  // Featured Announcement Slides (Admin Official Poster + ONLY Admin Uploaded Gallery Photos)
   const allSlides = React.useMemo(() => {
-    const list = [
+    const list: Array<{ id: string; title: string; subtitle: string; tag: string; img: string }> = [
       {
-        id: 's1',
-        title: 'Admissions Open 2026-27 | Classes 1–12 & DCA',
-        subtitle: 'Classes 1–12, NEET/JEE & DCA Coaching at L.C.C.',
+        id: 's-hero-poster',
+        title: websiteSettings?.emergencyAlertText || 'Admissions Open 2026-27 | Classes 1–12 & DCA',
+        subtitle: 'Classes 1–12, NEET/JEE & DCA Coaching at L.C.C. Campus',
         tag: 'NEW SESSION',
         img: websiteSettings?.heroPosterUrl || '/assets/hero_poster.jpg'
-      },
-      {
-        id: 's2',
-        title: 'Interactive Smart Classrooms',
-        subtitle: 'Concept Mastery with Director Aman Arora',
-        tag: 'CAMPUS LIFE',
-        img: '/assets/discussion.jpg'
-      },
-      {
-        id: 's3',
-        title: 'Debate Stage & English Speaking',
-        subtitle: 'Fluency & Public Articulation Bootcamps',
-        tag: 'SKILL MASTERY',
-        img: '/assets/debate.jpg'
-      },
-      {
-        id: 's4',
-        title: '1:1 Hi-Tech Computer Laboratory',
-        subtitle: 'Practical DCA, ADCA & Tally Prime Training',
-        tag: 'COMPUTER LAB',
-        img: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&auto=format&fit=crop&q=80'
-      },
-      {
-        id: 's5',
-        title: 'Smart Classroom Doubt Clinics',
-        subtitle: 'Daily Chapter Doubts & 1:1 Director Mentorship',
-        tag: 'DOUBT CLINICS',
-        img: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&auto=format&fit=crop&q=80'
-      },
-      {
-        id: 's6',
-        title: 'Science Practical Experiential Lab',
-        subtitle: 'Physics Optics & Chemistry Titrations',
-        tag: 'PRACTICAL LAB',
-        img: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=1200&auto=format&fit=crop&q=80'
       }
     ];
 
@@ -132,7 +98,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
       });
     }
     return list;
-  }, [websiteSettings?.heroPosterUrl, galleryItems]);
+  }, [websiteSettings?.heroPosterUrl, websiteSettings?.emergencyAlertText, galleryItems]);
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -835,15 +801,14 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           </div>
 
           <div className="flex gap-2 pt-1">
-            <a
-              href={`https://wa.me/91${contactPhone}?text=Hello%20Aman%20Sir%2C%20I%20want%20coaching%20admission%20details.`}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => setIsLiveSupportChatOpen(true)}
               className="flex-1 py-2.5 rounded-2xl bg-[#0066FF] hover:bg-blue-700 text-white text-xs font-black text-center shadow-sm active:scale-98 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <MessageSquare className="w-3.5 h-3.5" />
-              <span>WhatsApp Helpline</span>
-            </a>
+              <span>Live Support & Helpdesk</span>
+            </button>
             <a
               href={`tel:${contactPhone}`}
               className="px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-slate-800 text-xs font-bold shadow-xs active:scale-98 transition-all flex items-center justify-center cursor-pointer"
@@ -1229,16 +1194,15 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           <span className="text-[10px] font-semibold truncate max-w-full" style={{ color: '#64748b' }}>{t.offlineVault}</span>
         </button>
 
-        {/* Ask Doubt (WhatsApp) */}
-        <a
-          href={`https://wa.me/91${contactPhone}?text=Hello%20Aman%20Sir%2C%20I%20have%20a%20doubt.`}
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* Ask Doubt (In-App Live Support Chat) */}
+        <button
+          type="button"
+          onClick={() => setIsLiveSupportChatOpen(true)}
           className="flex flex-col items-center justify-center gap-0.5 cursor-pointer py-1"
         >
           <MessageSquare className="w-5 h-5" style={{ color: '#059669' }} />
           <span className="text-[10px] font-semibold truncate max-w-full" style={{ color: '#059669' }}>{t.askDoubt}</span>
-        </a>
+        </button>
 
         {/* Profile */}
         <button

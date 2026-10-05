@@ -29,6 +29,7 @@ import { DocPreviewModal } from './components/modals/DocPreviewModal';
 import { VideoPlayerModal } from './components/modals/VideoPlayerModal';
 import { StudentAuthModal } from './components/modals/StudentAuthModal';
 import { AdminAuthModal } from './components/modals/AdminAuthModal';
+import { LiveSupportChatModal } from './components/modals/LiveSupportChatModal';
 import { StudentDashboard } from './components/student/StudentDashboard';
 import { StaffDashboard } from './components/staff/StaffDashboard';
 import { AdminPanel } from './components/admin/AdminPanel';
@@ -100,6 +101,8 @@ const MainContent: React.FC = () => {
     isOfflineVaultOpen,
     setIsOfflineVaultOpen
   } = useApp();
+
+  const isAuthenticated = Boolean(currentStudent || currentStaff || isAdminAuthenticated);
 
   // On Mobile App Open (< 1024px): Immediately prompt Login / Register if user is not authenticated
   React.useEffect(() => {
@@ -181,11 +184,13 @@ const MainContent: React.FC = () => {
             <>
               {/* Mobile View: Dedicated Physics Wallah Mobile App Experience */}
               <div className="block lg:hidden w-full max-w-full overflow-x-hidden">
-                <MobileAppHome
-                  onOpenDrawer={() => setIsDrawerOpen(true)}
-                  onOpenGoalModal={() => setIsGoalModalOpen(true)}
-                  onOpenOfflineVault={() => setIsOfflineVaultOpen(true)}
-                />
+                {!isAuthenticated ? null : (
+                  <MobileAppHome
+                    onOpenDrawer={() => setIsDrawerOpen(true)}
+                    onOpenGoalModal={() => setIsGoalModalOpen(true)}
+                    onOpenOfflineVault={() => setIsOfflineVaultOpen(true)}
+                  />
+                )}
               </div>
 
               {/* Desktop View: Grand Educational Institute Web Experience */}
@@ -344,6 +349,7 @@ const MainContent: React.FC = () => {
       <VideoPlayerModal />
       <StudentAuthModal />
       <AdminAuthModal />
+      <LiveSupportChatModal />
       <ToastContainer />
       <ScreenProtectionGuard />
 
