@@ -179,21 +179,6 @@
       "dateAdded": "2026-09-21",
       "downloadsCount": 512,
       "previewContent": "Computer Architecture, Windows OS, Word, Excel Formulas and Tally Prime Basics."
-    },
-    {
-      "id": "mat-good-manners",
-      "title": "Good Manners and Social Etiquette",
-      "category": "pdf_notes",
-      "targetClass": "Spoken English",
-      "subject": "English",
-      "chapter": "Daily Life Etiquette",
-      "pages": 8,
-      "downloadUrl": "/assets/sample_notes.pdf",
-      "isPremium": false,
-      "fileType": "pdf",
-      "dateAdded": "2026-09-20",
-      "downloadsCount": 610,
-      "previewContent": "Essential polite phrases, formal greetings and conversational confidence."
     }
   ],
   "videos": [

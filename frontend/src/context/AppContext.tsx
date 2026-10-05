@@ -329,7 +329,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [courses, setCourses] = useState<Course[]>(() => loadSaved('lcc_courses', INITIAL_COURSES));
   const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(() => {
     const saved = loadSaved<StudyMaterial[]>('lcc_study_materials', INITIAL_STUDY_MATERIALS);
-    return Array.isArray(saved) && saved.length > 0 ? saved : INITIAL_STUDY_MATERIALS;
+    const valid = Array.isArray(saved) && saved.length > 0 ? saved : INITIAL_STUDY_MATERIALS;
+    const cleaned = valid.filter(m => m.id !== 'mat-good-manners' && m.id !== 'mat-vocabulary-list');
+    localStorage.setItem('lcc_study_materials', JSON.stringify(cleaned));
+    return cleaned;
   });
   const [syllabuses, setSyllabuses] = useState<SyllabusItem[]>(() => loadSaved('lcc_syllabus', INITIAL_SYLLABUS));
   const [notices, setNotices] = useState<Notice[]>(() => loadSaved('lcc_notices', INITIAL_NOTICES));
@@ -390,6 +393,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!parsed.courseProgress || typeof parsed.courseProgress !== 'object') parsed.courseProgress = {};
         if (!parsed.quizScores || typeof parsed.quizScores !== 'object') parsed.quizScores = {};
         if (!parsed.name) parsed.name = 'Student';
+
+        // Clean ghost demo courses and progress for non-demo students (e.g. muhammadaleemali782)
+        if (parsed.email && parsed.email !== 'student@lcc.edu') {
+          if (parsed.courseProgress && parsed.courseProgress['c-9-10'] === 65) {
+            delete parsed.courseProgress['c-9-10'];
+            if (parsed.enrolledCourses) {
+              parsed.enrolledCourses = parsed.enrolledCourses.filter((id: string) => id !== 'c-9-10' && id !== 'c-computer-diploma');
+            }
+            localStorage.setItem('lcc_student_session', JSON.stringify(parsed));
+          }
+        }
       }
       return parsed;
     } catch {
@@ -732,10 +746,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem('lcc_student_session', JSON.stringify(res.user));
       setCurrentStudent({
         ...res.user,
-        enrolledCourses: res.user.enrolledCourses || ['c-9-10'],
-        courseProgress: { 'c-9-10': 35 },
-        quizScores: { 'test-1': 88 },
-        dateJoined: res.user.createdAt || '2026-08-01'
+        enrolledCourses: res.user.enrolledCourses || [],
+        courseProgress: res.user.courseProgress || {},
+        quizScores: res.user.quizScores || {},
+        dateJoined: res.user.createdAt || new Date().toISOString().split('T')[0]
       });
       if (handlePostAuthResume(res.user.name)) {
         return true;
@@ -756,15 +770,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
       }
       if (cleanEmail === 'student@lcc.edu' || cleanEmail.includes('@') && pass.length >= 4) {
+        const isDemoStudent = cleanEmail === 'student@lcc.edu';
+        const studentTxns = transactions.filter(t => t.studentEmail?.toLowerCase() === cleanEmail);
+        const approvedCourses = studentTxns.filter(t => t.status === 'Completed').map(t => t.courseId).filter(Boolean);
+        const pendingTxn = studentTxns.find(t => t.status === 'Pending Verification' || t.status === 'Pending');
+
         const demoStudent: Student = {
-          id: `stu-${Date.now()}`,
+          id: isDemoStudent ? 'stu-demo' : `stu-${Date.now()}`,
           name: cleanEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
           email: cleanEmail,
-          phone: '+91 98765 43210',
-          classEnrolled: 'Class 10',
-          enrolledCourses: ['c-9-10', 'c-computer-diploma'],
-          courseProgress: { 'c-9-10': 65 },
-          quizScores: { 'test-1': 88 },
+          phone: isDemoStudent ? '+91 98765 43210' : (pendingTxn?.studentPhone || ''),
+          classEnrolled: isDemoStudent ? 'Class 10' : (pendingTxn?.courseName?.includes('11 & 12') ? 'Class 11 & 12' : 'Student'),
+          enrolledCourses: isDemoStudent ? ['c-9-10', 'c-computer-diploma'] : approvedCourses,
+          courseProgress: isDemoStudent ? { 'c-9-10': 65 } : {},
+          quizScores: isDemoStudent ? { 'test-1': 88 } : {},
           dateJoined: new Date().toISOString().split('T')[0],
           isActive: true
         };

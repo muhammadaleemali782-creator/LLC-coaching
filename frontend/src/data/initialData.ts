@@ -253,36 +253,6 @@ A number is irrational if it cannot be written in the form p/q where p, q are in
 • MS Excel: Essential Formulas: SUM, AVERAGE, IF, VLOOKUP, XLOOKUP, COUNTIF, Pivot Tables & Data Analysis.
 • MS PowerPoint: Slide Master, Custom animations, Transition timings, Presentation delivery.
 • Tally Prime Basics: Company creation, Ledger accounting, Voucher entries (F4 Contra, F5 Payment, F6 Receipt, F8 Sales, F9 Purchase), GST Invoicing.`
-  },
-  {
-    id: 'mat-good-manners',
-    title: 'Good Manners and Social Etiquette',
-    category: 'pdf_notes',
-    targetClass: 'Spoken English',
-    subject: 'English Fluency',
-    chapter: 'Etiquette & Manners',
-    pages: 5,
-    downloadUrl: '/assets/sample_notes.pdf',
-    isPremium: false,
-    fileType: 'pdf',
-    dateAdded: '2026-09-20',
-    downloadsCount: 150,
-    previewContent: 'Comprehensive theoretical notes, etiquette guidelines, and conversational practice examples for Spoken English fluency.'
-  },
-  {
-    id: 'mat-vocabulary-list',
-    title: 'Daily Vocabulary List & Conversation Starters',
-    category: 'pdf_notes',
-    targetClass: 'Spoken English',
-    subject: 'English Fluency',
-    chapter: 'Daily Vocabulary',
-    pages: 4,
-    downloadUrl: '/assets/sample_notes.pdf',
-    isPremium: false,
-    fileType: 'pdf',
-    dateAdded: '2026-09-20',
-    downloadsCount: 95,
-    previewContent: 'Essential daily vocabulary, words, meanings, synonyms and practical sentence construction for spoken communication.'
   }
 ];
 

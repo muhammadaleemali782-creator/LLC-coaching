@@ -118,6 +118,27 @@ export const StudentDashboard: React.FC = () => {
   const hasEnrollments = enrolledCourseList.length > 0;
   const activeCourse = enrolledCourseList[0] || null;
 
+  // Derive student class: prioritize pending admission program or enrolled course target class
+  const studentDisplayClass = React.useMemo(() => {
+    if (pendingAdmissions.length > 0) {
+      const p = pendingAdmissions[0];
+      if (p.courseName?.includes('11 & 12')) return 'Class 11 & 12';
+      if (p.courseName?.includes('9 & 10')) return 'Class 9 & 10';
+      if (p.courseName?.includes('Computer')) return 'Computer Diploma';
+      return p.courseName || 'Class 11 & 12';
+    }
+    if (enrolledCourseList.length > 0) {
+      return enrolledCourseList[0].targetClass || 'Enrolled Student';
+    }
+    if (currentStudent.targetClass && currentStudent.targetClass !== 'Class 10') {
+      return currentStudent.targetClass;
+    }
+    if (currentStudent.classEnrolled && currentStudent.classEnrolled !== 'Class 10') {
+      return currentStudent.classEnrolled;
+    }
+    return 'Enrolled Student';
+  }, [pendingAdmissions, enrolledCourseList, currentStudent]);
+
   // Real curriculum progress: exactly 0% if no enrollments!
   const overallCurriculumProgress = hasEnrollments
     ? Math.round(
@@ -276,31 +297,38 @@ export const StudentDashboard: React.FC = () => {
 
         {/* Pending Admission Verification Alert Banner */}
         {pendingAdmissions.length > 0 && (
-          <div className="p-4 sm:p-5 rounded-3xl bg-amber-50/90 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-in fade-in">
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-                <Clock className="w-5 h-5 animate-pulse" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h4 className="text-xs sm:text-sm font-black text-amber-950">
-                    Admission Verification In Progress ({pendingAdmissions.length} Pending)
-                  </h4>
-                  <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black uppercase">
-                    Admin Review
-                  </span>
+          <div className="relative overflow-hidden rounded-2xl border border-amber-200/90 bg-gradient-to-r from-amber-50 via-white to-amber-50/50 p-4 sm:p-5 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+              <div className="flex items-start sm:items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5 sm:mt-0">
+                  <Clock className="w-4 h-4" />
                 </div>
-                <p className="text-[11px] sm:text-xs text-amber-800 font-medium mt-0.5">
-                  Your UPI fee submission for <strong>{pendingAdmissions.map(p => p.courseName).join(', ')}</strong> (Ref: {pendingAdmissions.map(p => p.utrNumber).join(', ')}) is awaiting Director verification. Once approved, lessons & certificate will be unlocked.
-                </p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                    <h4 className="text-xs sm:text-sm font-bold text-amber-950">
+                      Admission Verification In Progress
+                    </h4>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-100 border border-amber-200 text-amber-800 text-[10px] font-bold">
+                      {pendingAdmissions.length} Pending
+                    </span>
+                  </div>
+                  <p className="text-[11px] sm:text-xs text-amber-800 font-medium mt-1 leading-relaxed">
+                    UPI payment received for <strong className="text-amber-950 font-bold">{pendingAdmissions.map(p => p.courseName).join(', ')}</strong> (Ref: <span className="font-mono text-amber-900 font-bold">{pendingAdmissions.map(p => p.utrNumber).join(', ')}</span>). Director review in progress.
+                  </p>
+                </div>
               </div>
+              <button
+                onClick={() => setActiveTab('courses')}
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shrink-0 shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <span>Check Admission Status</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <button
-              onClick={() => setActiveTab('courses')}
-              className="px-4 py-2 rounded-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shrink-0 shadow-xs cursor-pointer active:scale-95"
-            >
-              View Admission Status
-            </button>
           </div>
         )}
 
@@ -309,57 +337,79 @@ export const StudentDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => navigateTo('home')}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white border border-slate-200 text-slate-700 text-xs font-bold shadow-xs hover:bg-slate-50 cursor-pointer transition-all active:scale-95"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold shadow-2xs hover:bg-slate-50 cursor-pointer transition-all active:scale-95"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-[#0066FF]" />
             <span>{typeof window !== 'undefined' && window.innerWidth >= 1024 ? 'Back to Website Home' : 'Back to Learning App'}</span>
           </button>
         </div>
 
-        {/* Welcome Header Card */}
-        <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-card-clean flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4 text-center md:text-left">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#0066FF] to-blue-400 text-white flex items-center justify-center font-black text-2xl shadow-md shadow-blue-500/25 shrink-0">
-              {(currentStudent.name || 'S').charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-black text-slate-900">
+        {/* Welcome Header Card - Executive Modern Design */}
+        <div className="bg-white border border-slate-200/80 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xs relative overflow-hidden">
+          {/* Subtle brand top accent */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-500 to-sky-400" />
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 pt-1">
+            {/* Left: Avatar & Profile Info */}
+            <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 min-w-0">
+              <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-[#0066FF] to-blue-500 text-white flex items-center justify-center font-black text-xl sm:text-2xl shadow-sm ring-4 ring-blue-50 shrink-0 select-none">
+                {(currentStudent.name || 'S').charAt(0).toUpperCase()}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    Student Portal
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0066FF] border border-blue-200/60 font-bold text-[11px]">
+                    {studentDisplayClass}
+                  </span>
+                </div>
+
+                <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight truncate mt-0.5">
                   Welcome Back, {currentStudent.name || 'Student'}!
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-[#0066FF] font-bold text-xs">
-                  {currentStudent.targetClass || currentStudent.classEnrolled || 'Class 10'}
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 font-medium mt-1">
-                Student ID: <span className="font-mono text-slate-700 font-bold">{currentStudent.id}</span> • Email: {currentStudent.email}
-              </p>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap justify-center">
-            <button
-              onClick={() => setIsChangePasswordOpen(true)}
-              className="px-3.5 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
-              title="Change Password"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>Change Password</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('certificate')}
-              className="px-4 py-2 rounded-full bg-blue-50 hover:bg-blue-100 text-[#0066FF] border border-blue-200 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
-            >
-              <Award className="w-4 h-4" />
-              <span>My Certificate</span>
-            </button>
-            <button
-              onClick={logoutStudent}
-              className="px-4 py-2 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Logout</span>
-            </button>
+                <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-[11px] text-slate-500 font-medium mt-1">
+                  <span className="bg-slate-100 px-2 py-0.5 rounded-md font-mono text-slate-700 font-bold">
+                    ID: {currentStudent.id}
+                  </span>
+                  <span className="text-slate-300">•</span>
+                  <span className="truncate max-w-[200px] sm:max-w-none text-slate-600">
+                    {currentStudent.email}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Actions */}
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+              <button
+                onClick={() => setIsChangePasswordOpen(true)}
+                className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs"
+                title="Change Password"
+              >
+                <Lock className="w-3.5 h-3.5 text-slate-500" />
+                <span>Change Password</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('certificate')}
+                className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#0066FF] border border-blue-200/80 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs"
+              >
+                <Award className="w-3.5 h-3.5 text-[#0066FF]" />
+                <span>My Certificate</span>
+              </button>
+
+              <button
+                onClick={logoutStudent}
+                className="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-200 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs"
+                title="Sign Out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </div>
           </div>
         </div>
 

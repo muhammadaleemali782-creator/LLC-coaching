@@ -100,6 +100,8 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.content.Intent;
+import android.net.Uri;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -111,8 +113,8 @@ public class MainActivity extends Activity {
     private WebView webView;
     private ProgressBar progressBar;
     private LinearLayout errorLayout;
-    private static final String APP_URL = "https://lccedu.vercel.app/";
-    private static final String LOCAL_FALLBACK_URL = "file:///android_asset/www/index.html";
+    private static final String APP_URL = "file:///android_asset/www/index.html";
+    private static final String REMOTE_FALLBACK_URL = "https://lccedu.vercel.app/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -218,6 +220,9 @@ public class MainActivity extends Activity {
         errorLayout.addView(errSub);
         errorLayout.addView(retryBtn);
 
+        // Native instant loading: progress bar is kept completely hidden
+        progressBar.setVisibility(View.GONE);
+
         rootLayout.addView(webView, wvParams);
         rootLayout.addView(progressBar, pbParams);
         rootLayout.addView(errorLayout, wvParams);
@@ -225,21 +230,45 @@ public class MainActivity extends Activity {
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                if (request != null && request.getUrl() != null) {
+                    String url = request.getUrl().toString();
+                    if (url.startsWith("http://") || url.startsWith("https://")) {
+                        if (url.contains("whatsapp.com") || url.contains("wa.me") || 
+                            url.contains("youtube.com") || url.contains("youtu.be") || 
+                            url.contains("instagram.com") || url.contains("t.me")) {
+                            try {
+                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                startActivity(intent);
+                                return true;
+                            } catch (Exception e) {}
+                        }
+                    }
+                }
+                return false;
+            }
+
+            @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                progressBar.setVisibility(View.VISIBLE);
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
                 errorLayout.setVisibility(View.GONE);
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                progressBar.setVisibility(View.GONE);
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
             }
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                if (request.isForMainFrame()) {
-                    progressBar.setVisibility(View.GONE);
-                    errorLayout.setVisibility(View.VISIBLE);
+                if (request != null && request.isForMainFrame()) {
+                    if (progressBar != null) progressBar.setVisibility(View.GONE);
+                    // If local asset failed, fallback to remote
+                    if (APP_URL.startsWith("file://")) {
+                        view.loadUrl(REMOTE_FALLBACK_URL);
+                    } else {
+                        errorLayout.setVisibility(View.VISIBLE);
+                    }
                 }
             }
 
@@ -261,10 +290,7 @@ public class MainActivity extends Activity {
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
-                progressBar.setProgress(newProgress);
-                if (newProgress == 100) {
-                    progressBar.setVisibility(View.GONE);
-                }
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
             }
         });
 
