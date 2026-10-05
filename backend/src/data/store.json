@@ -21,6 +21,42 @@
       "targetClass": "Class 10",
       "createdAt": "2026-08-28T18:24:51.660Z",
       "isActive": true
+    },
+    {
+      "id": "staff-rajesh",
+      "name": "Rajesh Verma",
+      "email": "rajesh@lcc.edu",
+      "phone": "9876543220",
+      "passwordHash": "$2b$10$OtnMEZvQK.AQLBJMfkocW.tWy9M8hdbOZ91ii.BplnTt4jFF9en2i",
+      "role": "staff",
+      "branch": "Palahipatti Main Campus (Sindhora Rd)",
+      "designation": "Senior Mathematics Faculty",
+      "isActive": true,
+      "createdAt": "2026-10-05T12:48:52.406Z"
+    },
+    {
+      "id": "staff-ananya",
+      "name": "Mrs. Ananya Sharma",
+      "email": "ananya@lcc.edu",
+      "phone": "9876543221",
+      "passwordHash": "$2b$10$tLS7u8zG9aGgr2OSU0sVnOqdm4BaEo3ILt677.YsQkezGGo4HzOv2",
+      "role": "staff",
+      "branch": "Sindhora Market Branch",
+      "designation": "Science Specialist",
+      "isActive": true,
+      "createdAt": "2026-10-05T12:48:52.594Z"
+    },
+    {
+      "id": "staff-amit",
+      "name": "Amit Kumar",
+      "email": "amit@lcc.edu",
+      "phone": "9876543222",
+      "passwordHash": "$2b$10$xMyOizoymik7mPIo/6KIpe3K5pa22Xdx/QVixtpAEq0D1fysGf4Du",
+      "role": "staff",
+      "branch": "Babatpur City Center",
+      "designation": "Commerce & Computer Faculty",
+      "isActive": true,
+      "createdAt": "2026-10-05T12:48:52.740Z"
     }
   ],
   "otpSessions": [],
@@ -359,5 +395,20 @@
       "description": "Batch timing: 5:30 PM to 7:00 PM. Limited 20 seats per batch for personalized attention."
     }
   ],
-  "inquiries": []
+  "inquiries": [],
+  "teacherTasks": [
+    {
+      "id": "task-seed-1",
+      "title": "Complete Chapter 4 Quadratic Equations Doubt Session",
+      "description": "Conduct specialized doubt clinic for Class 10 Board aspirants and log student attendance.",
+      "assignedToStaffId": "staff-rajesh",
+      "assignedToStaffName": "Rajesh Verma",
+      "dueDate": "2026-10-05",
+      "priority": "High",
+      "status": "Pending",
+      "reportNote": "",
+      "submittedAt": "",
+      "createdAt": "2026-10-05T12:48:52.740Z"
+    }
+  ]
 }

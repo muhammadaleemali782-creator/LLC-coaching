@@ -243,7 +243,12 @@ export const StaffDashboard: React.FC = () => {
 
   // Filter tasks assigned to me
   const myTasks = teacherTasks.filter(
-    t => currentStaff && (t.assignedToStaffId === currentStaff.id || t.assignedToStaffName === currentStaff.name)
+    t => currentStaff && (
+      t.assignedToStaffId === currentStaff.id ||
+      t.assignedToStaffId === (currentStaff as any)._id ||
+      t.assignedToStaffName?.toLowerCase() === currentStaff.name.toLowerCase() ||
+      (currentStaff.email && t.assignedToStaffId?.toLowerCase() === currentStaff.email.toLowerCase())
+    )
   );
 
   // Filter student attendance for this teacher

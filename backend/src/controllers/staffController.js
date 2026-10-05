@@ -462,17 +462,19 @@ export const submitTeacherTaskReport = async (req, res) => {
   try {
     if (mongoose.connection.readyState === 1) {
       const updated = await TeacherTaskModel.findOneAndUpdate(
-        { id: taskId },
+        { $or: [{ id: taskId }, { _id: mongoose.Types.ObjectId.isValid(taskId) ? taskId : null }] },
         { $set: updateData },
         { new: true }
       );
-      return res.json({ success: true, message: 'Work report submitted successfully!', data: updated });
+      if (updated) {
+        return res.json({ success: true, message: 'Work report submitted successfully!', data: updated });
+      }
     }
   } catch (err) {}
 
   const db = getDB();
   if (!db.teacherTasks) db.teacherTasks = [];
-  const task = db.teacherTasks.find(t => t.id === taskId);
+  const task = db.teacherTasks.find(t => t.id === taskId || t._id === taskId);
   if (task) {
     task.reportNote = updateData.reportNote;
     task.status = updateData.status;

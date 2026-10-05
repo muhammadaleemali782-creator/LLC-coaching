@@ -23,11 +23,13 @@ const UserSchema = new mongoose.Schema({
   phone: String,
   passwordHash: String,
   role: { type: String, default: 'student' },
+  branch: String,
+  designation: String,
   targetClass: String,
   enrolledCourses: [String],
   createdAt: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: true }
-});
+}, { strict: false });
 
 const CourseSchema = new mongoose.Schema({
   id: String,

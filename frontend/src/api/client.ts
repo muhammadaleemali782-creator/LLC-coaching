@@ -1,4 +1,12 @@
-const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
+const isLocalhost = typeof window !== 'undefined' && (
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1' ||
+  window.location.hostname === '0.0.0.0' ||
+  window.location.hostname === '' ||
+  window.location.port === '5173' ||
+  window.location.port === '3000'
+);
+const API_BASE = import.meta.env.VITE_API_URL || (isLocalhost ? 'http://127.0.0.1:5000/api' : '/api');
 
 const getAuthHeader = (): Record<string, string> => {
   const adminToken = localStorage.getItem('lcc_admin_token');

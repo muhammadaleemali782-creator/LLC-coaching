@@ -156,7 +156,10 @@ export const StaffBranchCommandCenter: React.FC = () => {
     const enrolled = teacherAdmissions.filter(a => a.admissionType === 'Enrolled').length;
     const visited = teacherAdmissions.filter(a => a.admissionType === 'Visited').length;
     const tasks = teacherTasks.filter(
-      t => t.assignedToStaffId === staff.id || t.assignedToStaffName === staff.name
+      t => t.assignedToStaffId === staff.id ||
+           t.assignedToStaffId === (staff as any)._id ||
+           t.assignedToStaffName?.toLowerCase() === staff.name?.toLowerCase() ||
+           (staff.email && t.assignedToStaffId?.toLowerCase() === staff.email.toLowerCase())
     );
     const completedTasks = tasks.filter(t => t.status === 'Completed').length;
 
@@ -189,7 +192,10 @@ export const StaffBranchCommandCenter: React.FC = () => {
 
   const dossierTasks = selectedTeacherForDossier
     ? teacherTasks.filter(
-        t => t.assignedToStaffId === selectedTeacherForDossier.id || t.assignedToStaffName === selectedTeacherForDossier.name
+        t => t.assignedToStaffId === selectedTeacherForDossier.id ||
+             t.assignedToStaffId === (selectedTeacherForDossier as any)._id ||
+             t.assignedToStaffName?.toLowerCase() === selectedTeacherForDossier.name.toLowerCase() ||
+             (selectedTeacherForDossier.email && t.assignedToStaffId?.toLowerCase() === selectedTeacherForDossier.email.toLowerCase())
       )
     : [];
 
@@ -754,6 +760,23 @@ export const StaffBranchCommandCenter: React.FC = () => {
                         >
                           <KeyRound className="w-3.5 h-3.5 text-amber-400" />
                           <span className="hidden sm:inline">Reset Pass</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedTeacherForDossier(staff);
+                            setTaskTitle('');
+                            setTaskDescription('');
+                            setTaskDueDate(new Date().toISOString().split('T')[0]);
+                            setTaskPriority('Normal');
+                            setIsAssignTaskModalOpen(true);
+                          }}
+                          className="bg-primary-600 hover:bg-primary-500 text-white px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm"
+                          title="Assign New Task to this Teacher"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Assign Task</span>
                         </button>
 
                         <button
@@ -1645,6 +1668,14 @@ export const StaffBranchCommandCenter: React.FC = () => {
               >
                 <FileText className="w-4 h-4 text-primary-400" />
                 <span>Copy Details</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShareCredentialsTeacher(null)}
+                className="bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 py-3.5 px-4 rounded-xl text-xs font-bold cursor-pointer"
+              >
+                Done / Close
               </button>
             </div>
           </div>

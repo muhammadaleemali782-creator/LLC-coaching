@@ -114,11 +114,14 @@ export const login = async (req, res) => {
             message: `Welcome back, ${user.name}!`,
             token,
             user: {
-              id: user.id,
+              id: user.id || (user._id ? user._id.toString() : ''),
+              _id: user._id,
               name: user.name,
               email: user.email,
               phone: user.phone,
               role: user.role,
+              branch: user.branch || 'Palahipatti Main Campus (Sindhora Rd)',
+              designation: user.designation || 'Faculty Mentor',
               targetClass: user.targetClass,
               enrolledCourses: user.enrolledCourses || [],
               mustChangePassword: Boolean(user.mustChangePassword)
