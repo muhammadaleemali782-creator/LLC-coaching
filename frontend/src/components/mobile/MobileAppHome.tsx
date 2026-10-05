@@ -52,6 +52,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
     setLanguage,
     setSelectedCourseForPayment,
     setSelectedVideoForPlayer,
+    setSelectedDocForPreview,
     setIsStudentAuthModalOpen,
     setIsLiveSupportChatOpen,
     navigateTo,
@@ -452,6 +453,10 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                     alt={course.title}
                     className="w-full h-full object-cover"
                     loading="lazy"
+                    onError={(e: any) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = './logo.jpg';
+                    }}
                   />
                   <span
                     className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded-full"
@@ -530,10 +535,12 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
               return (
                 <div
                   key={mat.id}
-                  className="p-3 rounded-2xl flex items-center justify-between gap-2 shadow-sm"
-                  style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
+                  className="p-3 rounded-2xl flex items-center justify-between gap-2 shadow-sm bg-white border border-slate-200 transition-all hover:border-blue-300"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
+                  <div
+                    onClick={() => setSelectedDocForPreview(mat)}
+                    className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer"
+                  >
                     <div
                       className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                       style={{ backgroundColor: '#eff6ff', color: '#0066FF' }}
@@ -541,20 +548,26 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                       <FileText className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="text-xs font-bold truncate leading-tight" style={{ color: '#1e293b' }}>
+                      <h4 className="text-xs font-bold truncate leading-tight text-slate-800 hover:text-blue-600">
                         {mat.title}
                       </h4>
-                      <p className="text-[10px] mt-0.5" style={{ color: '#94a3b8' }}>
+                      <p className="text-[10px] mt-0.5 text-slate-400 font-medium">
                         {mat.subject} • {mat.targetClass}
                       </p>
                     </div>
                   </div>
 
                   <div className="shrink-0 flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDocForPreview(mat)}
+                      className="px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer bg-blue-50 text-[#0066FF] hover:bg-blue-100"
+                    >
+                      Read
+                    </button>
                     {offline ? (
                       <span
-                        className="px-2.5 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1"
-                        style={{ backgroundColor: '#ecfdf5', color: '#059669' }}
+                        className="px-2.5 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1 bg-emerald-50 text-emerald-700"
                       >
                         <CheckCircle2 className="w-3 h-3" /> Saved
                       </span>
@@ -562,8 +575,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                       <button
                         type="button"
                         onClick={() => handleSaveOffline(mat)}
-                        className="px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer"
-                        style={{ backgroundColor: '#f1f5f9', color: '#475569' }}
+                        className="px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200"
                       >
                         <DownloadCloud className="w-3 h-3" /> Save
                       </button>
@@ -731,6 +743,10 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                     alt={c.title}
                     className="w-12 h-12 rounded-xl object-cover shrink-0"
                     loading="lazy"
+                    onError={(e: any) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = './logo.jpg';
+                    }}
                   />
                   <div className="min-w-0">
                     <span
@@ -773,9 +789,13 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
         >
           <div className="flex items-center gap-3">
             <img
-              src="/logo.jpg"
-              alt="L.C.C."
+              src={websiteSettings?.logoUrl?.startsWith('/') ? '.' + websiteSettings.logoUrl : (websiteSettings?.logoUrl || './logo.jpg')}
+              alt={websiteSettings?.instituteName || 'L.C.C.'}
               className="w-10 h-10 rounded-2xl object-contain bg-white shadow-xs border border-blue-100"
+              onError={(e: any) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = './logo.jpg';
+              }}
             />
             <div className="min-w-0">
               <h4 className="text-xs font-black text-slate-900 leading-tight">

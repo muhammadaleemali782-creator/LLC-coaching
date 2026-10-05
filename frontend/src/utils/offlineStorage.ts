@@ -19,7 +19,15 @@ const OFFLINE_KEY = 'lcc_offline_vault_docs';
 export const getOfflineDocs = (): OfflineDoc[] => {
   try {
     const raw = localStorage.getItem(OFFLINE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const docs: OfflineDoc[] = raw ? JSON.parse(raw) : [];
+    const cleaned = docs.filter(d => 
+      d.id !== 'mat-good-manners' && 
+      d.id !== 'mat-vocabulary-list'
+    );
+    if (cleaned.length !== docs.length) {
+      localStorage.setItem(OFFLINE_KEY, JSON.stringify(cleaned));
+    }
+    return cleaned;
   } catch (e) {
     return [];
   }

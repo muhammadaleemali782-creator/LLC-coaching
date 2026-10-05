@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   Course,
   StudyMaterial,
@@ -285,6 +285,7 @@ const INITIAL_SETTINGS: WebsiteSettings = {
   instituteName: 'Learning Coaching Center (L.C.C.)',
   directorName: 'Aman Singh Gautam',
   directorPhotoUrl: '/assets/founder.png',
+  logoUrl: './logo.jpg',
   contactPhone: '+91 9250703092',
   contactEmail: 'admissions@lcc.edu',
   contactAddress: 'Palahipatti, Varanasi, Sindhora Road — Near Union Bank',
@@ -329,8 +330,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [courses, setCourses] = useState<Course[]>(() => loadSaved('lcc_courses', INITIAL_COURSES));
   const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(() => {
     const saved = loadSaved<StudyMaterial[]>('lcc_study_materials', INITIAL_STUDY_MATERIALS);
-    const valid = Array.isArray(saved) && saved.length > 0 ? saved : INITIAL_STUDY_MATERIALS;
-    const cleaned = valid.filter(m => m.id !== 'mat-good-manners' && m.id !== 'mat-vocabulary-list');
+    const valid = Array.isArray(saved) ? saved : INITIAL_STUDY_MATERIALS;
+    const cleaned = valid.filter(m => 
+      m.id !== 'mat-good-manners' && 
+      m.id !== 'mat-vocabulary-list'
+    );
     localStorage.setItem('lcc_study_materials', JSON.stringify(cleaned));
     return cleaned;
   });
@@ -378,7 +382,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const saved = localStorage.getItem('lcc_pending_enroll_course');
     return saved ? JSON.parse(saved) : null;
   });
-  const [selectedDocForPreview, setSelectedDocForPreview] = useState<StudyMaterial | null>(null);
+  const [selectedDocForPreview, setSelectedDocForPreviewState] = useState<StudyMaterial | null>(null);
+  const setSelectedDocForPreview = useCallback((doc: StudyMaterial | null) => {
+    (window as any).__lcc_current_selected_doc = doc;
+    setSelectedDocForPreviewState(doc);
+  }, []);
   const [selectedVideoForPlayer, setSelectedVideoForPlayer] = useState<VideoLecture | null>(null);
   const [isStudentAuthModalOpen, setIsStudentAuthModalOpen] = useState(false);
   const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
@@ -553,7 +561,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               ...prev,
               ...cloudSets,
               directorPhotoUrl: resolvedDirectorPhoto,
-              logoUrl: cloudSets.logoUrl || prev.logoUrl || '/logo.jpg',
+              logoUrl: (cloudSets.logoUrl && !cloudSets.logoUrl.startsWith('/')) ? cloudSets.logoUrl : (prev.logoUrl && !prev.logoUrl.startsWith('/') ? prev.logoUrl : './logo.jpg'),
               heroPosterUrl: cloudSets.heroPosterUrl || prev.heroPosterUrl,
               directorName: cloudSets.directorName || prev.directorName || 'Aman Singh Gautam',
               contactPhone: cloudSets.contactPhone || prev.contactPhone || '+91 9250703092',

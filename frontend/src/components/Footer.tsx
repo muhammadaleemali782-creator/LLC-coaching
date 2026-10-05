@@ -26,11 +26,12 @@ export const Footer: React.FC = () => {
             className="flex items-center gap-3 cursor-pointer select-none group"
           >
             <img
-              src={websiteSettings?.logoUrl || '/logo.jpg'}
+              src={websiteSettings?.logoUrl?.startsWith('/') ? '.' + websiteSettings.logoUrl : (websiteSettings?.logoUrl || './logo.jpg')}
               alt={websiteSettings?.instituteName || 'L.C.C. Learning Coaching Center'}
               className="w-12 h-12 rounded-2xl object-contain shadow-md border border-slate-200 bg-white"
               onError={(e: any) => {
-                e.target.src = '/logo.jpg';
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = './logo.jpg';
               }}
             />
             <div className="flex flex-col text-left">

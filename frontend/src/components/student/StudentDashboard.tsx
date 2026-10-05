@@ -966,8 +966,8 @@ export const StudentDashboard: React.FC = () => {
 
             {/* Offline Reader View */}
             {readingOfflineDoc ? (
-              <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-card-clean space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-card-clean space-y-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
                   <button
                     type="button"
                     onClick={() => setReadingOfflineDoc(null)}
@@ -976,21 +976,67 @@ export const StudentDashboard: React.FC = () => {
                     <ArrowLeft className="w-4 h-4" />
                     <span>Back to Notes List</span>
                   </button>
-                  <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
-                    Offline Zero-Data Reader
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
+                      Offline Zero-Data Reader
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedDocForPreview({
+                          id: readingOfflineDoc.id,
+                          title: readingOfflineDoc.title,
+                          category: (readingOfflineDoc.category as any) || 'pdf_notes',
+                          targetClass: readingOfflineDoc.targetClass,
+                          subject: readingOfflineDoc.subject || 'Curriculum',
+                          chapter: 'Offline Notes',
+                          pages: 15,
+                          downloadUrl: readingOfflineDoc.fileUrl,
+                          googleDriveUrl: readingOfflineDoc.fileUrl?.includes('drive.google.com') ? readingOfflineDoc.fileUrl : undefined,
+                          isGoogleDrive: Boolean(readingOfflineDoc.fileUrl?.includes('drive.google.com')),
+                          isPremium: false,
+                          fileType: (readingOfflineDoc.fileType as any) || 'pdf',
+                          dateAdded: readingOfflineDoc.downloadedAt,
+                          downloadsCount: 1,
+                          previewContent: readingOfflineDoc.contentSnippet || 'Comprehensive theoretical study notes and formulas prepared by L.C.C. faculty.'
+                        });
+                      }}
+                      className="px-3 py-1 rounded-xl bg-[#0066FF] hover:bg-blue-700 text-white text-[11px] font-bold shadow-xs cursor-pointer"
+                    >
+                      Fullscreen Reader
+                    </button>
+                  </div>
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
                     {readingOfflineDoc.targetClass} • {readingOfflineDoc.subject || 'Curriculum'}
                   </span>
                   <h3 className="text-lg font-black text-slate-900 mt-0.5">{readingOfflineDoc.title}</h3>
-                  <span className="text-[11px] text-slate-400">Saved on {readingOfflineDoc.downloadedAt}</span>
+                  <span className="text-[11px] text-slate-400 font-medium">Saved to Phone on {readingOfflineDoc.downloadedAt} • No Internet Needed</span>
                 </div>
 
-                <div className="p-4 sm:p-6 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 leading-relaxed font-sans whitespace-pre-line">
-                  {readingOfflineDoc.contentSnippet || 'Comprehensive theoretical study notes and formulas prepared by L.C.C. faculty.'}
+                <div className="space-y-4">
+                  <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/60 border border-blue-100 text-xs sm:text-sm text-slate-800 leading-relaxed font-sans">
+                    <span className="font-bold text-[#0066FF] block mb-1">📘 Chapter Theory & Core Concepts:</span>
+                    <p className="whitespace-pre-line">
+                      {readingOfflineDoc.contentSnippet || 'Comprehensive theoretical study notes, formulas, and board questions prepared by L.C.C. faculty.'}
+                    </p>
+                  </div>
+
+                  <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-700 space-y-2">
+                    <span className="font-bold text-slate-900 block">📝 Essential Formulas & Key Exam Highlights:</span>
+                    <ul className="space-y-1.5 list-disc list-inside text-xs text-slate-600">
+                      <li>Complete step-by-step NCERT & Exemplar syllabus derivations included.</li>
+                      <li>Standard board examination definitions and high-weightage question patterns.</li>
+                      <li>Rapid revision summary and formula quick-reference chart.</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs">
+                    <span className="font-bold">💡 Faculty Study Advice:</span>
+                    <p className="mt-0.5">Revise key definitions and solve corresponding chapter DPP questions to test your speed and accuracy.</p>
+                  </div>
                 </div>
               </div>
             ) : vaultSubTab === 'offline' ? (
@@ -1025,7 +1071,26 @@ export const StudentDashboard: React.FC = () => {
                       <div className="flex items-center gap-2 shrink-0">
                         <button
                           type="button"
-                          onClick={() => setReadingOfflineDoc(doc)}
+                          onClick={() => {
+                            setReadingOfflineDoc(doc);
+                            setSelectedDocForPreview({
+                              id: doc.id,
+                              title: doc.title,
+                              category: (doc.category as any) || 'pdf_notes',
+                              targetClass: doc.targetClass,
+                              subject: doc.subject || 'Curriculum',
+                              chapter: 'Offline Notes',
+                              pages: 15,
+                              downloadUrl: doc.fileUrl,
+                              googleDriveUrl: doc.fileUrl?.includes('drive.google.com') ? doc.fileUrl : undefined,
+                              isGoogleDrive: Boolean(doc.fileUrl?.includes('drive.google.com')),
+                              isPremium: false,
+                              fileType: (doc.fileType as any) || 'pdf',
+                              dateAdded: doc.downloadedAt,
+                              downloadsCount: 1,
+                              previewContent: doc.contentSnippet || 'Comprehensive theoretical study notes and formulas prepared by L.C.C. faculty.'
+                            });
+                          }}
                           className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs cursor-pointer"
                         >
                           Read Offline

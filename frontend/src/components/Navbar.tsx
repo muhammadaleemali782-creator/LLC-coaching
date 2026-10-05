@@ -119,10 +119,13 @@ export const Navbar: React.FC = () => {
         >
           <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full border-2 border-amber-400 p-0.5 sm:p-1 bg-white shadow-md flex items-center justify-center shrink-0">
             <img
-              src={websiteSettings?.logoUrl || '/logo.jpg'}
+              src={websiteSettings?.logoUrl?.startsWith('/') ? '.' + websiteSettings.logoUrl : (websiteSettings?.logoUrl || './logo.jpg')}
               alt={websiteSettings?.instituteName || 'L.C.C. Official Seal'}
               className="w-full h-full object-contain rounded-full"
-              onError={(e: any) => { e.target.src = '/logo.jpg'; }}
+              onError={(e: any) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = './logo.jpg';
+              }}
             />
           </div>
         </div>

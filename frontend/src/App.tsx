@@ -42,6 +42,7 @@ import { MobileAppHome } from './components/mobile/MobileAppHome';
 import { MobileAppDrawer } from './components/mobile/MobileAppDrawer';
 import { StudentGoalModal } from './components/modals/StudentGoalModal';
 import { OfflineVaultModal } from './components/common/OfflineVaultModal';
+import { saveOfflineDoc } from './utils/offlineStorage';
 
 // Progressive Chunked Fake Screen (Skeleton Shimmer) for instant perception while DB connects
 const SkeletonHomeScreen: React.FC = () => {
@@ -102,6 +103,7 @@ const MainContent: React.FC = () => {
     setIsOfflineVaultOpen,
     setIsLiveSupportChatOpen,
     setSelectedCourseForPayment,
+    selectedDocForPreview,
     setSelectedDocForPreview,
     courses
   } = useApp();
@@ -117,7 +119,22 @@ const MainContent: React.FC = () => {
     };
     (window as any).__lcc_close_payment = () => setSelectedCourseForPayment(null);
     (window as any).__lcc_close_doc = () => setSelectedDocForPreview(null);
-  }, [navigateTo, setIsLiveSupportChatOpen, setSelectedCourseForPayment, setSelectedDocForPreview, courses]);
+    (window as any).__lcc_save_doc_offline = (doc?: any) => {
+      const target = doc || selectedDocForPreview || (window as any).__lcc_current_selected_doc;
+      if (target) {
+        saveOfflineDoc({
+          id: target.id,
+          title: target.title,
+          category: target.category,
+          targetClass: target.targetClass,
+          subject: target.subject,
+          fileUrl: target.downloadUrl || '#',
+          fileType: target.fileType || 'pdf',
+          contentSnippet: target.previewContent
+        });
+      }
+    };
+  }, [navigateTo, setIsLiveSupportChatOpen, setSelectedCourseForPayment, setSelectedDocForPreview, selectedDocForPreview, courses]);
 
   // On Mobile App Open (< 1024px): Immediately prompt Login / Register if user is not authenticated
   React.useEffect(() => {

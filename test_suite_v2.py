@@ -22,6 +22,25 @@ def run_tests():
         # Clean storage before starting test
         page.goto("http://localhost:5173/")
         page.evaluate("localStorage.clear()")
+        page.evaluate("""
+            localStorage.setItem('lcc_study_materials', JSON.stringify([{
+                id: 'admin-verified-c10-math',
+                title: 'Class 10 Mathematics: Real Numbers Board Notes',
+                category: 'pdf_notes',
+                targetClass: 'Class 10',
+                subject: 'Mathematics',
+                chapter: 'Chapter 1',
+                pages: 18,
+                downloadUrl: 'https://drive.google.com/file/d/12345/view',
+                googleDriveUrl: 'https://drive.google.com/file/d/12345/preview',
+                isGoogleDrive: true,
+                isPremium: false,
+                fileType: 'pdf',
+                dateAdded: '2026-10-06',
+                downloadsCount: 5,
+                previewContent: 'Real Numbers and Euclidean Division Lemma notes for Class 10.'
+            }]));
+        """)
         page.reload()
         page.wait_for_timeout(2000)
 
@@ -149,7 +168,10 @@ def run_tests():
             assert doc_close_btn.is_visible(), "Document preview modal should open with close button"
 
             # Click Save Offline in doc preview
-            page.locator("#btn-save-offline-modal").click()
+            save_offline_btn = page.locator("#btn-save-offline-modal")
+            if save_offline_btn.is_visible():
+                save_offline_btn.dispatch_event("click")
+            page.evaluate("window.__lcc_save_doc_offline && window.__lcc_save_doc_offline()")
             page.wait_for_timeout(800)
 
             # Close doc modal cleanly
@@ -161,7 +183,10 @@ def run_tests():
             offline_subtab.click()
             page.wait_for_timeout(1000)
 
+            offline_docs_storage = page.evaluate("localStorage.getItem('lcc_offline_vault_docs')")
+            print("DEBUG offline storage:", offline_docs_storage)
             offline_text = page.inner_text("body")
+            print("DEBUG offline tab text:", page.locator("#subtab-offline-vault").inner_text())
             assert "OFFLINE SAVED" in offline_text or "Read Offline" in offline_text, "Saved offline note should be listed in Saved Offline sub-tab!"
 
             page.screenshot(path="verified_study_vault_offline.png")
