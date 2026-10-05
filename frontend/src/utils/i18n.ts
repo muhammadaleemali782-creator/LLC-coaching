@@ -62,7 +62,7 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
     changeGoal: 'Change',
     activeGoal: 'Target Goal',
     recommendedForYou: 'Recommended for Your Class',
-    freeNotes: 'Chapter Notes & DPPs',
+    freeNotes: 'Chapter Notes & Study Materials',
     videoClasses: 'Video Lectures & Shorts',
     exploreAllCourses: 'All Batches & Courses',
     downloadOffline: 'Download Offline',
@@ -87,7 +87,7 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
     myBatches: 'My Batches',
     askDoubt: 'Ask Doubt',
     seeAll: 'See All',
-    freeNotesDpp: 'Free Notes & DPPs'
+    freeNotesDpp: 'Study Notes & PDF Books'
   },
   hinglish: {
     appName: 'L.C.C. Learning App',
@@ -104,7 +104,7 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
     changeGoal: 'Badlo',
     activeGoal: 'Aapka Target',
     recommendedForYou: 'Aapki Class ke Top Batches',
-    freeNotes: 'Free Notes aur DPPs',
+    freeNotes: 'Study Notes & Kitabein',
     videoClasses: 'Video Lectures aur Shorts',
     exploreAllCourses: 'Saare Batches aur Courses',
     downloadOffline: 'Offline Save Karein',
@@ -129,7 +129,7 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
     myBatches: 'Mere Batches',
     askDoubt: 'Doubt Pucho',
     seeAll: 'Sabhi Dekho',
-    freeNotesDpp: 'Free Notes aur DPPs'
+    freeNotesDpp: 'Study Notes & Kitabein'
   },
   hi: {
     appName: 'एल.सी.सी. लर्निंग ऐप',
@@ -146,7 +146,7 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
     changeGoal: 'बदलें',
     activeGoal: 'लक्ष्य कक्षा',
     recommendedForYou: 'आपकी कक्षा के लिए अनुशंसित',
-    freeNotes: 'अध्याय नोट्स और डीपीपी',
+    freeNotes: 'अध्याय नोट्स और पुस्तकें',
     videoClasses: 'वीडियो कक्षाएं और रील्स',
     exploreAllCourses: 'सभी बैचेस और कोर्सेज',
     downloadOffline: 'ऑफलाइन डाउनलोड करें',
@@ -171,7 +171,7 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
     myBatches: 'मेरे बैचेस',
     askDoubt: 'संदेह पूछें',
     seeAll: 'सभी देखें',
-    freeNotesDpp: 'अध्याय नोट्स और डीपीपी'
+    freeNotesDpp: 'अध्ययन नोट्स और पुस्तकें'
   },
   mr: {
     appName: 'एल.सी.सी. लर्निंग अॅप',
@@ -188,7 +188,7 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
     changeGoal: 'बदला',
     activeGoal: 'लक्ष्य वर्ग',
     recommendedForYou: 'तुमच्या वर्गासाठी विशेष बॅचेस',
-    freeNotes: 'धडा नोट्स आणि डीपीपी',
+    freeNotes: 'धडा नोट्स आणि पुस्तके',
     videoClasses: 'व्हिडिओ लेक्चर्स आणि रील्स',
     exploreAllCourses: 'सर्व बॅचेस आणि कोर्सेस',
     downloadOffline: 'ऑफलाइन डाउनलोड करा',
@@ -213,7 +213,7 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
     myBatches: 'माझे बॅचेस',
     askDoubt: 'शंका विचारा',
     seeAll: 'सर्व पहा',
-    freeNotesDpp: 'धडा नोट्स आणि डीपीपी'
+    freeNotesDpp: 'अभ्यास नोट्स आणि पुस्तके'
   }
 };
 

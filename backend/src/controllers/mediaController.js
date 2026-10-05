@@ -17,28 +17,27 @@ export const getPDFs = async (req, res) => {
 
   try {
     if (mongoose.connection.readyState === 1) {
+      // Purge any legacy fake mock notes
+      await StudyMaterialModel.deleteMany({
+        $or: [
+          { id: 'mat-good-manners' },
+          { id: 'mat-vocabulary-list' }
+        ]
+      });
+
       const query = {};
       if (category && category !== 'all') query.category = category;
       if (targetClass && targetClass !== 'all') query.targetClass = new RegExp(targetClass, 'i');
-      let results = await StudyMaterialModel.find(query).sort({ _id: -1 });
-      if (results.length <= 2) {
-        const db = getDB();
-        const fallbackMaterials = db.studyMaterials || [];
-        for (const mat of fallbackMaterials) {
-          if (!results.some(r => r.id === mat.id || r.title === mat.title)) {
-            try {
-              await StudyMaterialModel.create(mat);
-            } catch (e) {}
-          }
-        }
-        results = await StudyMaterialModel.find(query).sort({ _id: -1 });
-      }
+      const results = await StudyMaterialModel.find(query).sort({ _id: -1 });
       return res.json({ success: true, count: results.length, data: results });
     }
   } catch (err) {}
 
   const db = getDB();
-  let results = db.studyMaterials || [];
+  let results = (db.studyMaterials || []).filter(m => 
+    m.id !== 'mat-good-manners' && 
+    m.id !== 'mat-vocabulary-list'
+  );
 
   if (category && category !== 'all') {
     results = results.filter(m => m.category === category);

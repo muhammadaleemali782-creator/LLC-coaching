@@ -27,6 +27,13 @@ export const BooksPdfManager: React.FC = () => {
 
   // Convert Google Drive share link to clean direct download and preview links
   const processDriveLink = (url: string) => {
+    if (url.startsWith('data:application/pdf')) {
+      return {
+        isDrive: false,
+        downloadUrl: url,
+        previewUrl: url
+      };
+    }
     const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
     if (fileIdMatch) {
       const fileId = fileIdMatch[1];
@@ -38,8 +45,8 @@ export const BooksPdfManager: React.FC = () => {
     }
     return {
       isDrive: false,
-      downloadUrl: url || '/assets/sample_notes.pdf',
-      previewUrl: url || '/assets/sample_notes.pdf'
+      downloadUrl: url || './assets/sample_notes.pdf',
+      previewUrl: url || './assets/sample_notes.pdf'
     };
   };
 
@@ -203,17 +210,40 @@ export const BooksPdfManager: React.FC = () => {
               />
             </div>
 
-            <div className="md:col-span-2">
-              <label className="text-xs font-bold text-slate-300 block mb-1">
-                Google Drive Share Link or PDF Download URL *
+            <div className="md:col-span-2 space-y-2">
+              <label className="text-xs font-bold text-slate-300 block">
+                Upload PDF File (Phone/PC) or Provide Online Link *
               </label>
-              <input
-                type="text"
-                placeholder="https://drive.google.com/file/d/.../view or direct PDF link"
-                value={newPdf.googleDriveUrl || newPdf.downloadUrl}
-                onChange={e => setNewPdf({ ...newPdf, googleDriveUrl: e.target.value, downloadUrl: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        setNewPdf({
+                          ...newPdf,
+                          downloadUrl: reader.result as string,
+                          fileType: 'pdf',
+                          title: newPdf.title || file.name.replace(/\.[^/.]+$/, "")
+                        });
+                        showToast(`PDF "${file.name}" ready to publish!`, 'info');
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-300 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-[#0066FF] file:text-white cursor-pointer"
+                />
+                <input
+                  type="text"
+                  placeholder="Or paste Google Drive link / Web PDF URL"
+                  value={newPdf.googleDriveUrl || (newPdf.downloadUrl?.startsWith('data:') ? '' : newPdf.downloadUrl)}
+                  onChange={e => setNewPdf({ ...newPdf, googleDriveUrl: e.target.value, downloadUrl: e.target.value })}
+                  className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                />
+              </div>
             </div>
 
             <div>

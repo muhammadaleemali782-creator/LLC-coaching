@@ -21,7 +21,7 @@ export const PaidBatchesSection: React.FC = () => {
             Join Our High-Impact <span className="text-[#0066FF]">Live Batches</span>
           </h2>
           <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-medium">
-            Enroll today for intensive curriculum coverage, daily practice problems (DPPs), personal doubt resolution sessions with {websiteSettings?.directorName || 'Aman Arora'}, and automated test evaluations.
+            Enroll today for intensive curriculum coverage, daily practice problem sheets, personal doubt resolution sessions with {websiteSettings?.directorName || 'Aman Arora'}, and automated test evaluations.
           </p>
         </div>
 

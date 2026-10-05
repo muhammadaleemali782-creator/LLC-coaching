@@ -33,6 +33,51 @@ interface MobileAppHomeProps {
   onOpenOfflineVault: () => void;
 }
 
+const SafeCourseImage: React.FC<{ src?: string; alt: string; className?: string; category?: string }> = ({ src, alt, className = 'w-full h-full object-cover', category }) => {
+  const [hasError, setHasError] = useState(false);
+  const icon = category === 'spoken' ? '🗣️' : category === 'computer' ? '💻' : category === 'senior' ? '🔬' : '📚';
+
+  if (hasError || !src) {
+    return (
+      <div className={`flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 text-white select-none ${className}`}>
+        <span className="text-xl drop-shadow">{icon}</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      onError={() => setHasError(true)}
+    />
+  );
+};
+
+const SafeInstituteLogo: React.FC<{ logoUrl?: string; name?: string }> = ({ logoUrl, name }) => {
+  const [hasError, setHasError] = useState(false);
+  const resolvedUrl = logoUrl?.startsWith('/') ? '.' + logoUrl : (logoUrl || './logo.jpg');
+
+  if (hasError) {
+    return (
+      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0052CC] to-[#0066FF] text-white font-black flex items-center justify-center text-xs shadow-xs border border-blue-200 shrink-0 select-none">
+        LCC
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={resolvedUrl}
+      alt={name || 'L.C.C.'}
+      className="w-10 h-10 rounded-2xl object-contain bg-white shadow-xs border border-blue-100 shrink-0"
+      onError={() => setHasError(true)}
+    />
+  );
+};
+
 export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
   onOpenDrawer,
   onOpenGoalModal,
@@ -448,15 +493,10 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                 style={{ width: '220px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
               >
                 <div className="relative" style={{ height: '110px' }}>
-                  <img
+                  <SafeCourseImage
                     src={course.image}
                     alt={course.title}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    onError={(e: any) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = './logo.jpg';
-                    }}
+                    category={course.category}
                   />
                   <span
                     className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded-full"
@@ -509,7 +549,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
         )}
       </div>
 
-      {/* ═══════════ FREE STUDY NOTES & DPPS ═══════════ */}
+      {/* ═══════════ FREE STUDY NOTES & BOOKS ═══════════ */}
       <div className="px-3 pt-4 space-y-2.5">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold" style={{ color: '#1e293b' }}>
@@ -525,8 +565,8 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
             <span className="text-[10px] font-black uppercase text-emerald-700 px-2 py-0.5 rounded bg-emerald-100">
               Pending / Uploading Soon
             </span>
-            <p className="text-xs font-bold text-slate-800 mt-1.5">Chapter Notes & DPPs in Preparation</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Academic Council is compiling verified PDF modules for your subjects.</p>
+            <p className="text-xs font-bold text-slate-800 mt-1.5">Official Study Notes & Books in Preparation</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Academic Council is compiling verified PDF modules for your curriculum.</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -738,15 +778,11 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                 style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <img
+                  <SafeCourseImage
                     src={c.image}
                     alt={c.title}
+                    category={c.category}
                     className="w-12 h-12 rounded-xl object-cover shrink-0"
-                    loading="lazy"
-                    onError={(e: any) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = './logo.jpg';
-                    }}
                   />
                   <div className="min-w-0">
                     <span
@@ -788,14 +824,9 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)' }}
         >
           <div className="flex items-center gap-3">
-            <img
-              src={websiteSettings?.logoUrl?.startsWith('/') ? '.' + websiteSettings.logoUrl : (websiteSettings?.logoUrl || './logo.jpg')}
-              alt={websiteSettings?.instituteName || 'L.C.C.'}
-              className="w-10 h-10 rounded-2xl object-contain bg-white shadow-xs border border-blue-100"
-              onError={(e: any) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = './logo.jpg';
-              }}
+            <SafeInstituteLogo
+              logoUrl={websiteSettings?.logoUrl}
+              name={websiteSettings?.instituteName}
             />
             <div className="min-w-0">
               <h4 className="text-xs font-black text-slate-900 leading-tight">

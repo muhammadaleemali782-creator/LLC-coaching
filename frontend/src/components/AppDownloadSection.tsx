@@ -135,7 +135,7 @@ export const AppDownloadSection: React.FC = () => {
                       <h4 className="font-extrabold text-sm leading-tight">
                         Class 10 Board Topper Batch 2026-27
                       </h4>
-                      <p className="text-[10px] text-blue-100">Daily live classes, DPPs & 1-on-1 doubt clearing.</p>
+                      <p className="text-[10px] text-blue-100">Daily live classes, study notes & 1-on-1 doubt clearing.</p>
                       <button className="px-3 py-1 bg-white text-blue-600 rounded-lg font-bold text-[10px] shadow-sm">
                         Join Now
                       </button>
@@ -217,7 +217,7 @@ export const AppDownloadSection: React.FC = () => {
                     <div>
                       <span className="text-[10px] text-blue-600 font-bold uppercase">Class 10 Board Master</span>
                       <h4 className="font-extrabold text-slate-900 text-sm">Complete Science & Maths Mastery</h4>
-                      <p className="text-[10px] text-slate-500 mt-1">120+ Video Lectures, 45 Solved DPPs, Chapter PYQ Vault.</p>
+                      <p className="text-[10px] text-slate-500 mt-1">120+ Video Lectures, 45 Solved Practice Sheets, Chapter PYQ Vault.</p>
                     </div>
 
                     <div className="space-y-2">
@@ -251,7 +251,7 @@ export const AppDownloadSection: React.FC = () => {
 
                     <div className="space-y-2 text-[10px]">
                       <div className="p-2.5 rounded-xl bg-slate-100 text-slate-700 max-w-[200px] leading-relaxed">
-                        Sir, I have a doubt in Physics Ohm's law numerical from yesterday's DPP.
+                        Sir, I have a doubt in Physics Ohm's law numerical from yesterday's practice sheet.
                       </div>
                       <div className="p-2.5 rounded-xl bg-blue-600 text-white ml-auto max-w-[200px] leading-relaxed">
                         Sure Aarav! Remember: V = I × R. When resistors are in series, add resistances directly.

@@ -1,5 +1,5 @@
 // In-App Offline Document Vault
-// Stores study notes, DPPs, and chapter materials locally in IndexedDB / localStorage for zero-internet access.
+// Stores study notes, practice sheets, and chapter materials locally in IndexedDB / localStorage for zero-internet access.
 
 export interface OfflineDoc {
   id: string;

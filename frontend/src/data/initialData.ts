@@ -34,7 +34,7 @@ export const INITIAL_COURSES: Course[] = [
     instructor: 'Mr. Rajesh Verma & Team',
     image: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&auto=format&fit=crop&q=80',
     badge: 'Core Strong',
-    features: ['Mathematics, Science, SST & English', 'Chapter-wise DPPs & Weekly Tests', 'Olympiad & NTSE Orientation', 'Doubt Solving Clinics'],
+    features: ['Mathematics, Science, SST & English', 'Chapter Practice Sheets & Weekly Tests', 'Olympiad & NTSE Orientation', 'Doubt Solving Clinics'],
     description: 'Comprehensive subject mastery for middle school students, bridging school curriculum with advanced logical reasoning.',
     syllabusHighlights: ['Algebra, Geometry & Mensuration', 'Physics, Chemistry & Biology Fundamentals', 'History, Civics & Geography Insights', 'Advanced Grammar & Writing'],
     isPaid: true,

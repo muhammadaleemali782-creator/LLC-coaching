@@ -526,10 +526,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setAds(adsRes.value.data);
           saveItem('lcc_ads', adsRes.value.data);
         }
-        if (pdfsRes.status === 'fulfilled' && Array.isArray(pdfsRes.value?.data) && pdfsRes.value.data.length > 0) {
-          const cloudPdfs = pdfsRes.value.data;
-          setStudyMaterials(cloudPdfs);
-          saveItem('lcc_study_materials', cloudPdfs);
+        if (pdfsRes.status === 'fulfilled' && Array.isArray(pdfsRes.value?.data)) {
+          const cloudPdfs = (pdfsRes.value.data || []).filter((m: any) => 
+            m.id !== 'mat-good-manners' && 
+            m.id !== 'mat-vocabulary-list'
+          );
+          const rawLocal = localStorage.getItem('lcc_study_materials');
+          let localMaterials: StudyMaterial[] = [];
+          try {
+            if (rawLocal) {
+              const parsed = JSON.parse(rawLocal);
+              if (Array.isArray(parsed)) {
+                localMaterials = parsed.filter((m: any) => 
+                  m.id !== 'mat-good-manners' && 
+                  m.id !== 'mat-vocabulary-list'
+                );
+              }
+            }
+          } catch (e) {}
+
+          if (cloudPdfs.length > 0) {
+            const merged = [...cloudPdfs];
+            localMaterials.forEach(loc => {
+              if (!merged.some(m => m.id === loc.id)) {
+                merged.push(loc);
+              }
+            });
+            setStudyMaterials(merged);
+            saveItem('lcc_study_materials', merged);
+          } else if (localMaterials.length > 0) {
+            setStudyMaterials(localMaterials);
+            saveItem('lcc_study_materials', localMaterials);
+          } else {
+            setStudyMaterials([]);
+            saveItem('lcc_study_materials', []);
+          }
         }
         if (vidsRes.status === 'fulfilled' && Array.isArray(vidsRes.value?.data)) {
           const cloudVids = vidsRes.value.data;

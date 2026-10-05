@@ -32,12 +32,14 @@ import {
   ShieldCheck,
   History,
   ArrowRight,
-  Layers
+  Layers,
+  ChevronLeft
 } from 'lucide-react';
 import { Youtube } from '../SocialIcons';
 import confetti from 'canvas-confetti';
 import { getLearningHistory, clearLearningHistory, LearningHistoryItem } from '../../utils/learningHistory';
 import { getOfflineDocs, saveOfflineDoc, isDocOffline, deleteOfflineDoc, OfflineDoc } from '../../utils/offlineStorage';
+import { PdfCanvasViewer } from '../modals/PdfCanvasViewer';
 
 export const StudentDashboard: React.FC = () => {
   const {
@@ -81,6 +83,9 @@ export const StudentDashboard: React.FC = () => {
   const [vaultSubTab, setVaultSubTab] = useState<'my' | 'offline' | 'all'>('my');
   const [offlineDocs, setOfflineDocs] = useState<OfflineDoc[]>(() => getOfflineDocs());
   const [readingOfflineDoc, setReadingOfflineDoc] = useState<OfflineDoc | null>(null);
+  const [offlineReaderPage, setOfflineReaderPage] = useState<number>(1);
+  const [offlineReaderMode, setOfflineReaderMode] = useState<'book' | 'canvas'>('book');
+  const [offlineReaderTheme, setOfflineReaderTheme] = useState<'light' | 'sepia' | 'dark'>('light');
 
   // Sync history and offline docs whenever tab or student changes
   useEffect(() => {
@@ -966,11 +971,15 @@ export const StudentDashboard: React.FC = () => {
 
             {/* Offline Reader View */}
             {readingOfflineDoc ? (
-              <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-card-clean space-y-5">
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-4 sm:p-7 shadow-card-clean space-y-4">
+                {/* Top Control Bar */}
                 <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
                   <button
                     type="button"
-                    onClick={() => setReadingOfflineDoc(null)}
+                    onClick={() => {
+                      setReadingOfflineDoc(null);
+                      setOfflineReaderPage(1);
+                    }}
                     className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:underline cursor-pointer"
                   >
                     <ArrowLeft className="w-4 h-4" />
@@ -980,6 +989,30 @@ export const StudentDashboard: React.FC = () => {
                     <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
                       Offline Zero-Data Reader
                     </span>
+                    {/* Mode selector */}
+                    <div className="flex bg-slate-100 p-0.5 rounded-xl text-[11px] font-bold">
+                      <button
+                        type="button"
+                        onClick={() => setOfflineReaderMode('book')}
+                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                          offlineReaderMode === 'book' ? 'bg-white text-[#0066FF] shadow-xs' : 'text-slate-600'
+                        }`}
+                      >
+                        📖 Book (2 Pages)
+                      </button>
+                      {(readingOfflineDoc.fileUrl?.toLowerCase().includes('.pdf') || readingOfflineDoc.fileUrl?.startsWith('data:application/pdf') || readingOfflineDoc.fileUrl === '/assets/sample_notes.pdf') && (
+                        <button
+                          type="button"
+                          onClick={() => setOfflineReaderMode('canvas')}
+                          className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                            offlineReaderMode === 'canvas' ? 'bg-white text-[#0066FF] shadow-xs' : 'text-slate-600'
+                          }`}
+                        >
+                          📄 Canvas PDF
+                        </button>
+                      )}
+                    </div>
+
                     <button
                       type="button"
                       onClick={() => {
@@ -990,7 +1023,7 @@ export const StudentDashboard: React.FC = () => {
                           targetClass: readingOfflineDoc.targetClass,
                           subject: readingOfflineDoc.subject || 'Curriculum',
                           chapter: 'Offline Notes',
-                          pages: 15,
+                          pages: 2,
                           downloadUrl: readingOfflineDoc.fileUrl,
                           googleDriveUrl: readingOfflineDoc.fileUrl?.includes('drive.google.com') ? readingOfflineDoc.fileUrl : undefined,
                           isGoogleDrive: Boolean(readingOfflineDoc.fileUrl?.includes('drive.google.com')),
@@ -1003,41 +1036,184 @@ export const StudentDashboard: React.FC = () => {
                       }}
                       className="px-3 py-1 rounded-xl bg-[#0066FF] hover:bg-blue-700 text-white text-[11px] font-bold shadow-xs cursor-pointer"
                     >
-                      Fullscreen Reader
+                      Fullscreen
                     </button>
                   </div>
                 </div>
 
-                <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                    {readingOfflineDoc.targetClass} • {readingOfflineDoc.subject || 'Curriculum'}
-                  </span>
-                  <h3 className="text-lg font-black text-slate-900 mt-0.5">{readingOfflineDoc.title}</h3>
-                  <span className="text-[11px] text-slate-400 font-medium">Saved to Phone on {readingOfflineDoc.downloadedAt} • No Internet Needed</span>
+                {/* Doc Title & Info */}
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                      {readingOfflineDoc.targetClass} • {readingOfflineDoc.subject || 'Curriculum'} • 2 Pages
+                    </span>
+                    <h3 className="text-lg font-black text-slate-900 mt-0.5">{readingOfflineDoc.title}</h3>
+                    <span className="text-[11px] text-slate-400 font-medium">Saved to Phone on {readingOfflineDoc.downloadedAt} • Read-Only Offline Document</span>
+                  </div>
+
+                  {/* Theme Switcher */}
+                  <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-[10px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setOfflineReaderTheme('light')}
+                      className={`px-2 py-0.5 rounded cursor-pointer ${offlineReaderTheme === 'light' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500'}`}
+                    >
+                      Day
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOfflineReaderTheme('sepia')}
+                      className={`px-2 py-0.5 rounded cursor-pointer ${offlineReaderTheme === 'sepia' ? 'bg-[#faebd7] text-amber-900 shadow-xs' : 'text-slate-500'}`}
+                    >
+                      Sepia
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOfflineReaderTheme('dark')}
+                      className={`px-2 py-0.5 rounded cursor-pointer ${offlineReaderTheme === 'dark' ? 'bg-slate-950 text-white shadow-xs' : 'text-slate-500'}`}
+                    >
+                      Night
+                    </button>
+                  </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/60 border border-blue-100 text-xs sm:text-sm text-slate-800 leading-relaxed font-sans">
-                    <span className="font-bold text-[#0066FF] block mb-1">📘 Chapter Theory & Core Concepts:</span>
-                    <p className="whitespace-pre-line">
-                      {readingOfflineDoc.contentSnippet || 'Comprehensive theoretical study notes, formulas, and board questions prepared by L.C.C. faculty.'}
-                    </p>
+                {/* Reader Content */}
+                {offlineReaderMode === 'canvas' && (readingOfflineDoc.fileUrl?.toLowerCase().includes('.pdf') || readingOfflineDoc.fileUrl?.startsWith('data:application/pdf') || readingOfflineDoc.fileUrl === '/assets/sample_notes.pdf') ? (
+                  <div className="w-full h-[520px] rounded-2xl overflow-hidden shadow-inner border border-slate-200">
+                    <PdfCanvasViewer 
+                      url={readingOfflineDoc.fileUrl.startsWith('/') ? '.' + readingOfflineDoc.fileUrl : readingOfflineDoc.fileUrl} 
+                      title={readingOfflineDoc.title} 
+                    />
                   </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Page Navigation Tabs */}
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-2 flex items-center justify-between gap-2 text-xs font-bold select-none">
+                      <button
+                        type="button"
+                        disabled={offlineReaderPage <= 1}
+                        onClick={() => setOfflineReaderPage(1)}
+                        className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 shadow-xs flex items-center gap-1 cursor-pointer"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Previous</span>
+                      </button>
 
-                  <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-700 space-y-2">
-                    <span className="font-bold text-slate-900 block">📝 Essential Formulas & Key Exam Highlights:</span>
-                    <ul className="space-y-1.5 list-disc list-inside text-xs text-slate-600">
-                      <li>Complete step-by-step NCERT & Exemplar syllabus derivations included.</li>
-                      <li>Standard board examination definitions and high-weightage question patterns.</li>
-                      <li>Rapid revision summary and formula quick-reference chart.</li>
-                    </ul>
-                  </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setOfflineReaderPage(1)}
+                          className={`px-3 py-1 rounded-xl text-xs font-black cursor-pointer transition-all ${
+                            offlineReaderPage === 1 ? 'bg-[#0066FF] text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100'
+                          }`}
+                        >
+                          Page 1 (Theory)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setOfflineReaderPage(2)}
+                          className={`px-3 py-1 rounded-xl text-xs font-black cursor-pointer transition-all ${
+                            offlineReaderPage === 2 ? 'bg-[#0066FF] text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100'
+                          }`}
+                        >
+                          Page 2 (Board Notes)
+                        </button>
+                      </div>
 
-                  <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs">
-                    <span className="font-bold">💡 Faculty Study Advice:</span>
-                    <p className="mt-0.5">Revise key definitions and solve corresponding chapter DPP questions to test your speed and accuracy.</p>
+                      <button
+                        type="button"
+                        disabled={offlineReaderPage >= 2}
+                        onClick={() => setOfflineReaderPage(2)}
+                        className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-40 shadow-xs flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Next</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Page Container */}
+                    <div
+                      className={`p-5 sm:p-7 rounded-2xl border transition-all duration-200 select-none space-y-5 ${
+                        offlineReaderTheme === 'dark'
+                          ? 'bg-slate-900 text-slate-100 border-slate-800'
+                          : offlineReaderTheme === 'sepia'
+                          ? 'bg-[#fbf0d9] text-[#433422] border-[#ebd5b3]'
+                          : 'bg-white text-slate-800 border-slate-200'
+                      }`}
+                    >
+                      {offlineReaderPage === 1 ? (
+                        /* ═══════════ PAGE 1: THEORETICAL FOUNDATIONS ═══════════ */
+                        <div className="space-y-4 text-xs sm:text-sm leading-relaxed">
+                          <div className="flex items-center justify-between border-b pb-2 border-slate-200/50">
+                            <span className="px-2.5 py-0.5 rounded-md bg-blue-100 text-[#0066FF] font-black text-[10px] uppercase">
+                              Page 1 of 2: Chapter Core Theory & Rules
+                            </span>
+                            <span className="text-[10px] opacity-60 font-mono">Curriculum Module</span>
+                          </div>
+
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-black text-[#0066FF]">1. Core Concepts & Chapter Overview</h4>
+                            <p className="whitespace-pre-line leading-relaxed">
+                              {readingOfflineDoc.contentSnippet || 'Fundamental principles, comprehensive syllabus definitions, and step-by-step conceptual derivations curated for academic mastery by Director Aman Arora.'}
+                            </p>
+                          </div>
+
+                          <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-100 text-slate-700 space-y-2">
+                            <h5 className="font-bold text-slate-900 text-xs">📌 Fundamental Axioms & Definitions:</h5>
+                            <ul className="list-disc list-inside space-y-1 text-xs text-slate-600">
+                              <li>Every composite number can be expressed uniquely as a product of primes, apart from the order of factors.</li>
+                              <li>Given positive integers a and b, there exist unique whole numbers q and r satisfying a = bq + r (0 ≤ r &lt; b).</li>
+                              <li>Standard board exam theorem proofs must include step-by-step statements, given data, and concluding rationale.</li>
+                            </ul>
+                          </div>
+
+                          <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80 text-amber-900 text-xs">
+                            <span className="font-bold">💡 Director's Study Tip:</span>
+                            <p className="mt-0.5">Read through each definition twice. Click 'Page 2' above or the 'Next' button to review solved examples and exam formulas.</p>
+                          </div>
+                        </div>
+                      ) : (
+                        /* ═══════════ PAGE 2: SOLVED EXAMPLES & FORMULAS ═══════════ */
+                        <div className="space-y-4 text-xs sm:text-sm leading-relaxed">
+                          <div className="flex items-center justify-between border-b pb-2 border-slate-200/50">
+                            <span className="px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-black text-[10px] uppercase">
+                              Page 2 of 2: Solved Board Examples & High-Yield Formulas
+                            </span>
+                            <span className="text-[10px] opacity-60 font-mono">Exam Focus Sheet</span>
+                          </div>
+
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-black text-emerald-700">2. Solved Example: High-Weightage Board Pattern</h4>
+                            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs font-mono">
+                              <p className="font-bold text-slate-800">Q: Find HCF and LCM of 96 and 404 by prime factorisation method, and verify HCF × LCM = Product of numbers.</p>
+                              <div className="pl-2 border-l-2 border-emerald-500 text-slate-700 space-y-1">
+                                <p>• 96 = 2⁵ × 3 = 32 × 3</p>
+                                <p>• 404 = 2² × 101 = 4 × 101</p>
+                                <p>• HCF(96, 404) = 2² = 4</p>
+                                <p>• LCM(96, 404) = (96 × 404) / 4 = 96 × 101 = 9696</p>
+                                <p className="text-emerald-700 font-bold">✓ Verification: 4 × 9696 = 38784 = 96 × 404. [Verified]</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 space-y-2">
+                            <span className="font-bold text-slate-900 block text-xs">📝 Essential Exam Formulas Quick-Reference:</span>
+                            <ul className="space-y-1.5 list-disc list-inside text-xs text-slate-600">
+                              <li>HCF(a, b) × LCM(a, b) = a × b (for any two positive integers a, b).</li>
+                              <li>If p is a prime and p divides a², then p divides a, where a is a positive integer.</li>
+                              <li>Terminating decimal expansion condition: q = 2ⁿ · 5ᵐ (n, m non-negative integers).</li>
+                            </ul>
+                          </div>
+
+                          <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-emerald-900 text-xs">
+                            <span className="font-bold">🎯 Board Practice Questions:</span>
+                            <p className="mt-0.5">Solve corresponding exercise questions from your textbook and weekly test sheets to strengthen your speed and board presentation.</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ) : vaultSubTab === 'offline' ? (
               /* Offline Docs List */

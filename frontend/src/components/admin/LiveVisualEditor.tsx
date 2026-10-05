@@ -207,7 +207,7 @@ export const getElementFriendlyInfo = (el: HTMLElement): { name: string; subtitl
   if (quickLinks && (el === quickLinks || el.closest('#hero-quick-links-header') || el.classList.contains('bg-white'))) {
     return {
       name: 'Quick Links Portal Card',
-      subtitle: 'Admission, Batches & DPP Links Box',
+      subtitle: 'Admission, Batches & Notes Links Box',
       targetEl: quickLinks
     };
   }

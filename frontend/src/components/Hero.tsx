@@ -176,7 +176,7 @@ export const Hero: React.FC = () => {
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <span className="text-rose-600 text-base shrink-0">📥</span>
-                          <span className="font-bold text-[11px] sm:text-xs text-slate-800 leading-tight">Free Study Notes & DPP Vault</span>
+                          <span className="font-bold text-[11px] sm:text-xs text-slate-800 leading-tight">Official Study Notes & PDF Books</span>
                         </div>
                         <span className="text-[9px] font-black text-rose-700 shrink-0 bg-rose-100/70 px-1.5 py-0.5 rounded ml-1">Free</span>
                       </button>

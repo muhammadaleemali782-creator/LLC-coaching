@@ -138,7 +138,7 @@ export const AboutSection: React.FC = () => {
               {[
                 { title: 'Personalized 1-on-1 Attention', desc: 'Small batch sizes (15–25 students) so every question is heard and resolved.' },
                 { title: 'Air-Conditioned Computer Lab', desc: 'Individual PC workstations for DCA, ADCA, Python, and Tally Prime with GST.' },
-                { title: 'Complete Chapter Vault & DPPs', desc: 'Point-wise solved notes, worksheets, and 10-year past papers for top scores.' }
+                { title: 'Complete Chapter Notes & Books', desc: 'Point-wise solved notes, worksheets, and 10-year past papers for top scores.' }
               ].map((item, idx) => (
                 <div key={idx} className="p-3.5 rounded-2xl bg-[#F8FAFC] border border-slate-200/80 flex items-start gap-3">
                   <div className="p-2 rounded-xl bg-blue-100 text-[#0066FF] shrink-0 mt-0.5">

@@ -42,7 +42,7 @@ export const MethodologySection: React.FC = () => {
       points: [
         'Direct 1:1 interaction with Aman Sir & senior faculty',
         'No question is considered silly — warm and encouraging classroom vibe',
-        'Daily homework and DPP checking with personalized feedback'
+        'Daily homework and practice sheet checking with personalized feedback'
       ]
     }
   ];

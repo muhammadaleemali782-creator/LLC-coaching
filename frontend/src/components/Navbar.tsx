@@ -431,7 +431,7 @@ export const Navbar: React.FC = () => {
           { label: '🩺 NEET / Foundation', view: 'courses' as const, anchor: 'courses-section', bg: 'bg-slate-800 text-slate-200' },
           { label: '💻 Computer DCA', view: 'courses' as const, anchor: 'courses-section', bg: 'bg-slate-800 text-slate-200' },
           { label: '🗣️ Spoken English', view: 'courses' as const, anchor: 'courses-section', bg: 'bg-slate-800 text-slate-200' },
-          { label: '📥 Free DPPs', view: 'study-material' as const, anchor: 'study-material-section', bg: 'bg-slate-800 text-slate-200' },
+          { label: '📥 Study Notes', view: 'study-material' as const, anchor: 'study-material-section', bg: 'bg-slate-800 text-slate-200' },
         ].map((pill, idx) => (
           <button
             key={idx}
@@ -473,7 +473,7 @@ export const Navbar: React.FC = () => {
           <span className="truncate w-full text-center text-[10px]">Batches</span>
         </button>
 
-        {/* 3. Study Vault (PW Notes & DPPs) */}
+        {/* 3. Study Vault (Official Notes & Books) */}
         <button
           type="button"
           onClick={() => navigateTo('study-material', 'study-material-section')}

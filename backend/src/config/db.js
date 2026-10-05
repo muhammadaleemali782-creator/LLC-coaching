@@ -405,7 +405,7 @@ const defaultData = {
       instructor: 'Mr. Rajesh Verma & Team',
       image: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&auto=format&fit=crop&q=80',
       badge: 'Core Strong',
-      features: ['Mathematics, Science, SST & English', 'Chapter-wise DPPs & Weekly Tests', 'Olympiad & NTSE Orientation', 'Doubt Solving Clinics'],
+      features: ['Mathematics, Science, SST & English', 'Chapter Practice Sheets & Weekly Tests', 'Olympiad & NTSE Orientation', 'Doubt Solving Clinics'],
       description: 'Comprehensive subject mastery for middle school students, bridging school curriculum with advanced logical reasoning.',
       isPaid: true,
       schedule: 'Mon - Sat | 4:00 PM - 6:00 PM'
@@ -485,34 +485,21 @@ const defaultData = {
   ],
   studyMaterials: [
     {
-      id: 'mat-good-manners',
-      title: 'Good Manners and Social Etiquette',
+      id: 'admin-verified-c10-math',
+      title: 'Class 10 Mathematics: Real Numbers Board Notes',
       category: 'pdf_notes',
-      targetClass: 'Spoken English',
-      subject: 'English Fluency',
-      chapter: 'Etiquette & Manners',
-      pages: 5,
+      targetClass: 'Class 10',
+      subject: 'Mathematics',
+      chapter: 'Chapter 1',
+      pages: 18,
       downloadUrl: '/assets/sample_notes.pdf',
+      googleDriveUrl: 'https://drive.google.com/file/d/12345/preview',
+      isGoogleDrive: true,
       isPremium: false,
       fileType: 'pdf',
-      dateAdded: '2026-09-20',
-      downloadsCount: 150,
-      previewContent: 'Comprehensive theoretical notes, etiquette guidelines, and conversational practice examples.'
-    },
-    {
-      id: 'mat-vocabulary-list',
-      title: 'Vocabulary List',
-      category: 'pdf_notes',
-      targetClass: 'Spoken English',
-      subject: 'English Fluency',
-      chapter: 'Daily Vocabulary',
-      pages: 2,
-      downloadUrl: '/assets/sample_notes.pdf',
-      isPremium: false,
-      fileType: 'pdf',
-      dateAdded: '2026-09-20',
-      downloadsCount: 95,
-      previewContent: 'Essential daily vocabulary, words, meanings and practical sentence construction.'
+      dateAdded: '2026-10-06',
+      downloadsCount: 5,
+      previewContent: 'Real Numbers and Euclidean Division Lemma notes for Class 10.'
     }
   ],
   videos: [
@@ -980,6 +967,15 @@ export const connectOnlineMongoDB = async () => {
               console.warn(`⚠️ Collection seed check note (${item.name}):`, colErr.message);
             }
           }
+
+          try {
+            await StudyMaterialModel.deleteMany({
+              $or: [
+                { id: 'mat-good-manners' },
+                { id: 'mat-vocabulary-list' }
+              ]
+            });
+          } catch (e) {}
 
           try {
             const settingsCount = await SettingModel.countDocuments();
