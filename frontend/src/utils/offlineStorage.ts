@@ -20,7 +20,8 @@ export const getOfflineDocs = (): OfflineDoc[] => {
   try {
     const raw = localStorage.getItem(OFFLINE_KEY);
     const docs: OfflineDoc[] = raw ? JSON.parse(raw) : [];
-    const cleaned = docs.filter(d => !d.id?.startsWith('mat-'));
+    const fakeIds = ['mat-dca-fund', 'mat-12-phys-electro', 'mat-9-math-geom', 'mat-10-sci-chem', 'mat-10-math-real'];
+    const cleaned = docs.filter(d => !fakeIds.includes(d.id));
     if (cleaned.length !== docs.length) {
       localStorage.setItem(OFFLINE_KEY, JSON.stringify(cleaned));
     }

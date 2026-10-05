@@ -483,7 +483,38 @@ const defaultData = {
       schedule: 'Mon - Fri | 7:00 PM - 8:15 PM'
     }
   ],
-  studyMaterials: [],
+  studyMaterials: [
+    {
+      id: 'mat-good-manners',
+      title: 'Good Manners and Social Etiquette',
+      category: 'pdf_notes',
+      targetClass: 'Class 1–12',
+      subject: 'Spoken English & Moral Values',
+      chapter: 'Personality Development',
+      pages: 2,
+      downloadUrl: '/assets/sample_notes.pdf',
+      isPremium: false,
+      fileType: 'pdf',
+      dateAdded: '2026-09-20',
+      downloadsCount: 120,
+      previewContent: 'Essential manners, polite phrases, greeting protocols, and social etiquette guidelines for students.'
+    },
+    {
+      id: 'mat-vocabulary-list',
+      title: 'Vocabulary List',
+      category: 'pdf_notes',
+      targetClass: 'Spoken English',
+      subject: 'English Fluency',
+      chapter: 'Daily Vocabulary',
+      pages: 2,
+      downloadUrl: '/assets/sample_notes.pdf',
+      isPremium: false,
+      fileType: 'pdf',
+      dateAdded: '2026-09-20',
+      downloadsCount: 95,
+      previewContent: 'Comprehensive theoretical notes, formula derivations, and board sample questions.'
+    }
+  ],
   videos: [
     {
       id: 'vid-1',
@@ -952,10 +983,7 @@ export const connectOnlineMongoDB = async () => {
 
           try {
             await StudyMaterialModel.deleteMany({
-              $or: [
-                { id: { $in: ['mat-dca-fund', 'mat-12-phys-electro', 'mat-9-math-geom', 'mat-10-sci-chem', 'mat-10-math-real', 'mat-good-manners', 'mat-vocabulary-list'] } },
-                { id: /^mat-/ }
-              ]
+              id: { $in: ['mat-dca-fund', 'mat-12-phys-electro', 'mat-9-math-geom', 'mat-10-sci-chem', 'mat-10-math-real'] }
             });
           } catch (e) {}
 

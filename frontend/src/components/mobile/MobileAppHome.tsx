@@ -20,7 +20,8 @@ import {
   Heart,
   Sparkles,
   Search,
-  ExternalLink
+  ExternalLink,
+  Phone
 } from 'lucide-react';
 import { getTranslation, AppLanguage } from '../../utils/i18n';
 import { saveOfflineDoc, isDocOffline } from '../../utils/offlineStorage';
@@ -875,12 +876,18 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
               <MessageSquare className="w-3.5 h-3.5" />
               <span>Live Support & Helpdesk</span>
             </button>
-            <a
-              href={`tel:${contactPhone}`}
-              className="px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-slate-800 text-xs font-bold shadow-xs active:scale-98 transition-all flex items-center justify-center cursor-pointer"
+            <button
+              type="button"
+              id="btn-call-campus"
+              onClick={() => {
+                const phone = contactPhone || '9250703092';
+                window.location.href = `tel:${phone}`;
+              }}
+              className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              📞 Call
-            </a>
+              <Phone className="w-3.5 h-3.5" />
+              <span>Call Helpline</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1212,7 +1219,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
       {/* ═══════════ BOTTOM NAVIGATION DOCK ═══════════ */}
       <nav
         aria-label="Mobile Bottom Navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 grid grid-cols-5 items-center shadow-2xl"
+        className="fixed bottom-0 left-0 right-0 z-40 grid grid-cols-4 items-center shadow-2xl"
         style={{
           backgroundColor: '#ffffff',
           borderTop: '1px solid #e2e8f0',
@@ -1270,15 +1277,6 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           <span className="text-[10px] font-semibold truncate max-w-full" style={{ color: '#059669' }}>{t.askDoubt}</span>
         </button>
 
-        {/* Profile */}
-        <button
-          type="button"
-          onClick={onOpenDrawer}
-          className="flex flex-col items-center justify-center gap-0.5 cursor-pointer py-1"
-        >
-          <User className="w-5 h-5" style={{ color: '#64748b' }} />
-          <span className="text-[10px] font-semibold truncate max-w-full" style={{ color: '#64748b' }}>Profile</span>
-        </button>
       </nav>
 
     </div>

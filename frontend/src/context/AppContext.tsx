@@ -329,11 +329,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [courses, setCourses] = useState<Course[]>(() => loadSaved('lcc_courses', INITIAL_COURSES));
   const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(() => {
+    const fakeIds = ['mat-dca-fund', 'mat-12-phys-electro', 'mat-9-math-geom', 'mat-10-sci-chem', 'mat-10-math-real'];
     const saved = loadSaved<StudyMaterial[]>('lcc_study_materials', INITIAL_STUDY_MATERIALS);
-    const valid = Array.isArray(saved) ? saved : INITIAL_STUDY_MATERIALS;
-    const cleaned = valid.filter(m => !m.id?.startsWith('mat-'));
-    localStorage.setItem('lcc_study_materials', JSON.stringify(cleaned));
-    return cleaned;
+    const valid = Array.isArray(saved) && saved.length > 0 ? saved : INITIAL_STUDY_MATERIALS;
+    const cleaned = valid.filter(m => !fakeIds.includes(m.id));
+    const finalMaterials = cleaned.length > 0 ? cleaned : INITIAL_STUDY_MATERIALS;
+    localStorage.setItem('lcc_study_materials', JSON.stringify(finalMaterials));
+    return finalMaterials;
   });
   const [syllabuses, setSyllabuses] = useState<SyllabusItem[]>(() => loadSaved('lcc_syllabus', INITIAL_SYLLABUS));
   const [notices, setNotices] = useState<Notice[]>(() => loadSaved('lcc_notices', INITIAL_NOTICES));
@@ -524,34 +526,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           saveItem('lcc_ads', adsRes.value.data);
         }
         if (pdfsRes.status === 'fulfilled' && Array.isArray(pdfsRes.value?.data)) {
-          const cloudPdfs = (pdfsRes.value.data || []).filter((m: any) => !m.id?.startsWith('mat-'));
+          const fakeIds = ['mat-dca-fund', 'mat-12-phys-electro', 'mat-9-math-geom', 'mat-10-sci-chem', 'mat-10-math-real'];
+          const cloudPdfs = (pdfsRes.value.data || []).filter((m: any) => !fakeIds.includes(m.id));
           const rawLocal = localStorage.getItem('lcc_study_materials');
           let localMaterials: StudyMaterial[] = [];
           try {
             if (rawLocal) {
               const parsed = JSON.parse(rawLocal);
               if (Array.isArray(parsed)) {
-                localMaterials = parsed.filter((m: any) => !m.id?.startsWith('mat-'));
+                localMaterials = parsed.filter((m: any) => !fakeIds.includes(m.id));
               }
             }
           } catch (e) {}
 
-          if (cloudPdfs.length > 0) {
-            const merged = [...cloudPdfs];
-            localMaterials.forEach(loc => {
-              if (!merged.some(m => m.id === loc.id)) {
-                merged.push(loc);
-              }
-            });
-            setStudyMaterials(merged);
-            saveItem('lcc_study_materials', merged);
-          } else if (localMaterials.length > 0) {
-            setStudyMaterials(localMaterials);
-            saveItem('lcc_study_materials', localMaterials);
-          } else {
-            setStudyMaterials([]);
-            saveItem('lcc_study_materials', []);
-          }
+          const baseList = cloudPdfs.length > 0 ? cloudPdfs : (localMaterials.length > 0 ? localMaterials : INITIAL_STUDY_MATERIALS);
+          const merged = [...baseList];
+          localMaterials.forEach(loc => {
+            if (!merged.some(m => m.id === loc.id)) {
+              merged.push(loc);
+            }
+          });
+          setStudyMaterials(merged);
+          saveItem('lcc_study_materials', merged);
         }
         if (vidsRes.status === 'fulfilled' && Array.isArray(vidsRes.value?.data)) {
           const cloudVids = vidsRes.value.data;

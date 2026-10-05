@@ -14,16 +14,13 @@ const extractYouTubeId = (url) => {
 // ==================== PDFS CONTROLLERS ====================
 export const getPDFs = async (req, res) => {
   const { category, targetClass } = req.query;
-  const FAKE_IDS = ['mat-dca-fund', 'mat-12-phys-electro', 'mat-9-math-geom', 'mat-10-sci-chem', 'mat-10-math-real', 'mat-good-manners', 'mat-vocabulary-list'];
+  const FAKE_IDS = ['mat-dca-fund', 'mat-12-phys-electro', 'mat-9-math-geom', 'mat-10-sci-chem', 'mat-10-math-real'];
 
   try {
     if (mongoose.connection.readyState === 1) {
-      // Purge any legacy fake mock notes
+      // Purge only the fake mock notes
       await StudyMaterialModel.deleteMany({
-        $or: [
-          { id: { $in: FAKE_IDS } },
-          { id: /^mat-/ }
-        ]
+        id: { $in: FAKE_IDS }
       });
 
       const query = {
@@ -38,7 +35,7 @@ export const getPDFs = async (req, res) => {
 
   const db = getDB();
   let results = (db.studyMaterials || []).filter(m => 
-    !FAKE_IDS.includes(m.id) && !m.id?.startsWith('mat-')
+    !FAKE_IDS.includes(m.id)
   );
 
   if (category && category !== 'all') {

@@ -13,7 +13,8 @@ import {
   Target,
   ArrowRight,
   ChevronRight,
-  GraduationCap
+  GraduationCap,
+  Phone
 } from 'lucide-react';
 import { getTranslation, AppLanguage } from '../../utils/i18n';
 import { getOfflineDocs } from '../../utils/offlineStorage';
@@ -49,8 +50,6 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
   const offlineCount = getOfflineDocs().length;
   const contactPhone = (websiteSettings?.contactPhone || '9250703092').replace(/[^0-9]/g, '');
 
-  if (!isOpen) return null;
-
   const languages: { id: AppLanguage; label: string; short: string }[] = [
     { id: 'en', label: 'English', short: 'EN' },
     { id: 'hinglish', label: 'Hinglish', short: 'HI' },
@@ -63,17 +62,24 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
   const studentSubjects = currentStudent?.selectedSubjects?.join(', ') || 'Maths, Science';
 
   return (
-    <div className="fixed inset-0 z-[9999] flex">
+    <div
+      className={`fixed inset-0 z-[9999] flex transition-all duration-300 ease-in-out ${
+        isOpen ? 'opacity-100 pointer-events-auto visible' : 'opacity-0 pointer-events-none invisible'
+      }`}
+    >
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0"
-        style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+        className={`fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300 ease-out ${
+          isOpen ? 'opacity-100' : 'opacity-0'
+        }`}
       />
 
       {/* Drawer Panel */}
       <div
-        className="relative h-full shadow-2xl flex flex-col z-10"
+        className={`relative h-full shadow-2xl flex flex-col z-10 transition-transform duration-300 ease-out will-change-transform ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
         style={{ width: '85%', maxWidth: '320px', backgroundColor: '#ffffff', color: '#1e293b' }}
       >
 
@@ -250,6 +256,22 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
               <div className="flex items-center gap-2">
                 <MessageSquare className="w-4 h-4" style={{ color: '#059669' }} />
                 <span>Live Student & Teacher Doubt Desk</span>
+              </div>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                const phone = contactPhone || '9250703092';
+                window.location.href = `tel:${phone}`;
+              }}
+              className="w-full flex items-center justify-between p-2.5 rounded-xl transition-colors cursor-pointer text-left mt-1.5"
+              style={{ backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0' }}
+            >
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-emerald-600" />
+                <span>Direct Campus Helpline ({contactPhone || '9250703092'})</span>
               </div>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>

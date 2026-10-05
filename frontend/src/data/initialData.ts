@@ -118,7 +118,38 @@ export const INITIAL_COURSES: Course[] = [
   }
 ];
 
-export const INITIAL_STUDY_MATERIALS: StudyMaterial[] = [];
+export const INITIAL_STUDY_MATERIALS: StudyMaterial[] = [
+  {
+    id: 'mat-good-manners',
+    title: 'Good Manners and Social Etiquette',
+    category: 'pdf_notes',
+    targetClass: 'Class 1–12',
+    subject: 'Spoken English & Moral Values',
+    chapter: 'Personality Development',
+    pages: 2,
+    downloadUrl: '/assets/sample_notes.pdf',
+    isPremium: false,
+    fileType: 'pdf',
+    dateAdded: '2026-09-20',
+    downloadsCount: 120,
+    previewContent: 'Essential manners, polite phrases, greeting protocols, and social etiquette guidelines for students.'
+  },
+  {
+    id: 'mat-vocabulary-list',
+    title: 'Vocabulary List',
+    category: 'pdf_notes',
+    targetClass: 'Spoken English',
+    subject: 'English Fluency',
+    chapter: 'Daily Vocabulary',
+    pages: 2,
+    downloadUrl: '/assets/sample_notes.pdf',
+    isPremium: false,
+    fileType: 'pdf',
+    dateAdded: '2026-09-20',
+    downloadsCount: 95,
+    previewContent: 'Comprehensive theoretical notes, formula derivations, and board sample questions.'
+  }
+];
 
 export const INITIAL_SYLLABUS: SyllabusItem[] = [
   {
