@@ -1,4 +1,5 @@
 import { Course, StudyMaterial, SyllabusItem, Notice, VideoLecture, InstagramPost, GalleryItem, Student, Transaction, MockTest } from '../types';
+import { ADMIN_GALLERY_ITEMS } from './adminGallery';
 
 export const INITIAL_COURSES: Course[] = [
   {
@@ -462,56 +463,7 @@ export const INITIAL_INSTAGRAM_POSTS: InstagramPost[] = [
   }
 ];
 
-export const INITIAL_GALLERY: GalleryItem[] = [
-  {
-    id: 'gal-1',
-    title: 'Annual Felicitation & Merit Award Ceremony 2026',
-    category: 'toppers',
-    imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
-    date: 'July 2026',
-    description: 'Awarding gold medals, laptops, and cash scholarships to our 10th and 12th board state and district rankers.'
-  },
-  {
-    id: 'gal-2',
-    title: 'Interactive Smart Classroom in Session',
-    category: 'classroom',
-    imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80',
-    date: 'August 2026',
-    description: 'Modern digital smart boards and audio-visual pedagogical tools making concepts vivid and easily understandable.'
-  },
-  {
-    id: 'gal-3',
-    title: 'Science Practical Lab Demonstration',
-    category: 'event',
-    imageUrl: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80',
-    date: 'June 2026',
-    description: 'Hands-on experiential learning where students perform physics optics and chemistry titration experiments.'
-  },
-  {
-    id: 'gal-4',
-    title: 'Modern High-Speed Computer Lab',
-    category: 'classroom',
-    imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80',
-    date: 'July 2026',
-    description: 'Air-conditioned lab equipped with 40+ latest Core-i5 systems, licensed software, and high-speed broadband.'
-  },
-  {
-    id: 'gal-5',
-    title: 'English Speaking Debate Competition',
-    category: 'students',
-    imageUrl: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80',
-    date: 'May 2026',
-    description: 'Inter-batch debate competition helping young minds express thoughts fearlessly with impeccable articulation.'
-  },
-  {
-    id: 'gal-6',
-    title: 'L.C.C. Foundation Day & Cultural Gala',
-    category: 'event',
-    imageUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&auto=format&fit=crop&q=80',
-    date: 'March 2026',
-    description: 'Celebrating 15+ years of educational excellence with teachers, alumni, students, and proud parents.'
-  }
-];
+export const INITIAL_GALLERY: GalleryItem[] = ADMIN_GALLERY_ITEMS;
 
 export const INITIAL_STUDENTS: Student[] = [
   {

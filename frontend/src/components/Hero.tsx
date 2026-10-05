@@ -18,52 +18,20 @@ import {
   Flame
 } from 'lucide-react';
 import { AdBanner } from './ads/AdBanner';
+import { ADMIN_GALLERY_ITEMS } from '../data/adminGallery';
 
 export const Hero: React.FC = () => {
   const { navigateTo, setIsStudentAuthModalOpen, websiteSettings, galleryItems, courses } = useApp();
 
-  // Slide Images for University-Style Carousel (High-res academic & campus events)
-  const defaultSlides = [
-    {
-      id: 'slide-1',
-      imageUrl: websiteSettings?.heroPosterUrl || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1600&auto=format&fit=crop&q=80',
-      title: 'Annual Felicitation & District Rankers Gala 2026',
-      subtitle: 'Celebrating Board Examination Toppers & Merit Scholars at L.C.C. Auditorium',
-      tag: 'ANNUAL FUNCTION & AWARDS'
-    },
-    {
-      id: 'slide-2',
-      imageUrl: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=1600&auto=format&fit=crop&q=80',
-      title: 'Inter-School Stage Debate & Public Speaking Championship',
-      subtitle: 'Nurturing Fearless Communicators, Critical Thinkers & Tomorrow’s Leaders',
-      tag: 'DEBATE & SPOKEN ENGLISH'
-    },
-    {
-      id: 'slide-3',
-      imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1600&auto=format&fit=crop&q=80',
-      title: '1:1 Hi-Tech Computer Laboratory (DCA / ADCA / Tally Prime)',
-      subtitle: 'Hands-on Software, Accounting, Coding & Practical Digital Skills Training',
-      tag: 'COMPUTER LAB SESSIONS'
-    },
-    {
-      id: 'slide-4',
-      imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1600&auto=format&fit=crop&q=80',
-      title: 'Smart Digital Classroom & Chapter Doubt Clinics',
-      subtitle: 'Personal Mentorship for Classes 1 to 12 with Comprehensive Chapter Notes',
-      tag: 'ACADEMIC EXCELLENCE'
-    }
-  ];
-
-  // Merge with any custom gallery items if available
-  const slides = galleryItems && galleryItems.length >= 3
-    ? galleryItems.slice(0, 5).map((g, i) => ({
-        id: g.id,
-        imageUrl: g.imageUrl,
-        title: g.title,
-        subtitle: g.description || defaultSlides[i % defaultSlides.length].subtitle,
-        tag: g.category ? g.category.toUpperCase() : 'CAMPUS HIGHLIGHT'
-      }))
-    : defaultSlides;
+  // Slide Images strictly using official Admin-uploaded Gallery items only
+  const sourceGallery = (galleryItems && galleryItems.length > 0) ? galleryItems : ADMIN_GALLERY_ITEMS;
+  const slides = sourceGallery.map(g => ({
+    id: g.id,
+    imageUrl: g.imageUrl,
+    title: g.title,
+    subtitle: g.description || 'L.C.C. Official Campus Event',
+    tag: (g.category || 'CAMPUS').toUpperCase()
+  }));
 
   const [currentSlide, setCurrentSlide] = useState(0);
 

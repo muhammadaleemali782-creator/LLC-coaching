@@ -25,6 +25,7 @@ import {
 import { getTranslation, AppLanguage } from '../../utils/i18n';
 import { saveOfflineDoc, isDocOffline } from '../../utils/offlineStorage';
 import { Course, VideoLecture, GalleryItem, InstagramPost } from '../../types';
+import { ADMIN_GALLERY_ITEMS } from '../../data/adminGallery';
 
 interface MobileAppHomeProps {
   onOpenDrawer: () => void;
@@ -73,47 +74,24 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
   // Featured Announcement Slides (Admin Official Uploaded Gallery Photos Only)
   const allSlides = React.useMemo(() => {
     const list: Array<{ id: string; title: string; subtitle: string; tag: string; img: string }> = [];
+    const sourceGallery = (galleryItems && galleryItems.length > 0) ? galleryItems : ADMIN_GALLERY_ITEMS;
+    const seen = new Set<string>();
 
-    // Include custom non-default poster only if admin has configured an external URL
-    if (websiteSettings?.heroPosterUrl && !websiteSettings.heroPosterUrl.includes('hero_poster.jpg')) {
-      list.push({
-        id: 's-admin-hero',
-        title: websiteSettings?.emergencyAlertText || 'Admissions Open 2026-27 | Classes 1–12 & DCA',
-        subtitle: 'Classes 1–12, NEET/JEE & DCA Coaching at L.C.C. Campus',
-        tag: 'OFFICIAL NOTICE',
-        img: websiteSettings.heroPosterUrl
-      });
-    }
-
-    if (galleryItems && galleryItems.length > 0) {
-      const seen = new Set(list.map(s => s.img));
-      galleryItems.forEach(g => {
-        if (!seen.has(g.imageUrl)) {
-          seen.add(g.imageUrl);
-          list.push({
-            id: g.id,
-            title: g.title,
-            subtitle: g.description || 'L.C.C. Campus & Academic Achievement',
-            tag: (g.category || 'CAMPUS').toUpperCase(),
-            img: g.imageUrl
-          });
-        }
-      });
-    }
-
-    // Safe fallback if gallery is empty
-    if (list.length === 0) {
-      list.push({
-        id: 's-default-slide',
-        title: websiteSettings?.emergencyAlertText || 'Admissions Open 2026-27 | Classes 1–12 & DCA',
-        subtitle: 'Premier Coaching & Computer Institute at Palahipatti, Varanasi',
-        tag: 'L.C.C. CAMPUS',
-        img: '/logo.jpg'
-      });
-    }
+    sourceGallery.forEach(g => {
+      if (g.imageUrl && !seen.has(g.imageUrl) && !g.imageUrl.includes('hero_poster.jpg')) {
+        seen.add(g.imageUrl);
+        list.push({
+          id: g.id,
+          title: g.title,
+          subtitle: g.description || 'L.C.C. Campus & Academic Achievement',
+          tag: (g.category || 'CAMPUS').toUpperCase(),
+          img: g.imageUrl
+        });
+      }
+    });
 
     return list;
-  }, [websiteSettings?.heroPosterUrl, websiteSettings?.emergencyAlertText, galleryItems]);
+  }, [galleryItems]);
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -348,6 +326,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
       {/* ═══════════ CAROUSEL / BANNER SLIDER (MANUAL ONLY, ZERO AUTO-ADVANCE) ═══════════ */}
       <div className="px-3 pt-3">
         <div
+          id="mobile-hero-slider"
           className="relative rounded-2xl overflow-hidden shadow-md select-none touch-pan-y"
           style={{ aspectRatio: '16/9', backgroundColor: '#0f172a' }}
           onTouchStart={handleTouchStart}
@@ -365,7 +344,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                 className="w-full h-full object-cover object-center"
                 loading="lazy"
                 onError={(e: any) => {
-                  e.currentTarget.src = '/logo.jpg';
+                  e.currentTarget.src = '/assets/admin_gallery_1.jpg';
                 }}
               />
               <div

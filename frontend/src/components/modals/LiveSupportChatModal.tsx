@@ -14,18 +14,20 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'msg-welcome-1',
     sender: 'counselor',
-    text: 'Namaste! 🙏 Welcome to L.C.C. AI Math Tutor & Live Student Helpdesk (100% Free). Aap yahan koi bhi math problem (e.g. "solve 2x + 5 = 25", "15% of 1200", formulas) solve karwa sakte hain, ya admission, fees, batch timings ke bare me pooch sakte hain. How can I help you today?',
+    text: 'Namaste! 🙏 Welcome to L.C.C. Student AI Tutor & Helpdesk (100% Free). Aap yahan sabhi subjects (Math, Science, Physics, Chemistry, Biology, English Grammar, Computer / DCA) ke questions pooch sakte hain, teachers & faculty ke bare me jankari le sakte hain, ya admission/fees ke bare me pooch sakte hain. Ask in Hindi, Hinglish, or English!',
     time: 'Just now'
   }
 ];
 
 const QUICK_CHIPS = [
   '🎯 Admission 2026 & Fee Structure',
-  '🧮 Solve: 2x + 5 = 25',
-  '💡 15% of 1200',
-  '🕒 Batch Timings & Location',
-  '💻 Computer DCA & Tally',
-  '📐 Area of Circle Radius 7'
+  '👨‍🏫 L.C.C. Teachers & Faculty',
+  '🌿 Photosynthesis kya hota hai?',
+  '🍎 Newton ke gati ke niyam',
+  '📖 Tenses ke rules & types',
+  '⚡ Ohm ka niyam (V = IR)',
+  '💻 Computer CPU, RAM, ROM',
+  '🧮 2x + 5 = 25'
 ];
 
 export const LiveSupportChatModal: React.FC = () => {
@@ -70,7 +72,7 @@ export const LiveSupportChatModal: React.FC = () => {
     setIsTyping(true);
 
     setTimeout(() => {
-      // 100% Free Client-Side AI Math & Counseling Agent
+      // 100% Free Client-Side All-Subject AI Tutor & Counseling Agent
       const agentRes = solveAcademicQuery(text);
       const counselorMsg: ChatMessage = {
         id: `msg-reply-${Date.now()}`,
@@ -133,7 +135,7 @@ export const LiveSupportChatModal: React.FC = () => {
             </div>
             <div className="min-w-0">
               <h3 className="text-xs sm:text-sm font-black text-slate-900 leading-tight truncate">
-                L.C.C. AI Math & Student Helpdesk
+                L.C.C. Student AI Tutor & Helpdesk
               </h3>
               <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />

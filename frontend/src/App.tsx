@@ -113,8 +113,9 @@ const MainContent: React.FC = () => {
     (window as any).__lcc_navigate = navigateTo;
     (window as any).__lcc_open_support = () => setIsLiveSupportChatOpen(true);
     (window as any).__lcc_open_payment = (course?: any) => {
-      setSelectedCourseForPayment(course || courses[0]);
+      setSelectedCourseForPayment(course !== undefined ? course : courses[0]);
     };
+    (window as any).__lcc_close_payment = () => setSelectedCourseForPayment(null);
     (window as any).__lcc_close_doc = () => setSelectedDocForPreview(null);
   }, [navigateTo, setIsLiveSupportChatOpen, setSelectedCourseForPayment, setSelectedDocForPreview, courses]);
 

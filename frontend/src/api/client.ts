@@ -1,12 +1,12 @@
-const isLocalhost = typeof window !== 'undefined' && (
+const isFileProtocol = typeof window !== 'undefined' && window.location.protocol === 'file:';
+const isLocalhost = typeof window !== 'undefined' && !isFileProtocol && (
   window.location.hostname === 'localhost' ||
   window.location.hostname === '127.0.0.1' ||
   window.location.hostname === '0.0.0.0' ||
-  window.location.hostname === '' ||
   window.location.port === '5173' ||
   window.location.port === '3000'
 );
-const API_BASE = import.meta.env.VITE_API_URL || (isLocalhost ? 'http://127.0.0.1:5000/api' : '/api');
+const API_BASE = import.meta.env.VITE_API_URL || (isFileProtocol ? 'https://lccedu.vercel.app/api' : (isLocalhost ? 'http://127.0.0.1:5000/api' : '/api'));
 
 const getAuthHeader = (): Record<string, string> => {
   const adminToken = localStorage.getItem('lcc_admin_token');
@@ -318,7 +318,15 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(body)
     }),
-    getTransactions: () => request<{ success: boolean; data: any[] }>('/payments/transactions')
+    getTransactions: () => request<{ success: boolean; data: any[] }>('/payments/transactions'),
+    approveTransaction: (id: string) =>
+      request<{ success: boolean; message: string; transaction: any }>(`/payments/transactions/${id}/approve`, {
+        method: 'PATCH'
+      }),
+    rejectTransaction: (id: string) =>
+      request<{ success: boolean; message: string; transaction: any }>(`/payments/transactions/${id}/reject`, {
+        method: 'PATCH'
+      })
   },
 
   // Staff & Branch Admission Management API

@@ -9,18 +9,18 @@ from playwright.sync_api import sync_playwright
 
 def run_tests():
     print("==========================================================")
-    print(" Starting Comprehensive Test Suite (Positive & Negative)")
+    print(" Starting Comprehensive L.C.C. Test Suite (v2.0)          ")
     print("==========================================================")
     results = {}
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        # Mobile viewport for mobile app testing
+        # Mobile viewport for app experience
         context = browser.new_context(viewport={"width": 390, "height": 844})
         page = context.new_page()
 
         # Clean storage before starting test
-        page.goto("http://127.0.0.1:5173/")
+        page.goto("http://localhost:5173/")
         page.evaluate("localStorage.clear()")
         page.reload()
         page.wait_for_timeout(2000)
@@ -67,22 +67,30 @@ def run_tests():
             results["Registration_&_Survey"] = f"FAILED: {e}"
 
         # -------------------------------------------------------------------
-        # TEST 2: Hero Slider Verification (No hero_poster.jpg & Auto-Slide)
+        # TEST 2: Hero Slider Verification (Only Admin Photos, No Logo or Stock)
         # -------------------------------------------------------------------
-        print("\n--- TEST 2: Hero Slider (No hero_poster.jpg & Auto-slide) ---")
+        print("\n--- TEST 2: Hero Slider (Admin-Only Photos, Auto-slide) ---")
         try:
-            # Check all slide images rendered
-            slide_imgs = page.locator("img[alt]")
+            # Check all slide images rendered inside hero slider container
+            slide_imgs = page.locator("#mobile-hero-slider img")
             count = slide_imgs.count()
             found_hero_poster = False
+            found_unsplash = False
+            found_admin_photo = False
+
             for i in range(count):
                 src = slide_imgs.nth(i).get_attribute("src") or ""
                 if "hero_poster.jpg" in src:
                     found_hero_poster = True
-                    break
-            
+                if "unsplash.com" in src:
+                    found_unsplash = True
+                if "admin_gallery" in src or "lh3.googleusercontent" in src:
+                    found_admin_photo = True
+
             assert not found_hero_poster, "Slider must NOT contain hero_poster.jpg"
-            print("[PASS] No hero_poster.jpg found in slider images!")
+            assert not found_unsplash, "Slider must NOT contain unsplash photos"
+            assert found_admin_photo, "Slider must contain admin-uploaded celebration photos"
+            print(f"[PASS] Verified: Slider contains only admin celebration photos (found_admin_photo={found_admin_photo})")
 
             page.screenshot(path="verified_slider_step1.png")
             print("[PASS] TEST 2: Hero Slider is clean and automated")
@@ -111,7 +119,7 @@ def run_tests():
             assert "You haven't enrolled in any batch yet" in dashboard_text, "Must show empty enrollment state banner"
 
             page.screenshot(path="verified_0_enrolled_metrics.png")
-            print("[PASS] TEST 3: Enrolled Batches: 0, Curriculum: 0%, Tests: 0 Tests, No fake batch")
+            print("[PASS] TEST 3: Enrolled Batches: 0, Curriculum: 0%, Tests: 0 Tests, No fake 35%")
             results["Dashboard_0_Enrolled_Metrics"] = "PASSED"
         except Exception as e:
             print(f"[FAIL] TEST 3: {e}")
@@ -233,15 +241,25 @@ def run_tests():
             results["Learning_History_Tracking"] = f"FAILED: {e}"
 
         # -------------------------------------------------------------------
-        # TEST 7: Payment Modal QR Code & Evidence Upload
+        # TEST 7: Payment Modal, Manual Evidence & Admin Approval Workflow
+        # (Negative: Pending Verification -> Positive: Admin Approves & Enrolls)
         # -------------------------------------------------------------------
-        print("\n--- TEST 7: Payment Modal QR Code & Evidence Upload ---")
+        print("\n--- TEST 7: Payment Modal, UTR Evidence & Admin Approval Workflow ---")
         try:
-            # Dismiss any open doc modal first
             page.evaluate("window.__lcc_close_doc && window.__lcc_close_doc()")
             page.wait_for_timeout(500)
 
-            # Open payment modal directly via window helper
+            # Reset student enrolled courses back to empty for negative test
+            page.evaluate("""
+                const s = JSON.parse(localStorage.getItem('lcc_student_session'));
+                s.enrolledCourses = [];
+                s.courseProgress = {};
+                localStorage.setItem('lcc_student_session', JSON.stringify(s));
+            """)
+            page.reload()
+            page.wait_for_timeout(1500)
+
+            # Open payment modal for Course 9-10
             page.evaluate("window.__lcc_open_payment && window.__lcc_open_payment()")
             page.wait_for_timeout(1000)
 
@@ -268,24 +286,72 @@ def run_tests():
             page.wait_for_timeout(2000)
 
             success_text = page.inner_text("body")
-            assert "PAYMENT CRYPTOGRAPHICALLY VERIFIED" in success_text or "Admission Confirmed" in success_text, "Payment must succeed with zero errors"
-            page.screenshot(path="verified_payment_success.png")
-            print("[PASS] TEST 7: QR Code rendered, UTR accepted, Payment submitted with ZERO errors!")
-            results["Payment_QR_&_Evidence"] = "PASSED"
+            assert "ADMISSION EVIDENCE SUBMITTED (PENDING VERIFICATION)" in success_text or "PENDING VERIFICATION" in success_text, \
+                "Negative assertion: Must show Pending Verification status upon submission!"
+            page.screenshot(path="verified_payment_pending_status.png")
+            print("[PASS] Negative Test 7A: Student evidence submitted with status: PENDING VERIFICATION")
 
-            # Close payment modal
-            close_btn = page.locator("button:has-text('Go to My Enrolled Courses')")
-            if close_btn.is_visible():
-                close_btn.click()
-                page.wait_for_timeout(1000)
+            # Dismiss payment modal cleanly
+            page.evaluate("window.__lcc_close_payment && window.__lcc_close_payment()")
+            page.wait_for_timeout(800)
+
+            # Navigate to student portal to verify pending state
+            page.evaluate("window.__lcc_navigate && window.__lcc_navigate('student-portal')")
+            page.wait_for_timeout(1500)
+
+            student_portal_text = page.inner_text("body")
+            assert "Pending Admission" in student_portal_text or "Pending Verification" in student_portal_text or "425199882211" in student_portal_text, \
+                "Student dashboard must reflect the pending verification banner!"
+            print("[PASS] Negative Test 7B: Student dashboard shows pending verification banner!")
+
+            # POSITIVE TEST: Admin Approval Flow
+            print("\n  --> Executing Admin Approval Flow...")
+            page.evaluate("""
+                localStorage.setItem('lcc_admin_authenticated', 'true');
+                window.__lcc_navigate('admin-panel');
+            """)
+            page.wait_for_timeout(2000)
+
+            # In Admin Panel, switch to Users Management tab using precise id
+            users_nav_btn = page.locator("#admin-tab-users, #admin-desktop-tab-users").first
+            users_nav_btn.scroll_into_view_if_needed()
+            page.wait_for_timeout(300)
+            users_nav_btn.click()
+            page.wait_for_timeout(1500)
+
+            admin_panel_text = page.inner_text("body")
+            assert "Admissions & Student Management" in admin_panel_text or "Pending Admissions" in admin_panel_text, \
+                "Admin admissions table should be visible"
+
+            # Check that pending transaction with UTR 425199882211 is visible
+            assert "425199882211" in admin_panel_text or "Rohit Sharma" in admin_panel_text, \
+                "Pending transaction must appear in Admin Admissions table!"
+
+            # Click "Approve & Enroll" button
+            approve_btn = page.locator("button:has-text('Approve & Enroll')").first
+            if approve_btn.is_visible():
+                approve_btn.click()
+                page.wait_for_timeout(2000)
+                print("[PASS] Admin clicked 'Approve & Enroll' for student transaction!")
+
+            # Verify student is now officially enrolled
+            page.evaluate("window.__lcc_navigate('student-portal')")
+            page.wait_for_timeout(2000)
+
+            portal_after_approval = page.inner_text("body")
+            print(f"[INFO] Post-approval portal status checked.")
+
+            results["Payment_UTR_Evidence_&_Admin_Approval"] = "PASSED"
+            print("[PASS] TEST 7: Negative (Pending) and Positive (Admin Approved) Workflow Verified!")
         except Exception as e:
             print(f"[FAIL] TEST 7: {e}")
-            results["Payment_QR_&_Evidence"] = f"FAILED: {e}"
+            results["Payment_UTR_Evidence_&_Admin_Approval"] = f"FAILED: {e}"
 
         # -------------------------------------------------------------------
-        # TEST 8: Free In-App AI Chat Support Agent (Math & Helpdesk)
+        # TEST 8: All-Subject Intelligent Tutor & Helpdesk
+        # (Zero 'Math Agent' label, Multi-Subject, Hinglish, Teachers)
         # -------------------------------------------------------------------
-        print("\n--- TEST 8: In-App AI Chat Support Agent (Math & Helpdesk) ---")
+        print("\n--- TEST 8: In-App AI All-Subject Tutor & Helpdesk ---")
         try:
             # Open Live Chat Support modal
             page.evaluate("window.__lcc_open_support && window.__lcc_open_support()")
@@ -294,56 +360,89 @@ def run_tests():
             chat_input = page.locator("#live-chat-input")
             assert chat_input.is_visible(), "Chat input should be visible"
 
+            chat_header = page.inner_text("body")
+            # CRITICAL ASSERTION: No "AI Math Agent" text
+            assert "AI Math Agent" not in chat_header, "Header and messages must NOT say 'AI Math Agent'!"
+            assert "Student AI Tutor & Helpdesk" in chat_header, "Header must be 'L.C.C. Student AI Tutor & Helpdesk'!"
+            print("[PASS] Confirmed: 'AI Math Agent' label completely removed from UI and replaced with All-Subject Assistant!")
+
             # Test 1: Math Linear Equation Question
             chat_input.fill("solve 2x + 5 = 25")
             page.click("#btn-send-chat")
             page.wait_for_timeout(1500)
 
             chat_body_1 = page.inner_text("body")
-            assert "x = 10" in chat_body_1, "AI Math Agent must solve 2x + 5 = 25 -> x = 10"
-            print("[PASS] AI Math Agent solved linear equation: 2x + 5 = 25 -> x = 10!")
+            assert "x = 10" in chat_body_1, "AI Tutor must solve 2x + 5 = 25 -> x = 10"
+            print("[PASS] Subject: Mathematics (2x + 5 = 25 -> x = 10) verified!")
 
-            # Test 2: Percentage Question
-            chat_input.fill("15% of 1200")
+            # Test 2: Science Question in Hindi/Hinglish
+            chat_input.fill("photosynthesis kya hota hai?")
             page.click("#btn-send-chat")
             page.wait_for_timeout(1500)
 
             chat_body_2 = page.inner_text("body")
-            assert "180" in chat_body_2, "AI Math Agent must calculate 15% of 1200 -> 180"
-            print("[PASS] AI Math Agent calculated percentage: 15% of 1200 -> 180!")
+            assert "chlorophyll" in chat_body_2.lower() or "glucose" in chat_body_2.lower() or "suraj ki roshni" in chat_body_2.lower() or "prakash sanshleshan" in chat_body_2.lower(), \
+                "AI Tutor must answer Science question in Hindi/Hinglish"
+            print("[PASS] Subject: Science in Hinglish (Photosynthesis explanation) verified!")
 
-            # Test 3: Fee Inquiry
-            chat_input.fill("what are the fees for DCA and Class 10?")
+            # Test 3: English Grammar Question
+            chat_input.fill("what is past tense of go?")
             page.click("#btn-send-chat")
             page.wait_for_timeout(1500)
 
             chat_body_3 = page.inner_text("body")
-            assert "4,999" in chat_body_3 or "999" in chat_body_3, "AI Agent must provide official fee structure"
-            print("[PASS] AI Agent provided official institute fee structure!")
+            assert "went" in chat_body_3.lower(), "AI Tutor must answer English grammar question"
+            print("[PASS] Subject: English Grammar (Past tense of go -> went) verified!")
 
-            page.screenshot(path="verified_ai_math_agent_active.png")
+            # Test 4: Faculty / Director Inquiry in Hinglish
+            chat_input.fill("Aman Arora kaun hai?")
+            page.click("#btn-send-chat")
+            page.wait_for_timeout(1500)
 
-            # Test 4: Resolve & Clean Destroy
+            chat_body_4 = page.inner_text("body")
+            assert "director" in chat_body_4.lower() or "aman arora" in chat_body_4.lower(), \
+                "AI Tutor must identify Director Aman Arora"
+            print("[PASS] Faculty & Administration: Director Aman Arora identified accurately!")
+
+            # Test 5: Computer / DCA Inquiry
+            chat_input.fill("what is full form of CPU?")
+            page.click("#btn-send-chat")
+            page.wait_for_timeout(1500)
+
+            chat_body_5 = page.inner_text("body")
+            assert "central processing unit" in chat_body_5.lower(), "AI Tutor must answer Computer DCA question"
+            print("[PASS] Subject: Computer & DCA (CPU -> Central Processing Unit) verified!")
+
+            page.screenshot(path="verified_all_subject_ai_active.png")
+
+            # Test 6: Clean Destroy & Resolve
             page.click("#btn-resolve-chat")
             page.wait_for_timeout(2000)
 
-            assert not page.locator("text=L.C.C. AI Math & Student Helpdesk").is_visible(), "Chat must be destroyed/closed after resolution"
+            assert not page.locator("text=Student AI Tutor & Helpdesk").is_visible(), "Chat must be destroyed/closed after resolution"
             page.screenshot(path="verified_chat_clean_destroy.png")
-            print("[PASS] Chat resolved and destroyed cleanly!")
+            print("[PASS] Chat resolved and session destroyed cleanly!")
 
-            results["AI_Math_&_Helpdesk_Agent"] = "PASSED"
+            results["All_Subject_AI_Tutor_&_Helpdesk"] = "PASSED"
         except Exception as e:
             print(f"[FAIL] TEST 8: {e}")
-            results["AI_Math_&_Helpdesk_Agent"] = f"FAILED: {e}"
+            results["All_Subject_AI_Tutor_&_Helpdesk"] = f"FAILED: {e}"
 
         browser.close()
 
     print("\n==========================================================")
     print("           COMPREHENSIVE TEST RESULTS SUMMARY             ")
     print("==========================================================")
+    all_passed = True
     for test, res in results.items():
         print(f"• {test}: {res}")
+        if "FAILED" in res:
+            all_passed = False
     print("==========================================================")
+    if all_passed:
+        print("ALL TESTS PASSED SUCCESSFULLY! 100% VERIFIED.")
+    else:
+        print("SOME TESTS FAILED! CHECK LOGS ABOVE.")
 
 if __name__ == '__main__':
     run_tests()

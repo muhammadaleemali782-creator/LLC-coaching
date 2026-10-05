@@ -20,7 +20,8 @@ import {
   Upload,
   Image as ImageIcon,
   Camera,
-  Trash2
+  Trash2,
+  Clock
 } from 'lucide-react';
 import { Youtube } from '../SocialIcons';
 import { api } from '../../api/client';
@@ -31,6 +32,7 @@ export const PaymentModal: React.FC = () => {
     selectedCourseForPayment,
     setSelectedCourseForPayment,
     enrollInCourse,
+    submitPendingAdmission,
     navigateTo,
     showToast,
     websiteSettings,
@@ -109,40 +111,36 @@ export const PaymentModal: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  // 1. Direct UPI / Instant Admission Handler with Proof Evidence
+  // 1. Direct UPI / Admission Submission Handler with Proof Evidence (Pending Admin Verification)
   const handleDirectUpiSubmit = async () => {
     setIsProcessing(true);
-    const generatedUtr = utrInput.trim() || `UPI-TXN-${Date.now().toString().slice(-8)}`;
+    const cleanUtr = utrInput.trim() || `UPI-${Date.now().toString().slice(-8)}`;
 
     try {
-      await enrollInCourse(selectedCourseForPayment.id, `UPI QR - ${generatedUtr}`);
+      await submitPendingAdmission(selectedCourseForPayment.id, cleanUtr, evidenceImage || undefined);
       const txnRecord = {
         id: `txn-${Date.now()}`,
-        utrNumber: generatedUtr,
+        utrNumber: cleanUtr,
         amount: selectedCourseForPayment.discountFee,
         date: new Date().toISOString().split('T')[0],
         paymentMethod: 'Direct UPI / QR',
         evidenceAttached: Boolean(evidenceImage),
-        status: 'Completed (UPI Evidence Submitted)',
-        isVerified: true
+        status: 'Pending Verification',
+        isVerified: false
       };
 
       setVerifiedTxn(txnRecord);
       setUnlockedAccess({
         whatsappUrl: fallbackWhatsapp,
         playlistUrl: fallbackPlaylist,
-        secureToken: `SEC-${generatedUtr}`
+        secureToken: `PENDING-${cleanUtr}`
       });
       setIsProcessing(false);
       setIsSuccess(true);
-      showToast('✅ Admission Confirmed & Evidence Saved! Welcome to the Batch.', 'success');
-      try { confetti({ particleCount: 160, spread: 100, origin: { y: 0.6 } }); } catch (e) {}
-      if (fallbackWhatsapp) {
-        setTimeout(() => window.open(fallbackWhatsapp, '_blank'), 2000);
-      }
+      showToast('⏳ Payment Evidence & UTR Submitted! Admission is Pending Director Verification.', 'info');
     } catch (e: any) {
       setIsProcessing(false);
-      showToast('Unable to complete enrollment: ' + (e?.message || 'Please retry'), 'error');
+      showToast('Unable to submit enrollment: ' + (e?.message || 'Please retry'), 'error');
     }
   };
 
@@ -400,13 +398,23 @@ export const PaymentModal: React.FC = () => {
         {isSuccess ? (
           /* ================= SUCCESS CONFIRMATION & ACCESS UNLOCK ================= */
           <div className="p-6 sm:p-8 text-center space-y-5 animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-md border-2 border-emerald-200">
-              <CheckCircle2 className="w-9 h-9" />
-            </div>
+            {verifiedTxn?.status === 'Pending Verification' ? (
+              <div className="w-16 h-16 rounded-3xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-md border-2 border-amber-200">
+                <Clock className="w-9 h-9" />
+              </div>
+            ) : (
+              <div className="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-md border-2 border-emerald-200">
+                <CheckCircle2 className="w-9 h-9" />
+              </div>
+            )}
 
             <div className="space-y-1">
-              <span className="text-xs font-black uppercase tracking-widest text-emerald-600 block">
-                PAYMENT CRYPTOGRAPHICALLY VERIFIED!
+              <span className={`text-xs font-black uppercase tracking-widest block ${
+                verifiedTxn?.status === 'Pending Verification' ? 'text-amber-600' : 'text-emerald-600'
+              }`}>
+                {verifiedTxn?.status === 'Pending Verification'
+                  ? '⏳ ADMISSION EVIDENCE SUBMITTED (PENDING VERIFICATION)'
+                  : 'PAYMENT CRYPTOGRAPHICALLY VERIFIED!'}
               </span>
               <h4 className="text-3xl font-black text-slate-900">
                 ₹{selectedCourseForPayment.discountFee}
@@ -417,19 +425,25 @@ export const PaymentModal: React.FC = () => {
             </div>
 
             {/* Verified Digital Seal */}
-            <div className="py-3 px-5 bg-slate-50 rounded-2xl border border-slate-200 text-left space-y-1.5 text-xs">
+            <div className={`py-3 px-5 rounded-2xl border text-left space-y-1.5 text-xs ${
+              verifiedTxn?.status === 'Pending Verification' ? 'bg-amber-50/60 border-amber-200' : 'bg-slate-50 border-slate-200'
+            }`}>
               <div className="flex justify-between items-center text-slate-500 text-[11px]">
-                <span>Payment Reference:</span>
+                <span>Payment Reference / UTR:</span>
                 <span className="font-mono font-bold text-slate-800">{verifiedTxn?.utrNumber || 'RZP-CONFIRMED'}</span>
               </div>
               <div className="flex justify-between items-center text-slate-500 text-[11px]">
-                <span>Student Enrolled:</span>
+                <span>Student:</span>
                 <span className="font-bold text-slate-800">{currentStudent.name} ({currentStudent.email})</span>
               </div>
               <div className="flex justify-between items-center text-slate-500 text-[11px]">
-                <span>Security Status:</span>
-                <span className="font-black uppercase text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                  100% Genuine Verified
+                <span>Admission Status:</span>
+                <span className={`font-black uppercase text-[10px] px-2 py-0.5 rounded-full ${
+                  verifiedTxn?.status === 'Pending Verification'
+                    ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                    : 'bg-emerald-100 text-emerald-800'
+                }`}>
+                  {verifiedTxn?.status === 'Pending Verification' ? 'Pending Admin Approval ⏳' : '100% Genuine Verified ✓'}
                 </span>
               </div>
               {verifiedTxn?.evidenceAttached && (
@@ -439,6 +453,16 @@ export const PaymentModal: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {verifiedTxn?.status === 'Pending Verification' && (
+              <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 text-left text-[11px] text-amber-900 leading-relaxed space-y-1">
+                <div className="font-black flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-amber-600" />
+                  <span>Admin Verification In Progress</span>
+                </div>
+                <p>Director Aman Arora sir will verify your payment and approve your admission. Once approved, your course curriculum and certificate will be unlocked automatically in your Student Portal.</p>
+              </div>
+            )}
 
             {/* ACTION REDIRECTS */}
             <div className="space-y-2.5 pt-1">

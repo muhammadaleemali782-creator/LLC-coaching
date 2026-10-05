@@ -138,6 +138,10 @@ export interface AppContextType {
   adminResetPassword: (id: string, tempPassword?: string) => Promise<{ success: boolean; tempPassword: string; message: string; user?: any } | null>;
   updateStudentPassword: (currentPass: string, newPass: string, targetEmail?: string) => Promise<boolean>;
   refreshUsers: () => Promise<void>;
+  submitPendingAdmission: (courseId: string, utrNumber: string, evidenceImage?: string) => Promise<boolean>;
+  approveTransaction: (id: string) => Promise<boolean>;
+  rejectTransaction: (id: string) => Promise<boolean>;
+  refreshTransactions: () => Promise<void>;
 
   // Content Actions
   addCourse: (course: Omit<Course, 'id' | 'enrolledCount' | 'rating'>) => void;
@@ -473,7 +477,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           instaRes,
           sylRes,
           inqRes,
-          usersRes
+          usersRes,
+          txnsRes
         ] = await Promise.allSettled([
           api.ads.get({ all: true }),
           api.media.getPDFs(),
@@ -487,9 +492,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           api.instagram.get(),
           api.syllabus.get(),
           api.inquiries.get(),
-          localStorage.getItem('lcc_admin_token') ? api.auth.getUsers() : Promise.resolve({ success: true, data: [] } as any)
+          localStorage.getItem('lcc_admin_token') ? api.auth.getUsers() : Promise.resolve({ success: true, data: [] } as any),
+          api.payments.getTransactions()
         ]);
 
+        if (txnsRes.status === 'fulfilled' && Array.isArray(txnsRes.value?.data)) {
+          setTransactions(txnsRes.value.data);
+          saveItem('lcc_transactions', txnsRes.value.data);
+        }
         if (adsRes.status === 'fulfilled' && Array.isArray(adsRes.value?.data)) {
           setAds(adsRes.value.data);
           saveItem('lcc_ads', adsRes.value.data);
@@ -1440,6 +1450,148 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
+  const refreshTransactions = async () => {
+    try {
+      const res = await api.payments.getTransactions();
+      if (res && res.success && Array.isArray(res.data)) {
+        setTransactions(res.data);
+        saveItem('lcc_transactions', res.data);
+      }
+    } catch (e) {}
+  };
+
+  const submitPendingAdmission = async (courseId: string, utrNumber: string, evidenceImage?: string): Promise<boolean> => {
+    const targetCourse = courses.find(c => c.id === courseId);
+    if (!targetCourse) return false;
+
+    const studentName = currentStudent ? currentStudent.name : 'Student';
+    const studentEmail = currentStudent ? currentStudent.email : 'student@lcc.edu';
+    const studentPhone = currentStudent ? currentStudent.phone : '';
+
+    const newTxn: Transaction = {
+      id: `txn-${Date.now()}`,
+      studentName,
+      studentEmail,
+      studentPhone,
+      courseId: targetCourse.id,
+      courseName: targetCourse.title,
+      amount: targetCourse.discountFee,
+      paymentMethod: 'Direct UPI / QR',
+      date: new Date().toISOString().split('T')[0],
+      status: 'Pending Verification',
+      utrNumber,
+      evidenceImage: evidenceImage || '',
+      isVerified: false
+    };
+
+    setTransactions(prev => [newTxn, ...prev]);
+    saveItem('lcc_transactions', [newTxn, ...transactions]);
+
+    try {
+      await api.payments.submitUTR({
+        courseId: targetCourse.id,
+        amount: targetCourse.discountFee,
+        utrNumber,
+        paymentMethod: 'Direct UPI / QR',
+        studentName,
+        studentEmail,
+        studentPhone,
+        evidenceImage
+      } as any);
+    } catch (e) {
+      console.warn('Backend UTR submission note:', e);
+    }
+
+    showToast('Payment evidence & UTR submitted! Pending verification by Director Aman Arora.', 'info');
+    return true;
+  };
+
+  const approveTransaction = async (id: string): Promise<boolean> => {
+    try {
+      await api.payments.approveTransaction(id);
+    } catch (e) {
+      console.warn('Backend approve txn note:', e);
+    }
+
+    let targetTxn: Transaction | null = null;
+    setTransactions(prev => {
+      const updated = prev.map(t => {
+        if (t.id === id) {
+          targetTxn = { ...t, status: 'Completed', isVerified: true };
+          return targetTxn;
+        }
+        return t;
+      });
+      saveItem('lcc_transactions', updated);
+      return updated;
+    });
+
+    if (!targetTxn) {
+      targetTxn = transactions.find(t => t.id === id) || null;
+    }
+
+    if (targetTxn) {
+      const studentEmail = (targetTxn as any).studentEmail;
+      const courseId = (targetTxn as any).courseId;
+
+      setStudents(prev => {
+        const updated = prev.map(s => {
+          if (s.email.toLowerCase() === studentEmail.toLowerCase()) {
+            const enrolled = s.enrolledCourses || [];
+            if (!enrolled.includes(courseId)) {
+              return {
+                ...s,
+                enrolledCourses: [...enrolled, courseId],
+                courseProgress: { ...(s.courseProgress || {}), [courseId]: 0 }
+              };
+            }
+          }
+          return s;
+        });
+        saveItem('lcc_students', updated);
+        return updated;
+      });
+
+      if (currentStudent && currentStudent.email.toLowerCase() === studentEmail.toLowerCase()) {
+        setCurrentStudent(prev => {
+          if (!prev) return prev;
+          const enrolled = prev.enrolledCourses || [];
+          if (!enrolled.includes(courseId)) {
+            const updated = {
+              ...prev,
+              enrolledCourses: [...enrolled, courseId],
+              courseProgress: { ...(prev.courseProgress || {}), [courseId]: 0 }
+            };
+            saveItem('lcc_current_student', updated);
+            localStorage.setItem('lcc_student_session', JSON.stringify(updated));
+            return updated;
+          }
+          return prev;
+        });
+      }
+    }
+
+    showToast('✅ Transaction Approved! Student has been enrolled.', 'success');
+    return true;
+  };
+
+  const rejectTransaction = async (id: string): Promise<boolean> => {
+    try {
+      await api.payments.rejectTransaction(id);
+    } catch (e) {
+      console.warn('Backend reject txn note:', e);
+    }
+
+    setTransactions(prev => {
+      const updated = prev.map(t => t.id === id ? { ...t, status: 'Rejected' as const, isVerified: false } : t);
+      saveItem('lcc_transactions', updated);
+      return updated;
+    });
+
+    showToast('Transaction marked as Rejected.', 'info');
+    return true;
+  };
+
   const submitAdmissionInquiry = (inquiry: Omit<AdmissionInquiry, 'id' | 'date' | 'status'>) => {
     api.inquiries.submit(inquiry).catch(() => {});
     const newInquiry: AdmissionInquiry = {
@@ -1821,6 +1973,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         adminResetPassword,
         updateStudentPassword,
         refreshUsers,
+        submitPendingAdmission,
+        approveTransaction,
+        rejectTransaction,
+        refreshTransactions,
         addCourse,
         updateCourse,
         deleteCourse,

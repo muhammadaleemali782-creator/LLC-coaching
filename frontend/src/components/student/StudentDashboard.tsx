@@ -44,6 +44,7 @@ export const StudentDashboard: React.FC = () => {
     currentStudent,
     logoutStudent,
     courses,
+    transactions,
     studyMaterials,
     videos,
     mockTests,
@@ -110,6 +111,10 @@ export const StudentDashboard: React.FC = () => {
   }
 
   const enrolledCourseList = courses.filter(c => (currentStudent?.enrolledCourses || []).includes(c.id));
+  const pendingAdmissions = (transactions || []).filter(t =>
+    t.studentEmail?.toLowerCase() === currentStudent?.email?.toLowerCase() &&
+    (t.status === 'Pending Verification' || t.status === 'Pending')
+  );
   const hasEnrollments = enrolledCourseList.length > 0;
   const activeCourse = enrolledCourseList[0] || null;
 
@@ -265,6 +270,36 @@ export const StudentDashboard: React.FC = () => {
               className="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-colors shrink-0 shadow-xs cursor-pointer"
             >
               Set New Password
+            </button>
+          </div>
+        )}
+
+        {/* Pending Admission Verification Alert Banner */}
+        {pendingAdmissions.length > 0 && (
+          <div className="p-4 sm:p-5 rounded-3xl bg-amber-50/90 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-in fade-in">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Clock className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs sm:text-sm font-black text-amber-950">
+                    Admission Verification In Progress ({pendingAdmissions.length} Pending)
+                  </h4>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black uppercase">
+                    Admin Review
+                  </span>
+                </div>
+                <p className="text-[11px] sm:text-xs text-amber-800 font-medium mt-0.5">
+                  Your UPI fee submission for <strong>{pendingAdmissions.map(p => p.courseName).join(', ')}</strong> (Ref: {pendingAdmissions.map(p => p.utrNumber).join(', ')}) is awaiting Director verification. Once approved, lessons & certificate will be unlocked.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveTab('courses')}
+              className="px-4 py-2 rounded-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shrink-0 shadow-xs cursor-pointer active:scale-95"
+            >
+              View Admission Status
             </button>
           </div>
         )}
@@ -565,71 +600,138 @@ export const StudentDashboard: React.FC = () => {
         {/* TAB 2: MY COURSES */}
         {activeTab === 'courses' && (
           <div className="space-y-6">
-            <h3 className="text-xl font-black text-slate-900">Enrolled Courses & Video Classes</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {enrolledCourseList.map(course => (
-                <div key={course.id} className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-card-clean space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 rounded-full bg-blue-50 text-[#0066FF] font-bold text-xs">
-                      {course.targetClass}
-                    </span>
-                    <span className="text-xs font-bold text-emerald-600">Active Batch</span>
-                  </div>
-                  <h4 className="text-base font-black text-slate-900">{course.title}</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed font-medium">{course.description}</p>
-                  
-                  <div className="pt-2">
-                    <div className="flex justify-between text-xs text-slate-600 mb-1 font-bold">
-                      <span>Batch Progress</span>
-                      <span>{(currentStudent.courseProgress || {})[course.id] || 35}%</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                      <div className="bg-[#0066FF] h-full rounded-full" style={{ width: `${(currentStudent.courseProgress || {})[course.id] || 35}%` }} />
-                    </div>
-                  </div>
-
-                  {/* Direct Batch Access: WhatsApp & Private Video Playlist */}
-                  <div className="pt-2 flex flex-wrap gap-2">
-                    {(course.whatsappRedirectUrl || websiteSettings?.defaultWhatsappRedirectUrl) && (
-                      <a
-                        href={course.whatsappRedirectUrl || websiteSettings?.defaultWhatsappRedirectUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[11px] flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                      >
-                        <MessageSquare className="w-3.5 h-3.5 fill-current" />
-                        <span>Join WhatsApp Group</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                    {(course.privatePlaylistUrl || websiteSettings?.defaultPlaylistRedirectUrl) && (
-                      <a
-                        href={course.privatePlaylistUrl || websiteSettings?.defaultPlaylistRedirectUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-[11px] flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                      >
-                        <Youtube className="w-3.5 h-3.5 fill-current" />
-                        <span>Private Video Playlist</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-xs text-slate-500 font-medium">Instructor: {course.instructor}</span>
-                    <button
-                      onClick={() => {
-                        if (videos.length > 0) setSelectedVideoForPlayer(videos[0]);
-                      }}
-                      className="px-4 py-2 rounded-full bg-[#0066FF] text-white text-xs font-bold shadow-sm cursor-pointer"
-                    >
-                      Watch Lecture
-                    </button>
-                  </div>
-                </div>
-              ))}
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-black text-slate-900">Enrolled Courses & Video Classes</h3>
+              <span className="text-xs font-bold text-slate-500">
+                {enrolledCourseList.length} Active • {pendingAdmissions.length} Pending
+              </span>
             </div>
+
+            {/* PENDING VERIFICATION COURSES */}
+            {pendingAdmissions.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-xs font-black uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Pending Admin Verification ({pendingAdmissions.length})</span>
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {pendingAdmissions.map(p => (
+                    <div key={p.id} className="bg-amber-50/60 border border-amber-200 rounded-3xl p-6 shadow-card-clean space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-bold text-xs flex items-center gap-1">
+                          <Clock className="w-3 h-3 animate-pulse" />
+                          <span>Pending Admin Approval</span>
+                        </span>
+                        <span className="text-[11px] font-mono font-bold text-slate-500">Ref: {p.utrNumber}</span>
+                      </div>
+                      <h4 className="text-base font-black text-slate-900">{p.courseName}</h4>
+                      <p className="text-xs text-amber-900 leading-relaxed font-medium">
+                        Payment of ₹{p.amount} submitted with UTR/receipt proof. Director Aman Arora is currently verifying bank clearance. Your batch lectures and study vault materials will be activated upon approval.
+                      </p>
+                      <div className="pt-2">
+                        <div className="flex justify-between text-xs text-slate-600 mb-1 font-bold">
+                          <span>Curriculum Progress</span>
+                          <span className="text-amber-700">0% (Locked until approved)</span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                          <div className="bg-amber-400 h-full rounded-full" style={{ width: '0%' }} />
+                        </div>
+                      </div>
+                      <div className="pt-3 border-t border-amber-200/60 flex items-center justify-between text-xs text-slate-500 font-medium">
+                        <span>Status: Awaiting Verification</span>
+                        <span className="px-3 py-1 rounded-full bg-slate-200 text-slate-600 font-bold text-[11px]">
+                          Locked
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ACTIVE ENROLLED COURSES */}
+            {enrolledCourseList.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {enrolledCourseList.map(course => (
+                  <div key={course.id} className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-card-clean space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="px-3 py-1 rounded-full bg-blue-50 text-[#0066FF] font-bold text-xs">
+                        {course.targetClass}
+                      </span>
+                      <span className="text-xs font-bold text-emerald-600">Active Batch</span>
+                    </div>
+                    <h4 className="text-base font-black text-slate-900">{course.title}</h4>
+                    <p className="text-xs text-slate-500 leading-relaxed font-medium">{course.description}</p>
+                    
+                    <div className="pt-2">
+                      <div className="flex justify-between text-xs text-slate-600 mb-1 font-bold">
+                        <span>Batch Progress</span>
+                        <span>{(currentStudent.courseProgress || {})[course.id] || 0}%</span>
+                      </div>
+                      <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                        <div className="bg-[#0066FF] h-full rounded-full" style={{ width: `${(currentStudent.courseProgress || {})[course.id] || 0}%` }} />
+                      </div>
+                    </div>
+
+                    {/* Direct Batch Access: WhatsApp & Private Video Playlist */}
+                    <div className="pt-2 flex flex-wrap gap-2">
+                      {(course.whatsappRedirectUrl || websiteSettings?.defaultWhatsappRedirectUrl) && (
+                        <a
+                          href={course.whatsappRedirectUrl || websiteSettings?.defaultWhatsappRedirectUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[11px] flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5 fill-current" />
+                          <span>Join WhatsApp Group</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                      {(course.privatePlaylistUrl || websiteSettings?.defaultPlaylistRedirectUrl) && (
+                        <a
+                          href={course.privatePlaylistUrl || websiteSettings?.defaultPlaylistRedirectUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-[11px] flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                        >
+                          <Youtube className="w-3.5 h-3.5 fill-current" />
+                          <span>Private Video Playlist</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-xs text-slate-500 font-medium">Instructor: {course.instructor}</span>
+                      <button
+                        onClick={() => {
+                          if (videos.length > 0) setSelectedVideoForPlayer(videos[0]);
+                        }}
+                        className="px-4 py-2 rounded-full bg-[#0066FF] text-white text-xs font-bold shadow-sm cursor-pointer"
+                      >
+                        Watch Lecture
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : pendingAdmissions.length === 0 ? (
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-10 text-center space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#0066FF] flex items-center justify-center mx-auto">
+                  <GraduationCap className="w-6 h-6" />
+                </div>
+                <h4 className="text-base font-black text-slate-900">No Enrolled Courses Yet</h4>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto font-medium">
+                  You have not enrolled in any academic or computer courses yet. Explore our courses on the home page.
+                </p>
+                <button
+                  onClick={() => navigateTo('home')}
+                  className="px-5 py-2.5 rounded-full bg-[#0066FF] text-white text-xs font-bold cursor-pointer"
+                >
+                  Browse Available Batches
+                </button>
+              </div>
+            ) : null}
           </div>
         )}
 

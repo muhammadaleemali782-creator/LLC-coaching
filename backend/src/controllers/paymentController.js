@@ -258,15 +258,27 @@ export const verifyRazorpayPayment = async (req, res) => {
 
 export const submitManualUTR = async (req, res) => {
   try {
-    const { courseId, amount, utrNumber, paymentMethod, studentName, studentEmail, studentPhone } = req.body;
+    const { courseId, amount, utrNumber, paymentMethod, studentName, studentEmail, studentPhone, evidenceImage, screenshotUrl } = req.body;
 
-    // Strict 12-digit UTR validation
+    // Strict UTR validation
     const cleanUTR = String(utrNumber || '').trim();
-    if (!cleanUTR || cleanUTR.length < 8 || !/^[A-Za-z0-9]+$/.test(cleanUTR)) {
+    if (!cleanUTR || cleanUTR.length < 6 || !/^[A-Za-z0-9_-]+$/.test(cleanUTR)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid UTR / UPI Reference Number. Please enter the valid 12-digit transaction ID from your payment app.'
+        message: 'Invalid UTR / UPI Reference Number. Please enter the valid transaction reference from your payment app.'
       });
+    }
+
+    let courseName = req.body.courseName || 'Academic Course Enrollment';
+    if (courseId) {
+      if (mongoose.connection.readyState === 1) {
+        const c = await CourseModel.findOne({ id: courseId });
+        if (c) courseName = c.title;
+      } else {
+        const db = getDB();
+        const c = (db.courses || []).find(x => x.id === courseId);
+        if (c) courseName = c.title;
+      }
     }
 
     const transactionRecord = {
@@ -275,12 +287,13 @@ export const submitManualUTR = async (req, res) => {
       studentEmail: studentEmail || 'student@lcc.edu',
       studentPhone: studentPhone || '',
       courseId,
-      courseName: 'Academic Course Enrollment',
+      courseName,
       amount: Number(amount) || 0,
-      paymentMethod: paymentMethod || 'UPI Direct',
+      paymentMethod: paymentMethod || 'Direct UPI / QR',
       date: new Date().toISOString().split('T')[0],
       status: 'Pending Verification',
       utrNumber: cleanUTR,
+      evidenceImage: evidenceImage || screenshotUrl || '',
       isVerified: false,
       submittedAt: new Date().toISOString()
     };
@@ -296,8 +309,106 @@ export const submitManualUTR = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'UTR submitted for Director verification. Access will be confirmed upon bank credit.',
+      message: 'Payment evidence & UTR submitted successfully! Pending verification by Director Aman Arora.',
       transaction: transactionRecord
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const approveTransaction = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ success: false, message: 'Transaction ID is required.' });
+
+    let updatedTxn = null;
+    let studentEmail = null;
+    let courseId = null;
+
+    if (mongoose.connection.readyState === 1) {
+      const txn = await TransactionModel.findOne({ $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : null }] });
+      if (!txn) {
+        return res.status(404).json({ success: false, message: 'Transaction not found.' });
+      }
+      txn.status = 'Completed';
+      txn.isVerified = true;
+      txn.verifiedAt = new Date().toISOString();
+      await txn.save();
+      updatedTxn = txn.toObject();
+      studentEmail = txn.studentEmail;
+      courseId = txn.courseId;
+
+      if (studentEmail && courseId) {
+        await UserModel.updateOne(
+          { email: studentEmail.toLowerCase() },
+          { $addToSet: { enrolledCourses: courseId } }
+        );
+      }
+    } else {
+      const db = getDB();
+      const txns = db.transactions || [];
+      const txn = txns.find(t => t.id === id);
+      if (!txn) {
+        return res.status(404).json({ success: false, message: 'Transaction not found.' });
+      }
+      txn.status = 'Completed';
+      txn.isVerified = true;
+      txn.verifiedAt = new Date().toISOString();
+      updatedTxn = { ...txn };
+      studentEmail = txn.studentEmail;
+      courseId = txn.courseId;
+
+      if (studentEmail && courseId && db.users) {
+        const user = db.users.find(u => u.email?.toLowerCase() === studentEmail.toLowerCase());
+        if (user) {
+          if (!user.enrolledCourses) user.enrolledCourses = [];
+          if (!user.enrolledCourses.includes(courseId)) {
+            user.enrolledCourses.push(courseId);
+          }
+        }
+      }
+      saveDB(db);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Transaction approved! Student has been officially enrolled.',
+      transaction: updatedTxn
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const rejectTransaction = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ success: false, message: 'Transaction ID is required.' });
+
+    let updatedTxn = null;
+    if (mongoose.connection.readyState === 1) {
+      const txn = await TransactionModel.findOne({ $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : null }] });
+      if (!txn) return res.status(404).json({ success: false, message: 'Transaction not found.' });
+      txn.status = 'Rejected';
+      txn.isVerified = false;
+      await txn.save();
+      updatedTxn = txn.toObject();
+    } else {
+      const db = getDB();
+      const txns = db.transactions || [];
+      const txn = txns.find(t => t.id === id);
+      if (!txn) return res.status(404).json({ success: false, message: 'Transaction not found.' });
+      txn.status = 'Rejected';
+      txn.isVerified = false;
+      updatedTxn = { ...txn };
+      saveDB(db);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Transaction marked as Rejected.',
+      transaction: updatedTxn
     });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });

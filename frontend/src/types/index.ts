@@ -153,8 +153,10 @@ export interface Transaction {
   amount: number;
   paymentMethod: string;
   date: string;
-  status: 'Completed' | 'Pending' | 'Failed';
+  status: 'Completed' | 'Pending' | 'Failed' | 'Pending Verification' | 'Rejected';
   utrNumber: string;
+  evidenceImage?: string;
+  isVerified?: boolean;
 }
 
 export interface MockQuestion {

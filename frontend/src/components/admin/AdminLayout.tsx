@@ -118,6 +118,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
             return (
               <button
                 key={item.id}
+                id={`admin-tab-${item.id}`}
                 onClick={() => setActiveTab(item.id as AdminTab)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 flex items-center gap-1.5 transition-all cursor-pointer ${
                   isActive
@@ -163,6 +164,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
               return (
                 <button
                   key={item.id}
+                  id={`admin-desktop-tab-${item.id}`}
                   onClick={() => setActiveTab(item.id as AdminTab)}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                     isActive
