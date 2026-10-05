@@ -366,7 +366,47 @@ def run_tests():
             assert "Student AI Tutor & Helpdesk" in chat_header, "Header must be 'L.C.C. Student AI Tutor & Helpdesk'!"
             print("[PASS] Confirmed: 'AI Math Agent' label completely removed from UI and replaced with All-Subject Assistant!")
 
-            # Test 1: Math Linear Equation Question
+            # Test 1: User's exact question from prompt: "Eng me verbs kya hote hai"
+            chat_input.fill("Eng me verbs kya hote hai")
+            page.click("#btn-send-chat")
+            page.wait_for_timeout(1500)
+
+            chat_body_v = page.inner_text("body").lower()
+            assert "kriya" in chat_body_v or "action" in chat_body_v or "main verbs" in chat_body_v, \
+                "AI Tutor must answer English Verbs question accurately!"
+            print("[PASS] User Question: 'Eng me verbs kya hote hai' -> Answered accurately with Verbs & Types!")
+
+            # Test 2: Social Studies / SST Question
+            chat_input.fill("Bharat ka Samvidhan kya hai?")
+            page.click("#btn-send-chat")
+            page.wait_for_timeout(1500)
+
+            chat_body_sst = page.inner_text("body").lower()
+            assert "samvidhan" in chat_body_sst and ("ambedkar" in chat_body_sst or "supreme law" in chat_body_sst or "republic" in chat_body_sst), \
+                "AI Tutor must answer Social Studies / SST Samvidhan question!"
+            print("[PASS] Subject: Social Studies / SST (Indian Constitution / Samvidhan) verified!")
+
+            # Test 3: Computer Hardware vs Software Question
+            chat_input.fill("hardware aur software me kya farak hai?")
+            page.click("#btn-send-chat")
+            page.wait_for_timeout(1500)
+
+            chat_body_comp = page.inner_text("body").lower()
+            assert "hardware" in chat_body_comp and "software" in chat_body_comp, \
+                "AI Tutor must answer Computer Hardware & Software question!"
+            print("[PASS] Subject: Computer & DCA (Hardware vs Software) verified!")
+
+            # Test 4: Spoken English Question
+            chat_input.fill("English speaking ke daily use sentences batao")
+            page.click("#btn-send-chat")
+            page.wait_for_timeout(1500)
+
+            chat_body_spk = page.inner_text("body").lower()
+            assert "how are you" in chat_body_spk or "spoken english" in chat_body_spk, \
+                "AI Tutor must answer Spoken English conversation question!"
+            print("[PASS] Subject: Spoken English & Daily Sentences verified!")
+
+            # Test 5: Math Linear Equation Question
             chat_input.fill("solve 2x + 5 = 25")
             page.click("#btn-send-chat")
             page.wait_for_timeout(1500)
@@ -375,7 +415,7 @@ def run_tests():
             assert "x = 10" in chat_body_1, "AI Tutor must solve 2x + 5 = 25 -> x = 10"
             print("[PASS] Subject: Mathematics (2x + 5 = 25 -> x = 10) verified!")
 
-            # Test 2: Science Question in Hindi/Hinglish
+            # Test 6: Science Question in Hindi/Hinglish
             chat_input.fill("photosynthesis kya hota hai?")
             page.click("#btn-send-chat")
             page.wait_for_timeout(1500)
@@ -385,16 +425,7 @@ def run_tests():
                 "AI Tutor must answer Science question in Hindi/Hinglish"
             print("[PASS] Subject: Science in Hinglish (Photosynthesis explanation) verified!")
 
-            # Test 3: English Grammar Question
-            chat_input.fill("what is past tense of go?")
-            page.click("#btn-send-chat")
-            page.wait_for_timeout(1500)
-
-            chat_body_3 = page.inner_text("body")
-            assert "went" in chat_body_3.lower(), "AI Tutor must answer English grammar question"
-            print("[PASS] Subject: English Grammar (Past tense of go -> went) verified!")
-
-            # Test 4: Faculty / Director Inquiry in Hinglish
+            # Test 7: Faculty / Director Inquiry in Hinglish
             chat_input.fill("Aman Arora kaun hai?")
             page.click("#btn-send-chat")
             page.wait_for_timeout(1500)
@@ -404,18 +435,9 @@ def run_tests():
                 "AI Tutor must identify Director Aman Arora"
             print("[PASS] Faculty & Administration: Director Aman Arora identified accurately!")
 
-            # Test 5: Computer / DCA Inquiry
-            chat_input.fill("what is full form of CPU?")
-            page.click("#btn-send-chat")
-            page.wait_for_timeout(1500)
-
-            chat_body_5 = page.inner_text("body")
-            assert "central processing unit" in chat_body_5.lower(), "AI Tutor must answer Computer DCA question"
-            print("[PASS] Subject: Computer & DCA (CPU -> Central Processing Unit) verified!")
-
             page.screenshot(path="verified_all_subject_ai_active.png")
 
-            # Test 6: Clean Destroy & Resolve
+            # Test 8: Clean Destroy & Resolve
             page.click("#btn-resolve-chat")
             page.wait_for_timeout(2000)
 

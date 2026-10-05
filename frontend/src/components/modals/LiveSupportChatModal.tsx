@@ -14,20 +14,20 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'msg-welcome-1',
     sender: 'counselor',
-    text: 'Namaste! 🙏 Welcome to L.C.C. Student AI Tutor & Helpdesk (100% Free). Aap yahan sabhi subjects (Math, Science, Physics, Chemistry, Biology, English Grammar, Computer / DCA) ke questions pooch sakte hain, teachers & faculty ke bare me jankari le sakte hain, ya admission/fees ke bare me pooch sakte hain. Ask in Hindi, Hinglish, or English!',
+    text: 'Namaste! 🙏 Kya problem hai aapko? Hamein batayein, hum turant madad karenge.',
     time: 'Just now'
   }
 ];
 
 const QUICK_CHIPS = [
-  '🎯 Admission 2026 & Fee Structure',
-  '👨‍🏫 L.C.C. Teachers & Faculty',
+  '🗣️ Eng me verbs kya hote hain?',
+  '📜 Bharat ka Samvidhan (Constitution)',
+  '💻 Computer Hardware vs Software',
+  '🗣️ Spoken English sentences',
   '🌿 Photosynthesis kya hota hai?',
-  '🍎 Newton ke gati ke niyam',
-  '📖 Tenses ke rules & types',
-  '⚡ Ohm ka niyam (V = IR)',
-  '💻 Computer CPU, RAM, ROM',
-  '🧮 2x + 5 = 25'
+  '🧮 2x + 5 = 25',
+  '👨‍🏫 Director Aman Arora & Teachers',
+  '🎯 Admission 2026 & Fee Structure'
 ];
 
 export const LiveSupportChatModal: React.FC = () => {
