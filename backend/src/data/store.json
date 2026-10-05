@@ -104,25 +104,7 @@
       "clicks": 67
     }
   ],
-  "studyMaterials": [
-    {
-      "id": "admin-verified-c10-math",
-      "title": "Class 10 Mathematics: Real Numbers Board Notes",
-      "category": "pdf_notes",
-      "targetClass": "Class 10",
-      "subject": "Mathematics",
-      "chapter": "Chapter 1",
-      "pages": 18,
-      "downloadUrl": "/assets/sample_notes.pdf",
-      "googleDriveUrl": "https://drive.google.com/file/d/12345/preview",
-      "isGoogleDrive": true,
-      "isPremium": false,
-      "fileType": "pdf",
-      "dateAdded": "2026-10-06",
-      "downloadsCount": 5,
-      "previewContent": "Real Numbers and Euclidean Division Lemma notes for Class 10."
-    }
-  ],
+  "studyMaterials": [],
   "videos": [
     {
       "id": "v-1789836144774",

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { User, Mail, Lock, Phone, X, GraduationCap, ArrowRight, Loader2, KeyRound } from 'lucide-react';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
+import defaultLogo from '../../assets/logo.jpg';
 
 export const StudentAuthModal: React.FC = () => {
   const {
@@ -16,7 +17,8 @@ export const StudentAuthModal: React.FC = () => {
     showToast,
     currentStudent,
     currentStaff,
-    isAdminAuthenticated
+    isAdminAuthenticated,
+    websiteSettings
   } = useApp();
   const [tab, setTab] = useState<'student' | 'staff' | 'register'>('student');
   const [email, setEmail] = useState('');
@@ -150,9 +152,13 @@ export const StudentAuthModal: React.FC = () => {
           {/* Compact Blue Header */}
           <div className="px-5 py-4 bg-[#0066FF] text-white flex items-center gap-3">
             <img
-              src="/logo.jpg"
-              alt="L.C.C."
-              className="w-10 h-10 rounded-xl object-contain bg-white shadow-sm border border-white/20"
+              src={websiteSettings?.logoUrl || defaultLogo}
+              alt={websiteSettings?.instituteName || "L.C.C."}
+              className="w-10 h-10 rounded-xl object-contain bg-white shadow-sm border border-white/20 p-0.5"
+              onError={(e: any) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = defaultLogo;
+              }}
             />
             <div>
               <h3 className="text-sm sm:text-base font-black">L.C.C. Learning & Campus Portal</h3>

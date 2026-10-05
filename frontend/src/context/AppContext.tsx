@@ -331,10 +331,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(() => {
     const saved = loadSaved<StudyMaterial[]>('lcc_study_materials', INITIAL_STUDY_MATERIALS);
     const valid = Array.isArray(saved) ? saved : INITIAL_STUDY_MATERIALS;
-    const cleaned = valid.filter(m => 
-      m.id !== 'mat-good-manners' && 
-      m.id !== 'mat-vocabulary-list'
-    );
+    const cleaned = valid.filter(m => !m.id?.startsWith('mat-'));
     localStorage.setItem('lcc_study_materials', JSON.stringify(cleaned));
     return cleaned;
   });
@@ -527,20 +524,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           saveItem('lcc_ads', adsRes.value.data);
         }
         if (pdfsRes.status === 'fulfilled' && Array.isArray(pdfsRes.value?.data)) {
-          const cloudPdfs = (pdfsRes.value.data || []).filter((m: any) => 
-            m.id !== 'mat-good-manners' && 
-            m.id !== 'mat-vocabulary-list'
-          );
+          const cloudPdfs = (pdfsRes.value.data || []).filter((m: any) => !m.id?.startsWith('mat-'));
           const rawLocal = localStorage.getItem('lcc_study_materials');
           let localMaterials: StudyMaterial[] = [];
           try {
             if (rawLocal) {
               const parsed = JSON.parse(rawLocal);
               if (Array.isArray(parsed)) {
-                localMaterials = parsed.filter((m: any) => 
-                  m.id !== 'mat-good-manners' && 
-                  m.id !== 'mat-vocabulary-list'
-                );
+                localMaterials = parsed.filter((m: any) => !m.id?.startsWith('mat-'));
               }
             }
           } catch (e) {}

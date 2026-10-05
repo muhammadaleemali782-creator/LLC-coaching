@@ -2,6 +2,7 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 import { GraduationCap, Phone, Mail, MapPin, Heart, Shield, Sparkles, ArrowUp } from 'lucide-react';
 import { Youtube, Instagram } from './SocialIcons';
+import defaultLogo from '../assets/logo.jpg';
 
 export const Footer: React.FC = () => {
   const { navigateTo, websiteSettings, socialLinks, isAdminAuthenticated, setIsAdminAuthModalOpen } = useApp();
@@ -26,12 +27,12 @@ export const Footer: React.FC = () => {
             className="flex items-center gap-3 cursor-pointer select-none group"
           >
             <img
-              src={websiteSettings?.logoUrl?.startsWith('/') ? '.' + websiteSettings.logoUrl : (websiteSettings?.logoUrl || './logo.jpg')}
+              src={websiteSettings?.logoUrl || defaultLogo}
               alt={websiteSettings?.instituteName || 'L.C.C. Learning Coaching Center'}
               className="w-12 h-12 rounded-2xl object-contain shadow-md border border-slate-200 bg-white"
               onError={(e: any) => {
                 e.currentTarget.onerror = null;
-                e.currentTarget.src = './logo.jpg';
+                e.currentTarget.src = defaultLogo;
               }}
             />
             <div className="flex flex-col text-left">

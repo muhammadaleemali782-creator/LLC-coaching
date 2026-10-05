@@ -20,10 +20,7 @@ export const getOfflineDocs = (): OfflineDoc[] => {
   try {
     const raw = localStorage.getItem(OFFLINE_KEY);
     const docs: OfflineDoc[] = raw ? JSON.parse(raw) : [];
-    const cleaned = docs.filter(d => 
-      d.id !== 'mat-good-manners' && 
-      d.id !== 'mat-vocabulary-list'
-    );
+    const cleaned = docs.filter(d => !d.id?.startsWith('mat-'));
     if (cleaned.length !== docs.length) {
       localStorage.setItem(OFFLINE_KEY, JSON.stringify(cleaned));
     }

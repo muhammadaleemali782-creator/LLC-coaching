@@ -26,6 +26,7 @@ import { getTranslation, AppLanguage } from '../../utils/i18n';
 import { saveOfflineDoc, isDocOffline } from '../../utils/offlineStorage';
 import { Course, VideoLecture, GalleryItem, InstagramPost } from '../../types';
 import { ADMIN_GALLERY_ITEMS } from '../../data/adminGallery';
+import defaultLogo from '../../assets/logo.jpg';
 
 interface MobileAppHomeProps {
   onOpenDrawer: () => void;
@@ -58,13 +59,15 @@ const SafeCourseImage: React.FC<{ src?: string; alt: string; className?: string;
 
 const SafeInstituteLogo: React.FC<{ logoUrl?: string; name?: string }> = ({ logoUrl, name }) => {
   const [hasError, setHasError] = useState(false);
-  const resolvedUrl = logoUrl?.startsWith('/') ? '.' + logoUrl : (logoUrl || './logo.jpg');
+  const resolvedUrl = logoUrl || defaultLogo;
 
   if (hasError) {
     return (
-      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0052CC] to-[#0066FF] text-white font-black flex items-center justify-center text-xs shadow-xs border border-blue-200 shrink-0 select-none">
-        LCC
-      </div>
+      <img
+        src={defaultLogo}
+        alt={name || 'L.C.C.'}
+        className="w-10 h-10 rounded-2xl object-contain bg-white shadow-xs border border-blue-100 shrink-0 p-0.5"
+      />
     );
   }
 
@@ -72,7 +75,7 @@ const SafeInstituteLogo: React.FC<{ logoUrl?: string; name?: string }> = ({ logo
     <img
       src={resolvedUrl}
       alt={name || 'L.C.C.'}
-      className="w-10 h-10 rounded-2xl object-contain bg-white shadow-xs border border-blue-100 shrink-0"
+      className="w-10 h-10 rounded-2xl object-contain bg-white shadow-xs border border-blue-100 shrink-0 p-0.5"
       onError={() => setHasError(true)}
     />
   );
@@ -239,7 +242,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
         className="sticky top-0 z-30 px-3 py-2.5 flex items-center justify-between shadow-sm"
         style={{ background: 'linear-gradient(135deg, #0052CC 0%, #0066FF 60%, #1a73e8 100%)' }}
       >
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
           <button
             type="button"
             id="mobile-drawer-toggle"
@@ -250,6 +253,16 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           >
             <Menu className="w-4 h-4" />
           </button>
+          {/* Institute Official Logo */}
+          <img
+            src={websiteSettings?.logoUrl || defaultLogo}
+            alt={websiteSettings?.instituteName || "L.C.C. Logo"}
+            className="w-8 h-8 rounded-full object-contain bg-white border border-amber-300 p-0.5 shrink-0 shadow-xs"
+            onError={(e: any) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = defaultLogo;
+            }}
+          />
           <div className="min-w-0">
             <div className="text-xs font-bold text-white leading-tight truncate">
               {currentStaff

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MessageSquare, X, Send, CheckCircle2, Check, Sparkles, User, GraduationCap, Calculator } from 'lucide-react';
 import { solveAcademicQuery } from '../../utils/mathSolverAgent';
+import defaultLogo from '../../assets/logo.jpg';
 
 interface ChatMessage {
   id: string;
@@ -127,9 +128,13 @@ export const LiveSupportChatModal: React.FC = () => {
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="relative">
               <img
-                src="/logo.jpg"
-                alt="L.C.C."
+                src={websiteSettings?.logoUrl || defaultLogo}
+                alt={websiteSettings?.instituteName || "L.C.C."}
                 className="w-9 h-9 rounded-xl object-contain bg-white border border-slate-200 p-0.5 shadow-xs"
+                onError={(e: any) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = defaultLogo;
+                }}
               />
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white" />
             </div>

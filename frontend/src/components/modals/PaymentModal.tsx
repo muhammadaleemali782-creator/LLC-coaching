@@ -23,6 +23,7 @@ import {
   Trash2,
   Clock
 } from 'lucide-react';
+import defaultLogo from '../../assets/logo.jpg';
 import { Youtube } from '../SocialIcons';
 import { api } from '../../api/client';
 import confetti from 'canvas-confetti';
@@ -235,7 +236,7 @@ export const PaymentModal: React.FC = () => {
       currency: serverOrder ? serverOrder.currency : 'INR',
       name: websiteSettings?.instituteName || 'Learning Coaching Center (L.C.C.)',
       description: `Enrollment Fee: ${selectedCourseForPayment.title}`,
-      image: websiteSettings?.logoUrl || '/logo.jpg',
+      image: websiteSettings?.logoUrl || defaultLogo,
       ...(serverOrder?.orderId ? { order_id: serverOrder.orderId } : {}),
       handler: async function (response: any) {
         paymentAttemptDone = true;
@@ -640,7 +641,15 @@ export const PaymentModal: React.FC = () => {
                         className="w-44 h-44 object-contain rounded-lg"
                       />
                       <div className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-white border-2 border-emerald-500 p-0.5 shadow-sm flex items-center justify-center pointer-events-none">
-                        <img src="/logo.jpg" alt="LCC" className="w-full h-full object-contain rounded-full" />
+                        <img
+                          src={websiteSettings?.logoUrl || defaultLogo}
+                          alt="LCC"
+                          className="w-full h-full object-contain rounded-full"
+                          onError={(e: any) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = defaultLogo;
+                          }}
+                        />
                       </div>
                     </div>
                     <span className="text-xs font-black text-slate-900 mt-2">

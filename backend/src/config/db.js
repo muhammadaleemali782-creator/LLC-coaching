@@ -483,25 +483,7 @@ const defaultData = {
       schedule: 'Mon - Fri | 7:00 PM - 8:15 PM'
     }
   ],
-  studyMaterials: [
-    {
-      id: 'admin-verified-c10-math',
-      title: 'Class 10 Mathematics: Real Numbers Board Notes',
-      category: 'pdf_notes',
-      targetClass: 'Class 10',
-      subject: 'Mathematics',
-      chapter: 'Chapter 1',
-      pages: 18,
-      downloadUrl: '/assets/sample_notes.pdf',
-      googleDriveUrl: 'https://drive.google.com/file/d/12345/preview',
-      isGoogleDrive: true,
-      isPremium: false,
-      fileType: 'pdf',
-      dateAdded: '2026-10-06',
-      downloadsCount: 5,
-      previewContent: 'Real Numbers and Euclidean Division Lemma notes for Class 10.'
-    }
-  ],
+  studyMaterials: [],
   videos: [
     {
       id: 'vid-1',
@@ -971,8 +953,8 @@ export const connectOnlineMongoDB = async () => {
           try {
             await StudyMaterialModel.deleteMany({
               $or: [
-                { id: 'mat-good-manners' },
-                { id: 'mat-vocabulary-list' }
+                { id: { $in: ['mat-dca-fund', 'mat-12-phys-electro', 'mat-9-math-geom', 'mat-10-sci-chem', 'mat-10-math-real', 'mat-good-manners', 'mat-vocabulary-list'] } },
+                { id: /^mat-/ }
               ]
             });
           } catch (e) {}
