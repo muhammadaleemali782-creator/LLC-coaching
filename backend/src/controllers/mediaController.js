@@ -20,7 +20,19 @@ export const getPDFs = async (req, res) => {
       const query = {};
       if (category && category !== 'all') query.category = category;
       if (targetClass && targetClass !== 'all') query.targetClass = new RegExp(targetClass, 'i');
-      const results = await StudyMaterialModel.find(query).sort({ _id: -1 });
+      let results = await StudyMaterialModel.find(query).sort({ _id: -1 });
+      if (results.length <= 2) {
+        const db = getDB();
+        const fallbackMaterials = db.studyMaterials || [];
+        for (const mat of fallbackMaterials) {
+          if (!results.some(r => r.id === mat.id || r.title === mat.title)) {
+            try {
+              await StudyMaterialModel.create(mat);
+            } catch (e) {}
+          }
+        }
+        results = await StudyMaterialModel.find(query).sort({ _id: -1 });
+      }
       return res.json({ success: true, count: results.length, data: results });
     }
   } catch (err) {}

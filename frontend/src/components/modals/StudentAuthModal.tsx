@@ -234,6 +234,7 @@ export const StudentAuthModal: React.FC = () => {
                 {/* 3-Tab Selector: Student | Teacher / Staff | New Registration */}
                 <div className="flex rounded-2xl bg-slate-100 p-1 border border-slate-200 gap-1">
                   <button
+                    id="auth-tab-student"
                     type="button"
                     onClick={() => setTab('student')}
                     style={tab === 'student' ? { backgroundColor: '#0066FF', color: '#ffffff' } : { color: '#475569' }}
@@ -248,6 +249,7 @@ export const StudentAuthModal: React.FC = () => {
                   </button>
 
                   <button
+                    id="auth-tab-staff"
                     type="button"
                     onClick={() => setTab('staff')}
                     style={tab === 'staff' ? { backgroundColor: '#4f46e5', color: '#ffffff' } : { color: '#475569' }}
@@ -262,6 +264,7 @@ export const StudentAuthModal: React.FC = () => {
                   </button>
 
                   <button
+                    id="auth-tab-register"
                     type="button"
                     onClick={() => setTab('register')}
                     style={tab === 'register' ? { backgroundColor: '#0066FF', color: '#ffffff' } : { color: '#475569' }}
@@ -290,6 +293,7 @@ export const StudentAuthModal: React.FC = () => {
                         <div className="relative">
                           <User className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                           <input
+                            id="reg-input-name"
                             type="text"
                             required
                             placeholder="e.g. Aarav Patel"
@@ -305,6 +309,7 @@ export const StudentAuthModal: React.FC = () => {
                         <div className="relative">
                           <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                           <input
+                            id="reg-input-phone"
                             type="tel"
                             required
                             placeholder="9876543210"
@@ -318,6 +323,7 @@ export const StudentAuthModal: React.FC = () => {
                       <div>
                         <label className="text-[11px] font-bold text-slate-700 block mb-1">Target Class / Course *</label>
                         <select
+                          id="reg-select-class"
                           value={targetClass}
                           onChange={e => setTargetClass(e.target.value)}
                           className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#0066FF] font-medium"
@@ -342,6 +348,7 @@ export const StudentAuthModal: React.FC = () => {
                     <div className="relative">
                       <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
+                        id={tab === 'register' ? 'reg-input-email' : 'auth-input-email'}
                         type="email"
                         required
                         placeholder={tab === 'staff' ? 'faculty@lcc.edu' : 'name@example.com'}
@@ -368,6 +375,7 @@ export const StudentAuthModal: React.FC = () => {
                     <div className="relative">
                       <Lock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
+                        id={tab === 'register' ? 'reg-input-password' : 'auth-input-password'}
                         type="password"
                         required
                         placeholder="••••••••"
@@ -380,7 +388,7 @@ export const StudentAuthModal: React.FC = () => {
 
                   <div className="pt-2">
                     <button
-                      id="auth-submit-btn"
+                      id={tab === 'register' ? 'reg-submit-btn' : 'auth-submit-btn'}
                       type="submit"
                       disabled={isLoading}
                       style={{

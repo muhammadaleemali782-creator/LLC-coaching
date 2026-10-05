@@ -70,17 +70,20 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
   const [batchCategoryFilter, setBatchCategoryFilter] = useState<string>('all');
   const [galleryCategoryFilter, setGalleryCategoryFilter] = useState<string>('all');
 
-  // Featured Announcement Slides (Admin Official Poster + ONLY Admin Uploaded Gallery Photos)
+  // Featured Announcement Slides (Admin Official Uploaded Gallery Photos Only)
   const allSlides = React.useMemo(() => {
-    const list: Array<{ id: string; title: string; subtitle: string; tag: string; img: string }> = [
-      {
-        id: 's-hero-poster',
+    const list: Array<{ id: string; title: string; subtitle: string; tag: string; img: string }> = [];
+
+    // Include custom non-default poster only if admin has configured an external URL
+    if (websiteSettings?.heroPosterUrl && !websiteSettings.heroPosterUrl.includes('hero_poster.jpg')) {
+      list.push({
+        id: 's-admin-hero',
         title: websiteSettings?.emergencyAlertText || 'Admissions Open 2026-27 | Classes 1–12 & DCA',
         subtitle: 'Classes 1–12, NEET/JEE & DCA Coaching at L.C.C. Campus',
-        tag: 'NEW SESSION',
-        img: websiteSettings?.heroPosterUrl || '/assets/hero_poster.jpg'
-      }
-    ];
+        tag: 'OFFICIAL NOTICE',
+        img: websiteSettings.heroPosterUrl
+      });
+    }
 
     if (galleryItems && galleryItems.length > 0) {
       const seen = new Set(list.map(s => s.img));
@@ -97,13 +100,33 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
         }
       });
     }
+
+    // Safe fallback if gallery is empty
+    if (list.length === 0) {
+      list.push({
+        id: 's-default-slide',
+        title: websiteSettings?.emergencyAlertText || 'Admissions Open 2026-27 | Classes 1–12 & DCA',
+        subtitle: 'Premier Coaching & Computer Institute at Palahipatti, Varanasi',
+        tag: 'L.C.C. CAMPUS',
+        img: '/logo.jpg'
+      });
+    }
+
     return list;
   }, [websiteSettings?.heroPosterUrl, websiteSettings?.emergencyAlertText, galleryItems]);
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
-  // NO AUTO TIMER! Strictly static so user can read without unexpected auto-sliding
+  // Automatic slide rotation every 4 seconds
+  useEffect(() => {
+    if (allSlides.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % allSlides.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [allSlides.length]);
+
   const prevSlide = () => {
     setCurrentSlide(prev => (prev === 0 ? allSlides.length - 1 : prev - 1));
   };
@@ -342,7 +365,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                 className="w-full h-full object-cover object-center"
                 loading="lazy"
                 onError={(e: any) => {
-                  e.currentTarget.src = '/assets/hero_poster.jpg';
+                  e.currentTarget.src = '/logo.jpg';
                 }}
               />
               <div

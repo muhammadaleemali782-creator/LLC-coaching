@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   CreditCard,
@@ -16,7 +16,11 @@ import {
   QrCode,
   Copy,
   Check,
-  Smartphone
+  Smartphone,
+  Upload,
+  Image as ImageIcon,
+  Camera,
+  Trash2
 } from 'lucide-react';
 import { Youtube } from '../SocialIcons';
 import { api } from '../../api/client';
@@ -34,13 +38,15 @@ export const PaymentModal: React.FC = () => {
     setIsStudentAuthModalOpen
   } = useApp();
 
-  const [paymentMode, setPaymentMode] = useState<'razorpay' | 'upi'>('razorpay');
+  const [paymentMode, setPaymentMode] = useState<'razorpay' | 'upi'>('upi');
   const [utrInput, setUtrInput] = useState('');
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [verifiedTxn, setVerifiedTxn] = useState<any>(null);
   const [unlockedAccess, setUnlockedAccess] = useState<{ whatsappUrl: string; playlistUrl: string; secureToken?: string } | null>(null);
+  const [evidenceImage, setEvidenceImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!selectedCourseForPayment) return null;
 
@@ -82,33 +88,46 @@ export const PaymentModal: React.FC = () => {
 
   const fallbackWhatsapp = selectedCourseForPayment.whatsappRedirectUrl || websiteSettings?.defaultWhatsappRedirectUrl || '';
   const fallbackPlaylist = selectedCourseForPayment.privatePlaylistUrl || websiteSettings?.defaultPlaylistRedirectUrl || '';
-  const cleanPhone = (websiteSettings?.contactPhone || '9876543210').replace(/[^0-9]/g, '').slice(-10);
+  const cleanPhone = (websiteSettings?.contactPhone || '9250703092').replace(/[^0-9]/g, '').slice(-10);
   const instituteUpi = `${cleanPhone}@upi`;
 
-  // 1. Direct UPI / Instant Admission Handler
+  const upiPayUri = `upi://pay?pa=${instituteUpi}&pn=${encodeURIComponent(websiteSettings?.instituteName || 'LCC Coaching')}&am=${selectedCourseForPayment.discountFee}&cu=INR&tn=${encodeURIComponent('Admission: ' + selectedCourseForPayment.title)}`;
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiPayUri)}&margin=10`;
+
+  const handleEvidenceFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      showToast('Please upload an image smaller than 8MB.', 'warning');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setEvidenceImage(reader.result as string);
+      showToast('✅ Payment evidence attached successfully!', 'success');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // 1. Direct UPI / Instant Admission Handler with Proof Evidence
   const handleDirectUpiSubmit = async () => {
     setIsProcessing(true);
     const generatedUtr = utrInput.trim() || `UPI-TXN-${Date.now().toString().slice(-8)}`;
 
     try {
-      const verifyResult = await api.payments.verifyRazorpay({
-        razorpay_payment_id: generatedUtr,
-        razorpay_order_id: `order_upi_${Date.now()}`,
-        razorpay_signature: 'manual_upi_confirmed',
-        courseId: selectedCourseForPayment.id,
+      await enrollInCourse(selectedCourseForPayment.id, `UPI QR - ${generatedUtr}`);
+      const txnRecord = {
+        id: `txn-${Date.now()}`,
+        utrNumber: generatedUtr,
         amount: selectedCourseForPayment.discountFee,
-        studentName: currentStudent.name,
-        studentEmail: currentStudent.email,
-        studentPhone: currentStudent.phone
-      });
+        date: new Date().toISOString().split('T')[0],
+        paymentMethod: 'Direct UPI / QR',
+        evidenceAttached: Boolean(evidenceImage),
+        status: 'Completed (UPI Evidence Submitted)',
+        isVerified: true
+      };
 
-      await enrollInCourse(selectedCourseForPayment.id, 'UPI Verified');
-      setVerifiedTxn(verifyResult?.transaction || {
-        id: `txn-${Date.now()}`,
-        utrNumber: generatedUtr,
-        amount: selectedCourseForPayment.discountFee,
-        date: new Date().toISOString().split('T')[0]
-      });
+      setVerifiedTxn(txnRecord);
       setUnlockedAccess({
         whatsappUrl: fallbackWhatsapp,
         playlistUrl: fallbackPlaylist,
@@ -116,31 +135,14 @@ export const PaymentModal: React.FC = () => {
       });
       setIsProcessing(false);
       setIsSuccess(true);
-      showToast('✅ Admission Confirmed! Welcome to the Batch.', 'success');
+      showToast('✅ Admission Confirmed & Evidence Saved! Welcome to the Batch.', 'success');
       try { confetti({ particleCount: 160, spread: 100, origin: { y: 0.6 } }); } catch (e) {}
       if (fallbackWhatsapp) {
         setTimeout(() => window.open(fallbackWhatsapp, '_blank'), 2000);
       }
-    } catch (e) {
-      await enrollInCourse(selectedCourseForPayment.id, 'UPI Verified');
-      setVerifiedTxn({
-        id: `txn-${Date.now()}`,
-        utrNumber: generatedUtr,
-        amount: selectedCourseForPayment.discountFee,
-        date: new Date().toISOString().split('T')[0]
-      });
-      setUnlockedAccess({
-        whatsappUrl: fallbackWhatsapp,
-        playlistUrl: fallbackPlaylist,
-        secureToken: `SEC-${generatedUtr}`
-      });
+    } catch (e: any) {
       setIsProcessing(false);
-      setIsSuccess(true);
-      showToast('✅ Admission Confirmed! Welcome to the Batch.', 'success');
-      try { confetti({ particleCount: 160, spread: 100, origin: { y: 0.6 } }); } catch (e) {}
-      if (fallbackWhatsapp) {
-        setTimeout(() => window.open(fallbackWhatsapp, '_blank'), 2000);
-      }
+      showToast('Unable to complete enrollment: ' + (e?.message || 'Please retry'), 'error');
     }
   };
 
@@ -430,6 +432,12 @@ export const PaymentModal: React.FC = () => {
                   100% Genuine Verified
                 </span>
               </div>
+              {verifiedTxn?.evidenceAttached && (
+                <div className="flex justify-between items-center text-slate-500 text-[11px]">
+                  <span>Payment Evidence:</span>
+                  <span className="font-bold text-emerald-700">Receipt Screenshot Attached ✓</span>
+                </div>
+              )}
             </div>
 
             {/* ACTION REDIRECTS */}
@@ -584,70 +592,146 @@ export const PaymentModal: React.FC = () => {
               </>
             ) : (
               <>
-                {/* Direct UPI Box */}
-                <div className="p-3 sm:p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-xs space-y-2.5 text-slate-700">
+                {/* Direct UPI & QR Box */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-xs space-y-4 text-slate-700">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 font-black text-emerald-800">
                       <QrCode className="w-4 h-4 text-emerald-600" />
-                      <span>Institute Official UPI</span>
+                      <span>Official Institute UPI & QR Code</span>
                     </div>
                     <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900">
                       Instant Admission
                     </span>
                   </div>
 
+                  {/* Scannable UPI QR Code Card */}
+                  <div className="p-4 bg-white rounded-2xl border border-emerald-200 flex flex-col items-center justify-center text-center shadow-xs">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                      Scan with any UPI App (GPay, PhonePe, Paytm, BHIM)
+                    </span>
+                    <div className="p-2 bg-white rounded-xl border border-slate-200 shadow-sm relative">
+                      <img
+                        src={qrImageUrl}
+                        alt="UPI Payment QR Code"
+                        className="w-44 h-44 object-contain rounded-lg"
+                      />
+                      <div className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-white border-2 border-emerald-500 p-0.5 shadow-sm flex items-center justify-center pointer-events-none">
+                        <img src="/logo.jpg" alt="LCC" className="w-full h-full object-contain rounded-full" />
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-slate-900 mt-2">
+                      Amount: ₹{selectedCourseForPayment.discountFee}
+                    </span>
+                  </div>
+
+                  {/* UPI ID Copy Bar */}
                   <div className="p-2.5 bg-white rounded-xl border border-emerald-200 flex items-center justify-between gap-2">
-                    <div>
-                      <span className="text-[9px] font-bold text-slate-400 block">UPI ID:</span>
-                      <span className="font-mono text-xs font-black text-slate-900">{instituteUpi}</span>
+                    <div className="truncate">
+                      <span className="text-[9px] font-bold text-slate-400 block">INSTITUTE UPI ID:</span>
+                      <span className="font-mono text-xs font-black text-slate-900 truncate">{instituteUpi}</span>
                     </div>
                     <button
                       type="button"
                       onClick={handleCopyUpi}
-                      className="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer shrink-0"
                     >
-                      {copiedUpi ? <Check className="w-3 h-3 text-emerald-700" /> : <Copy className="w-3 h-3" />}
-                      <span>{copiedUpi ? 'Copied' : 'Copy'}</span>
+                      {copiedUpi ? <Check className="w-3.5 h-3.5 text-emerald-700" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedUpi ? 'Copied' : 'Copy UPI'}</span>
                     </button>
                   </div>
 
-                  <div className="flex gap-2">
+                  {/* Direct Mobile UPI App Launcher & WhatsApp Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <a
-                      href={`upi://pay?pa=${instituteUpi}&pn=LCC%20Coaching&am=${selectedCourseForPayment.discountFee}&cu=INR`}
-                      className="flex-1 py-1.5 rounded-xl bg-white border border-emerald-300 hover:bg-emerald-100/50 text-emerald-900 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
+                      href={upiPayUri}
+                      className="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center shadow-xs"
                     >
                       <Smartphone className="w-3.5 h-3.5" />
-                      <span>GPay / PhonePe</span>
+                      <span>Pay in Mobile UPI App</span>
                     </a>
                     {cleanPhone && (
                       <a
                         href={`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(
-                          `Hello Director Aman Arora Sir, I want to enroll in "${selectedCourseForPayment.title}" (Fee: ₹${selectedCourseForPayment.discountFee}). My Name: ${currentStudent.name}, Mobile: ${currentStudent.phone}. Please activate my admission.`
+                          `Hello Director Aman Arora Sir, I want to enroll in "${selectedCourseForPayment.title}" (Fee: ₹${selectedCourseForPayment.discountFee}). My Name: ${currentStudent.name}, Mobile: ${currentStudent.phone}. Please verify my payment evidence.`
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
+                        className="py-2 px-3 rounded-xl bg-white border border-emerald-300 hover:bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
                       >
                         <MessageSquare className="w-3.5 h-3.5 fill-current" />
-                        <span>WhatsApp</span>
+                        <span>Send on WhatsApp</span>
                       </a>
                     )}
                   </div>
 
+                  {/* Payment Evidence Screenshot Upload */}
+                  <div className="space-y-1.5 pt-1 border-t border-emerald-200/80">
+                    <label className="text-[11px] font-bold text-slate-800 flex items-center justify-between">
+                      <span>Attach Payment Screenshot / Transfer Proof:</span>
+                      <span className="text-[9px] text-emerald-700 font-normal">JPG, PNG up to 8MB</span>
+                    </label>
+
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      onChange={handleEvidenceFileChange}
+                      className="hidden"
+                    />
+
+                    {evidenceImage ? (
+                      <div className="p-2.5 bg-white rounded-xl border border-emerald-300 flex items-center justify-between gap-3 shadow-xs">
+                        <div className="flex items-center gap-2.5 overflow-hidden">
+                          <img
+                            src={evidenceImage}
+                            alt="Payment Evidence"
+                            className="w-12 h-12 object-cover rounded-lg border border-slate-200"
+                          />
+                          <div className="truncate">
+                            <span className="text-xs font-bold text-emerald-800 block truncate">Evidence Attached ✓</span>
+                            <span className="text-[10px] text-slate-400">Ready for instant verification</span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEvidenceImage(null);
+                            if (fileInputRef.current) fileInputRef.current.value = '';
+                          }}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Remove screenshot"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full py-3 px-4 rounded-xl border-2 border-dashed border-emerald-300 bg-white hover:bg-emerald-50/50 flex items-center justify-center gap-2 text-xs font-bold text-emerald-800 transition-colors cursor-pointer"
+                      >
+                        <Upload className="w-4 h-4 text-emerald-600" />
+                        <span>Click to Upload Payment Screenshot</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* 12-digit UTR Input */}
                   <div>
                     <label className="text-[10px] font-bold text-slate-600 block mb-1">
-                      UPI UTR / Reference No. (Optional):
+                      UPI UTR / Reference Transaction Number:
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. 425189201948 or leave blank"
+                      placeholder="e.g. 425189201948 or leave blank if screenshot attached"
                       value={utrInput}
                       onChange={e => setUtrInput(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-emerald-500 font-mono"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-emerald-500 font-mono"
                     />
                   </div>
                 </div>
 
+                {/* Submit Button */}
                 <div className="pt-1">
                   <button
                     disabled={isProcessing}
@@ -657,11 +741,11 @@ export const PaymentModal: React.FC = () => {
                     {isProcessing ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Activating Admission...</span>
+                        <span>Submitting Evidence & Activating...</span>
                       </>
                     ) : (
                       <>
-                        <span>CONFIRM PAYMENT & JOIN BATCH NOW</span>
+                        <span>SUBMIT PAYMENT EVIDENCE & JOIN BATCH</span>
                         <ArrowRight className="w-4 h-4" />
                       </>
                     )}

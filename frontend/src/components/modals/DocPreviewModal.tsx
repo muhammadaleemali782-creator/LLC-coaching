@@ -1,12 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { FileText, Download, X, ZoomIn, ZoomOut, Printer, CheckCircle2, HardDrive, ExternalLink } from 'lucide-react';
+import { FileText, Download, X, ZoomIn, ZoomOut, Printer, CheckCircle2, HardDrive, ExternalLink, DownloadCloud, Check } from 'lucide-react';
+import { recordLearningHistory } from '../../utils/learningHistory';
+import { saveOfflineDoc, isDocOffline } from '../../utils/offlineStorage';
 
 export const DocPreviewModal: React.FC = () => {
-  const { selectedDocForPreview, setSelectedDocForPreview, showToast } = useApp();
+  const { selectedDocForPreview, setSelectedDocForPreview, showToast, currentStudent } = useApp();
   const [zoomLevel, setZoomLevel] = useState<number>(100);
+  const [isOfflineSaved, setIsOfflineSaved] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (selectedDocForPreview) {
+      setIsOfflineSaved(isDocOffline(selectedDocForPreview.id));
+      recordLearningHistory({
+        type: 'material',
+        itemId: selectedDocForPreview.id,
+        title: selectedDocForPreview.title,
+        subject: selectedDocForPreview.subject,
+        targetClass: selectedDocForPreview.targetClass,
+        pages: selectedDocForPreview.pages
+      }, currentStudent?.id || currentStudent?.email);
+    }
+  }, [selectedDocForPreview, currentStudent]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedDocForPreview(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setSelectedDocForPreview]);
 
   if (!selectedDocForPreview) return null;
+
+  const handleSaveOffline = () => {
+    if (!selectedDocForPreview) return;
+    const ok = saveOfflineDoc({
+      id: selectedDocForPreview.id,
+      title: selectedDocForPreview.title,
+      category: selectedDocForPreview.category,
+      targetClass: selectedDocForPreview.targetClass,
+      subject: selectedDocForPreview.subject,
+      fileUrl: selectedDocForPreview.downloadUrl || '#',
+      fileType: selectedDocForPreview.fileType || 'pdf',
+      contentSnippet: selectedDocForPreview.previewContent
+    });
+    if (ok) {
+      setIsOfflineSaved(true);
+      showToast('✅ Saved to Offline Vault! You can read this anytime without internet.', 'success');
+    }
+  };
 
   const isDriveDoc = selectedDocForPreview.isGoogleDrive || (selectedDocForPreview.downloadUrl && selectedDocForPreview.downloadUrl.includes('drive.google.com'));
 
@@ -93,6 +136,21 @@ export const DocPreviewModal: React.FC = () => {
             </button>
 
             <button
+              id="btn-save-offline-modal"
+              onClick={handleSaveOffline}
+              disabled={isOfflineSaved}
+              className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer ${
+                isOfflineSaved
+                  ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-300'
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+              }`}
+              title="Save to Phone Offline Vault"
+            >
+              {isOfflineSaved ? <Check className="w-4 h-4" /> : <DownloadCloud className="w-4 h-4" />}
+              <span className="text-[11px] font-bold">{isOfflineSaved ? 'Saved Offline' : 'Save Offline'}</span>
+            </button>
+
+            <button
               onClick={handleDownload}
               className="px-4 py-2 rounded-xl bg-[#0066FF] hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
             >
@@ -101,6 +159,7 @@ export const DocPreviewModal: React.FC = () => {
             </button>
 
             <button
+              id="btn-close-doc-modal"
               onClick={() => setSelectedDocForPreview(null)}
               className="p-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
             >

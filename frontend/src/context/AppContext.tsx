@@ -323,7 +323,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const [courses, setCourses] = useState<Course[]>(() => loadSaved('lcc_courses', INITIAL_COURSES));
-  const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(() => loadSaved('lcc_study_materials', INITIAL_STUDY_MATERIALS));
+  const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(() => {
+    const saved = loadSaved<StudyMaterial[]>('lcc_study_materials', INITIAL_STUDY_MATERIALS);
+    return Array.isArray(saved) && saved.length > 0 ? saved : INITIAL_STUDY_MATERIALS;
+  });
   const [syllabuses, setSyllabuses] = useState<SyllabusItem[]>(() => loadSaved('lcc_syllabus', INITIAL_SYLLABUS));
   const [notices, setNotices] = useState<Notice[]>(() => loadSaved('lcc_notices', INITIAL_NOTICES));
   const [videos, setVideos] = useState<VideoLecture[]>(() => {
@@ -491,7 +494,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setAds(adsRes.value.data);
           saveItem('lcc_ads', adsRes.value.data);
         }
-        if (pdfsRes.status === 'fulfilled' && Array.isArray(pdfsRes.value?.data)) {
+        if (pdfsRes.status === 'fulfilled' && Array.isArray(pdfsRes.value?.data) && pdfsRes.value.data.length > 0) {
           const cloudPdfs = pdfsRes.value.data;
           setStudyMaterials(cloudPdfs);
           saveItem('lcc_study_materials', cloudPdfs);

@@ -1,9 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Video, X, Eye, Clock, User, Share2 } from 'lucide-react';
+import { recordLearningHistory } from '../../utils/learningHistory';
 
 export const VideoPlayerModal: React.FC = () => {
-  const { selectedVideoForPlayer, setSelectedVideoForPlayer, showToast } = useApp();
+  const { selectedVideoForPlayer, setSelectedVideoForPlayer, showToast, currentStudent } = useApp();
+
+  useEffect(() => {
+    if (selectedVideoForPlayer) {
+      recordLearningHistory({
+        type: 'video',
+        itemId: selectedVideoForPlayer.id,
+        title: selectedVideoForPlayer.title,
+        subject: selectedVideoForPlayer.subject,
+        targetClass: selectedVideoForPlayer.targetClass,
+        duration: selectedVideoForPlayer.duration
+      }, currentStudent?.id || currentStudent?.email);
+    }
+  }, [selectedVideoForPlayer, currentStudent]);
 
   if (!selectedVideoForPlayer) return null;
 

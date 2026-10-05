@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   GraduationCap,
@@ -25,10 +25,19 @@ import {
   X,
   Check,
   Loader2,
-  ArrowLeft
+  ArrowLeft,
+  DownloadCloud,
+  Eye,
+  Trash2,
+  ShieldCheck,
+  History,
+  ArrowRight,
+  Layers
 } from 'lucide-react';
 import { Youtube } from '../SocialIcons';
 import confetti from 'canvas-confetti';
+import { getLearningHistory, clearLearningHistory, LearningHistoryItem } from '../../utils/learningHistory';
+import { getOfflineDocs, saveOfflineDoc, isDocOffline, deleteOfflineDoc, OfflineDoc } from '../../utils/offlineStorage';
 
 export const StudentDashboard: React.FC = () => {
   const {
@@ -62,6 +71,24 @@ export const StudentDashboard: React.FC = () => {
   const [confirmPassInput, setConfirmPassInput] = useState('');
   const [isUpdatingPass, setIsUpdatingPass] = useState(false);
 
+  // Learning Activity History State
+  const [historyItems, setHistoryItems] = useState<LearningHistoryItem[]>(() =>
+    getLearningHistory(currentStudent?.id || currentStudent?.email)
+  );
+
+  // Study Vault Filtering & Offline Reading State
+  const [vaultSubTab, setVaultSubTab] = useState<'my' | 'offline' | 'all'>('my');
+  const [offlineDocs, setOfflineDocs] = useState<OfflineDoc[]>(() => getOfflineDocs());
+  const [readingOfflineDoc, setReadingOfflineDoc] = useState<OfflineDoc | null>(null);
+
+  // Sync history and offline docs whenever tab or student changes
+  useEffect(() => {
+    if (currentStudent) {
+      setHistoryItems(getLearningHistory(currentStudent.id || currentStudent.email));
+      setOfflineDocs(getOfflineDocs());
+    }
+  }, [activeTab, currentStudent]);
+
   if (!currentStudent) {
     return (
       <div className="py-24 px-4 text-center max-w-md mx-auto">
@@ -83,25 +110,81 @@ export const StudentDashboard: React.FC = () => {
   }
 
   const enrolledCourseList = courses.filter(c => (currentStudent?.enrolledCourses || []).includes(c.id));
-  const fallbackCourse = {
-    id: 'batch-foundation',
-    title: 'Comprehensive Board & Academic Coaching',
-    category: 'secondary' as const,
-    targetClass: currentStudent?.targetClass || currentStudent?.classEnrolled || 'Class 10',
-    duration: 'Full Academic Session',
-    fee: 3999,
-    discountFee: 2999,
-    rating: 5,
-    enrolledCount: 150,
-    instructor: 'Director Aman Arora',
-    image: '/logo.jpg',
-    badge: 'Premier',
-    features: ['Daily Live Classes', 'Notes PDF Vault', 'Weekly Tests'],
-    description: 'Premier curriculum batch designed for academic excellence.',
-    syllabusHighlights: ['Complete NCERT & State Board syllabus', 'PYQ Mastery'],
-    isPaid: true
-  };
-  const activeCourse = enrolledCourseList[0] || courses[0] || fallbackCourse;
+  const hasEnrollments = enrolledCourseList.length > 0;
+  const activeCourse = enrolledCourseList[0] || null;
+
+  // Real curriculum progress: exactly 0% if no enrollments!
+  const overallCurriculumProgress = hasEnrollments
+    ? Math.round(
+        enrolledCourseList.reduce((acc, c) => acc + ((currentStudent.courseProgress || {})[c.id] || 0), 0) /
+        enrolledCourseList.length
+      )
+    : 0;
+
+  // Real mock tests attempted: from quizScores keys
+  const attemptedQuizKeys = Object.keys(currentStudent.quizScores || {});
+  const attemptedQuizCount = attemptedQuizKeys.length;
+  const avgQuizScore = attemptedQuizCount > 0
+    ? Math.round(Object.values(currentStudent.quizScores || {}).reduce((a, b) => a + b, 0) / attemptedQuizCount)
+    : 0;
+
+  // Real completed courses (100% completion) for certificate
+  const completedCourses = enrolledCourseList.filter(c => ((currentStudent.courseProgress || {})[c.id] || 0) >= 100);
+  const isCertificateUnlocked = completedCourses.length > 0;
+  const certifiedCourse = completedCourses[0] || enrolledCourseList[0] || null;
+
+  // Filter study materials for student's personal vault
+  const userClass = (currentStudent.targetClass || currentStudent.classEnrolled || '').toLowerCase();
+  const userSubjects = (currentStudent.selectedSubjects || []).map(s => s.toLowerCase());
+
+  const relevantStudyMaterials = studyMaterials.filter(m => {
+    const mClass = (m.targetClass || '').toLowerCase();
+    const mSubj = (m.subject || '').toLowerCase();
+    const mCat = (m.category || '').toLowerCase();
+    const mTitle = (m.title || '').toLowerCase();
+
+    // 1. Matches enrolled courses
+    const matchesEnrolled = enrolledCourseList.some(c => {
+      const cClass = (c.targetClass || '').toLowerCase();
+      const cCat = (c.category || '').toLowerCase();
+      const cTitle = (c.title || '').toLowerCase();
+      return (
+        (cClass && (mClass.includes(cClass) || cClass.includes(mClass))) ||
+        (cCat && (mCat.includes(cCat) || cCat.includes(mCat))) ||
+        (cTitle && cTitle.includes(mClass))
+      );
+    });
+    if (matchesEnrolled) return true;
+
+    // Strict stream isolation: Spoken English notes only for Spoken English students
+    const isSpoken = mClass.includes('spoken') || mCat.includes('spoken') || mTitle.includes('manners') || mTitle.includes('vocabulary');
+    if (isSpoken) {
+      return userClass.includes('spoken');
+    }
+
+    // Strict stream isolation: Computer / DCA notes only for Computer students
+    const isComputer = mClass.includes('computer') || mClass.includes('dca') || mCat.includes('computer');
+    if (isComputer) {
+      return userClass.includes('computer') || userClass.includes('dca');
+    }
+
+    // 2. Matches student's academic targetClass
+    if (userClass) {
+      const classMatch = (
+        (userClass.includes('10') && mClass.includes('10')) ||
+        (userClass.includes('9') && mClass.includes('9')) ||
+        (userClass.includes('11') && mClass.includes('11')) ||
+        (userClass.includes('12') && mClass.includes('12')) ||
+        mClass.includes(userClass) ||
+        userClass.includes(mClass)
+      );
+      if (classMatch) {
+        return true;
+      }
+    }
+
+    return false;
+  });
 
   const handleSelectAnswer = (qId: number, optionIdx: number) => {
     if (testSubmitted) return;
@@ -124,7 +207,9 @@ export const StudentDashboard: React.FC = () => {
         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       } catch (e) {}
       showToast(`Congratulations! You scored ${score}/${activeTest.totalMarks} Marks. Passed with distinction!`, 'success');
-      updateStudentProgress(activeCourse.id, 25);
+      if (activeCourse) {
+        updateStudentProgress(activeCourse.id, 25);
+      }
     } else {
       showToast(`You scored ${score}/${activeTest.totalMarks} Marks. Review explanations and try again!`, 'info');
     }
@@ -254,6 +339,7 @@ export const StudentDashboard: React.FC = () => {
           ].map(tab => (
             <button
               key={tab.id}
+              data-tab={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all cursor-pointer ${
                 activeTab === tab.id
@@ -279,58 +365,199 @@ export const StudentDashboard: React.FC = () => {
               <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-card-clean">
                 <span className="text-xs text-slate-500 font-bold block mb-1">Overall Curriculum Completed</span>
                 <span className="text-3xl font-black text-emerald-600">
-                  {(currentStudent.courseProgress || {})[activeCourse.id] || 35}%
+                  {overallCurriculumProgress}%
                 </span>
                 <div className="w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden">
                   <div
                     className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${(currentStudent.courseProgress || {})[activeCourse.id] || 35}%` }}
+                    style={{ width: `${overallCurriculumProgress}%` }}
                   />
                 </div>
               </div>
               <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-card-clean">
                 <span className="text-xs text-slate-500 font-bold block mb-1">Mock Quizzes Attempted</span>
-                <span className="text-3xl font-black text-purple-600">3 Tests</span>
-                <span className="text-[11px] text-emerald-600 font-bold block mt-2">Passed with 92% Average</span>
+                <span className="text-3xl font-black text-purple-600">
+                  {attemptedQuizCount} {attemptedQuizCount === 1 ? 'Test' : 'Tests'}
+                </span>
+                <span className="text-[11px] text-emerald-600 font-bold block mt-2">
+                  {attemptedQuizCount > 0 ? `Passed with ${avgQuizScore}% Average` : 'No quizzes attempted yet'}
+                </span>
               </div>
             </div>
 
-            {/* Current Active Batch Feed */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-card-clean space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-black text-[#0066FF] uppercase">Active Program</span>
-                  <h3 className="text-xl font-black text-slate-900 mt-0.5">{activeCourse.title}</h3>
-                </div>
-                <button
-                  onClick={() => setActiveTab('courses')}
-                  className="text-xs font-bold text-[#0066FF] hover:underline"
-                >
-                  View All Lectures
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {videos.slice(0, 2).map(vid => (
-                  <div
-                    key={vid.id}
-                    onClick={() => setSelectedVideoForPlayer(vid)}
-                    className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 hover:border-blue-300 transition-all cursor-pointer flex items-center gap-4 group"
+            {/* Current Active Batch Feed or Empty Enrollment Banner */}
+            {hasEnrollments && activeCourse ? (
+              <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-card-clean space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-black text-[#0066FF] uppercase">Active Program</span>
+                    <h3 className="text-xl font-black text-slate-900 mt-0.5">{activeCourse.title}</h3>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('courses')}
+                    className="text-xs font-bold text-[#0066FF] hover:underline cursor-pointer"
                   >
-                    <div className="w-16 h-16 rounded-xl bg-slate-900 overflow-hidden relative shrink-0">
-                      <img src={vid.thumbnail} alt={vid.title} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <Play className="w-5 h-5 text-white fill-white" />
+                    View All Lectures
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {videos.slice(0, 2).map(vid => (
+                    <div
+                      key={vid.id}
+                      onClick={() => setSelectedVideoForPlayer(vid)}
+                      className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 hover:border-blue-300 transition-all cursor-pointer flex items-center gap-4 group"
+                    >
+                      <div className="w-16 h-16 rounded-xl bg-slate-900 overflow-hidden relative shrink-0">
+                        <img src={vid.thumbnail} alt={vid.title} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <Play className="w-5 h-5 text-white fill-white" />
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-[#0066FF] uppercase">{vid.subject}</span>
+                        <h4 className="text-xs font-bold text-slate-900 line-clamp-1 group-hover:text-[#0066FF] transition-colors">{vid.title}</h4>
+                        <span className="text-[10px] text-slate-400 font-medium">{vid.duration} • By {vid.instructor}</span>
                       </div>
                     </div>
-                    <div>
-                      <span className="text-[10px] font-bold text-[#0066FF] uppercase">{vid.subject}</span>
-                      <h4 className="text-xs font-bold text-slate-900 line-clamp-1 group-hover:text-[#0066FF] transition-colors">{vid.title}</h4>
-                      <span className="text-[10px] text-slate-400 font-medium">{vid.duration} • By {vid.instructor}</span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+            ) : (
+              <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-card-clean flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-blue-50 text-[#0066FF] flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">No Active Enrollment</span>
+                    <h4 className="text-base font-black text-slate-900 mt-0.5">You haven't enrolled in any batch yet</h4>
+                    <p className="text-xs text-slate-500 mt-1 max-w-md">
+                      Enroll in Classes 1–12, DCA Computer, or Spoken English batches to unlock live class access, chapter notes, and completion certificates.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigateTo('batches')}
+                  className="px-6 py-3 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-500/25 shrink-0 transition-all cursor-pointer"
+                >
+                  Explore All Batches
+                </button>
+              </div>
+            )}
+
+            {/* ═══════════ RECENT LEARNING & ACTIVITY HISTORY ═══════════ */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-card-clean space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-blue-50 text-[#0066FF]">
+                    <History className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-slate-900">My Learning History</h3>
+                    <p className="text-[11px] text-slate-500 font-medium">Recently watched lectures and reviewed study notes.</p>
+                  </div>
+                </div>
+                {historyItems.length > 0 && (
+                  <button
+                    onClick={() => {
+                      clearLearningHistory(currentStudent.id || currentStudent.email);
+                      setHistoryItems([]);
+                      showToast('Learning history cleared.', 'info');
+                    }}
+                    className="text-[11px] text-slate-400 hover:text-rose-600 font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Clear</span>
+                  </button>
+                )}
+              </div>
+
+              {historyItems.length === 0 ? (
+                <div className="py-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  <Sparkles className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                  <p className="text-xs text-slate-500 font-medium">No recent learning activity recorded yet.</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Watched video lectures and read notes will automatically appear here.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                  {historyItems.slice(0, 6).map(item => (
+                    <div
+                      key={item.id}
+                      className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:border-blue-300 transition-all flex items-center justify-between gap-3 group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                          item.type === 'video' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-[#0066FF]'
+                        }`}>
+                          {item.type === 'video' ? <Play className="w-4 h-4 fill-current" /> : <BookOpen className="w-4 h-4" />}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-[9px] font-black uppercase text-[#0066FF] tracking-wider block">
+                            {item.type === 'video' ? 'VIDEO LECTURE' : 'STUDY NOTE'} • {item.subject || item.targetClass || 'Curriculum'}
+                          </span>
+                          <h4 className="text-xs font-bold text-slate-900 truncate group-hover:text-[#0066FF] transition-colors">
+                            {item.title}
+                          </h4>
+                          <span className="text-[10px] text-slate-400">
+                            {new Date(item.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (item.type === 'video') {
+                            const foundVid = videos.find(v => v.id === item.itemId);
+                            if (foundVid) {
+                              setSelectedVideoForPlayer(foundVid);
+                            } else {
+                              setSelectedVideoForPlayer({
+                                id: item.itemId,
+                                title: item.title,
+                                subject: item.subject || 'Lecture',
+                                targetClass: item.targetClass || 'All Classes',
+                                duration: item.duration || '15 min',
+                                instructor: 'Director Aman Arora',
+                                thumbnail: '/logo.jpg',
+                                youtubeUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
+                                views: '120 views',
+                                dateAdded: '2026-09-01'
+                              });
+                            }
+                          } else {
+                            const foundMat = studyMaterials.find(m => m.id === item.itemId);
+                            if (foundMat) {
+                              setSelectedDocForPreview(foundMat);
+                            } else {
+                              setSelectedDocForPreview({
+                                id: item.itemId,
+                                title: item.title,
+                                category: 'pdf_notes',
+                                targetClass: item.targetClass || 'Class 10',
+                                subject: item.subject || 'Notes',
+                                chapter: 'Curriculum Unit',
+                                pages: item.pages || 5,
+                                downloadUrl: '/assets/sample_notes.pdf',
+                                isPremium: false,
+                                fileType: 'pdf',
+                                dateAdded: '2026-09-01',
+                                downloadsCount: 50,
+                                previewContent: `Official study material for ${item.title}.`
+                              });
+                            }
+                          }
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-blue-50 hover:border-blue-300 text-[#0066FF] text-[11px] font-bold shrink-0 transition-colors cursor-pointer"
+                      >
+                        Resume
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -531,24 +758,222 @@ export const StudentDashboard: React.FC = () => {
         {/* TAB 4: STUDY VAULT */}
         {activeTab === 'vault' && (
           <div className="space-y-6">
-            <h3 className="text-xl font-black text-slate-900">Enrolled Study Notes & PYQ Vault</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {studyMaterials.map(m => (
-                <div key={m.id} className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-card-clean flex items-center justify-between gap-4">
-                  <div>
-                    <span className="text-[10px] font-bold text-[#0066FF] uppercase">{m.targetClass} • {m.subject}</span>
-                    <h4 className="text-sm font-bold text-slate-900 mt-0.5">{m.title}</h4>
-                    <span className="text-xs text-slate-400 font-medium">{m.pages} Pages</span>
-                  </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-black text-slate-900">Study Notes & PYQ Vault</h3>
+                <p className="text-xs text-slate-500 font-medium">Read online or save to your phone for offline zero-data access.</p>
+              </div>
+
+              {/* Vault Filter Tabs */}
+              <div className="flex p-1 bg-slate-100 rounded-2xl border border-slate-200 text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVaultSubTab('my');
+                    setReadingOfflineDoc(null);
+                  }}
+                  className={`px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+                    vaultSubTab === 'my'
+                      ? 'bg-[#0066FF] text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  My Notes ({relevantStudyMaterials.length})
+                </button>
+                <button
+                  id="subtab-offline-vault"
+                  type="button"
+                  onClick={() => {
+                    setVaultSubTab('offline');
+                    setOfflineDocs(getOfflineDocs());
+                  }}
+                  className={`px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+                    vaultSubTab === 'offline'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Offline Saved ({offlineDocs.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVaultSubTab('all');
+                    setReadingOfflineDoc(null);
+                  }}
+                  className={`px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+                    vaultSubTab === 'all'
+                      ? 'bg-[#0066FF] text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  All Institute ({studyMaterials.length})
+                </button>
+              </div>
+            </div>
+
+            {/* Offline Reader View */}
+            {readingOfflineDoc ? (
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-card-clean space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <button
-                    onClick={() => setSelectedDocForPreview(m)}
-                    className="px-4 py-2 rounded-full bg-blue-50 text-[#0066FF] text-xs font-bold hover:bg-blue-100"
+                    type="button"
+                    onClick={() => setReadingOfflineDoc(null)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:underline cursor-pointer"
                   >
-                    Read Online
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back to Notes List</span>
+                  </button>
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
+                    Offline Zero-Data Reader
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase">
+                    {readingOfflineDoc.targetClass} • {readingOfflineDoc.subject || 'Curriculum'}
+                  </span>
+                  <h3 className="text-lg font-black text-slate-900 mt-0.5">{readingOfflineDoc.title}</h3>
+                  <span className="text-[11px] text-slate-400">Saved on {readingOfflineDoc.downloadedAt}</span>
+                </div>
+
+                <div className="p-4 sm:p-6 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 leading-relaxed font-sans whitespace-pre-line">
+                  {readingOfflineDoc.contentSnippet || 'Comprehensive theoretical study notes and formulas prepared by L.C.C. faculty.'}
+                </div>
+              </div>
+            ) : vaultSubTab === 'offline' ? (
+              /* Offline Docs List */
+              offlineDocs.length === 0 ? (
+                <div className="py-12 text-center bg-white rounded-3xl border border-dashed border-slate-200 p-6 space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                    <DownloadCloud className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-base font-black text-slate-900">Offline Vault is Empty</h4>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    Click "Save Offline" on any study notes to read without internet data on your phone.
+                  </p>
+                  <button
+                    onClick={() => setVaultSubTab('my')}
+                    className="px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs cursor-pointer"
+                  >
+                    Browse My Curriculum Notes
                   </button>
                 </div>
-              ))}
-            </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {offlineDocs.map(doc => (
+                    <div key={doc.id} className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-card-clean flex items-center justify-between gap-4">
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-black text-emerald-600 uppercase tracking-wider block">
+                          OFFLINE SAVED • {doc.targetClass}
+                        </span>
+                        <h4 className="text-sm font-bold text-slate-900 truncate mt-0.5">{doc.title}</h4>
+                        <span className="text-xs text-slate-400 font-medium">Saved: {doc.downloadedAt}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setReadingOfflineDoc(doc)}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs cursor-pointer"
+                        >
+                          Read Offline
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            deleteOfflineDoc(doc.id);
+                            setOfflineDocs(getOfflineDocs());
+                            showToast(`Removed "${doc.title}" from offline vault.`, 'info');
+                          }}
+                          className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Delete from offline storage"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              /* My Enrolled Notes or All Notes */
+              (() => {
+                const displayList = vaultSubTab === 'my' ? relevantStudyMaterials : studyMaterials;
+                if (displayList.length === 0) {
+                  return (
+                    <div className="py-12 text-center bg-white rounded-3xl border border-dashed border-slate-200 p-6 space-y-3">
+                      <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#0066FF] flex items-center justify-center mx-auto">
+                        <BookOpen className="w-6 h-6" />
+                      </div>
+                      <h4 className="text-base font-black text-slate-900">No Specific Notes Assigned Yet</h4>
+                      <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                        Your profile currently has target class <strong>"{currentStudent.targetClass || 'General'}"</strong>. Enroll in a batch or browse all institute notes below.
+                      </p>
+                      <button
+                        onClick={() => setVaultSubTab('all')}
+                        className="px-4 py-2 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-bold text-xs shadow-xs cursor-pointer"
+                      >
+                        View All Institute Notes ({studyMaterials.length})
+                      </button>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {displayList.map(m => {
+                      const isOffline = isDocOffline(m.id);
+                      return (
+                        <div key={m.id} className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-card-clean flex items-center justify-between gap-4">
+                          <div className="min-w-0">
+                            <span className="text-[10px] font-bold text-[#0066FF] uppercase">
+                              {m.targetClass} • {m.subject}
+                            </span>
+                            <h4 className="text-sm font-bold text-slate-900 mt-0.5 truncate">{m.title}</h4>
+                            <span className="text-xs text-slate-400 font-medium">{m.pages} Pages</span>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedDocForPreview(m)}
+                              className="px-3.5 py-1.5 rounded-full bg-blue-50 hover:bg-blue-100 text-[#0066FF] text-xs font-bold cursor-pointer"
+                            >
+                              Read Online
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isOffline}
+                              onClick={() => {
+                                saveOfflineDoc({
+                                  id: m.id,
+                                  title: m.title,
+                                  category: m.category,
+                                  targetClass: m.targetClass,
+                                  subject: m.subject,
+                                  fileUrl: m.downloadUrl || '#',
+                                  fileType: m.fileType || 'pdf',
+                                  contentSnippet: m.previewContent
+                                });
+                                setOfflineDocs(getOfflineDocs());
+                                showToast(`✅ "${m.title}" saved offline!`, 'success');
+                              }}
+                              className={`p-2 rounded-full cursor-pointer transition-colors ${
+                                isOffline
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                              }`}
+                              title={isOffline ? 'Already saved offline' : 'Save for offline reading'}
+                            >
+                              {isOffline ? <Check className="w-3.5 h-3.5" /> : <DownloadCloud className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()
+            )}
           </div>
         )}
 
@@ -560,46 +985,179 @@ export const StudentDashboard: React.FC = () => {
                 <h3 className="text-xl font-black text-slate-900">Verified Academic Completion Certificate</h3>
                 <p className="text-xs text-slate-500 font-medium">Official verified credential issued by Director Aman Arora.</p>
               </div>
-              <button
-                onClick={handlePrintCertificate}
-                className="px-5 py-2.5 rounded-full bg-[#0066FF] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm"
-              >
-                <Printer className="w-4 h-4" />
-                <span>Print Certificate</span>
-              </button>
+              {isCertificateUnlocked && (
+                <button
+                  onClick={handlePrintCertificate}
+                  className="px-5 py-2.5 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Print Official Certificate</span>
+                </button>
+              )}
             </div>
 
-            {/* Official Printable Certificate Canvas */}
-            <div className="bg-white rounded-3xl p-8 sm:p-14 border-8 border-double border-[#0066FF] shadow-2xl text-center space-y-6 relative max-w-3xl mx-auto">
-              <div className="flex items-center justify-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#0066FF] text-white flex items-center justify-center font-black text-xl shadow-md">
-                  LCC
+            {!isCertificateUnlocked ? (
+              /* 🔒 LOCKED CERTIFICATE STATE */
+              <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200/90 shadow-card-clean max-w-2xl mx-auto text-center space-y-6">
+                <div className="w-20 h-20 rounded-3xl bg-amber-50 border-2 border-amber-200 text-amber-500 flex items-center justify-center mx-auto shadow-md">
+                  <Lock className="w-10 h-10" />
                 </div>
+
+                <div className="space-y-2">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-amber-600 bg-amber-100 px-3 py-1 rounded-full">
+                    CERTIFICATE LOCKED
+                  </span>
+                  <h3 className="text-2xl font-black text-slate-900">
+                    100% Course Completion Required
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                    Official completion certificates signed by Director Aman Arora are awarded only upon enrolling in a batch and achieving 100% curriculum completion.
+                  </p>
+                </div>
+
+                {/* Requirements Progress Card */}
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-3">
+                  <span className="text-xs font-bold text-slate-700 block">Certificate Unlock Criteria:</span>
+
+                  <div className="flex items-center justify-between text-xs py-2 border-b border-slate-200">
+                    <span className="flex items-center gap-2">
+                      <GraduationCap className="w-4 h-4 text-[#0066FF]" />
+                      <span>Active Batch Enrollment:</span>
+                    </span>
+                    <span className={`font-black ${hasEnrollments ? 'text-emerald-600' : 'text-slate-400'}`}>
+                      {hasEnrollments ? `Enrolled (${enrolledCourseList.length} Courses)` : 'Not Enrolled'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs py-2 border-b border-slate-200">
+                    <span className="flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4 text-emerald-600" />
+                      <span>Curriculum Completion:</span>
+                    </span>
+                    <span className={`font-black ${overallCurriculumProgress >= 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                      {overallCurriculumProgress}% / 100%
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs py-2">
+                    <span className="flex items-center gap-2">
+                      <FileCheck className="w-4 h-4 text-purple-600" />
+                      <span>Chapter Mock Assessments:</span>
+                    </span>
+                    <span className={`font-black ${attemptedQuizCount > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                      {attemptedQuizCount > 0 ? `${attemptedQuizCount} Tests Cleared` : 'Pending (0 Tests)'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action CTA */}
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">LAKSHYA CAREER CLASSES</h2>
-                  <span className="text-xs text-slate-500 uppercase tracking-widest font-bold block">Premier Coaching & Computer Institute</span>
+                  {hasEnrollments ? (
+                    <button
+                      onClick={() => setActiveTab('courses')}
+                      className="px-6 py-3 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-500/25 transition-all cursor-pointer"
+                    >
+                      Resume Learning to Unlock Certificate
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => navigateTo('batches')}
+                      className="px-6 py-3 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-blue-500/25 transition-all cursor-pointer"
+                    >
+                      Enroll in a Batch to Start
+                    </button>
+                  )}
                 </div>
               </div>
+            ) : (
+              /* 🎓 REDESIGNED WORLD-CLASS VERIFIED CERTIFICATE */
+              <div className="bg-white rounded-3xl p-8 sm:p-14 border-8 border-double border-[#0066FF] ring-4 ring-amber-400/80 shadow-2xl text-center space-y-6 relative max-w-4xl mx-auto overflow-hidden">
+                {/* Background Watermark Seal */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
+                  <div className="w-96 h-96 rounded-full border-[20px] border-[#0066FF] flex items-center justify-center font-black text-8xl font-serif">
+                    LCC
+                  </div>
+                </div>
 
-              <div className="py-2">
-                <span className="text-xs text-slate-400 uppercase tracking-widest font-bold block">CERTIFICATE OF EXCELLENCE</span>
-                <h3 className="text-3xl font-serif font-black text-slate-900 mt-2 italic">{currentStudent.name}</h3>
-                <p className="text-xs text-slate-600 max-w-lg mx-auto mt-2 leading-relaxed">
-                  has successfully completed the comprehensive academic coaching program in <strong>{activeCourse.title}</strong> with distinction and outstanding performance.
-                </p>
-              </div>
+                {/* Institute Header */}
+                <div className="flex items-center justify-center gap-4 relative z-10">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0066FF] to-blue-800 text-white flex items-center justify-center font-black text-2xl shadow-md border-2 border-amber-400 shrink-0">
+                    LCC
+                  </div>
+                  <div>
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-serif">
+                      LAKSHYA CAREER CLASSES (L.C.C.)
+                    </h2>
+                    <span className="text-[11px] sm:text-xs text-amber-700 uppercase tracking-widest font-black block">
+                      Government Registered Premier Academic & Computer Institute
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium block">
+                      Main Campus: Palahipatti, Sindhora Road, Varanasi - 221206 (U.P.)
+                    </span>
+                  </div>
+                </div>
 
-              <div className="pt-8 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
-                <div className="text-left">
-                  <span className="font-mono text-[11px] block text-slate-400">Cert ID: LCC-2026-CERT-8842</span>
-                  <span className="font-bold">Verified Date: August 2026</span>
+                <div className="w-32 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto my-2" />
+
+                {/* Proclamation */}
+                <div className="py-2 space-y-2 relative z-10">
+                  <span className="text-xs font-black uppercase tracking-[0.25em] text-slate-500 block">
+                    CERTIFICATE OF MERIT & CURRICULUM MASTERY
+                  </span>
+                  <p className="text-xs text-slate-500 italic">This is proudly awarded to</p>
+                  <h3 className="text-3xl sm:text-4xl font-serif font-black text-slate-900 italic tracking-tight underline decoration-amber-400/60 decoration-2 underline-offset-8">
+                    {currentStudent.name}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto pt-4 leading-relaxed font-medium">
+                    for satisfactorily attending all academic sessions, completing 100% of the prescribed coursework, and demonstrating outstanding excellence in
+                  </p>
+                  <div className="inline-block px-5 py-2 rounded-2xl bg-blue-50 border border-blue-200 text-[#0066FF] font-black text-sm sm:text-base tracking-wide shadow-xs">
+                    {certifiedCourse?.title || 'Academic Coaching Program'}
+                  </div>
+                  <div className="pt-1">
+                    <span className="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
+                      Grade: A+ Distinction (100% Completed)
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="font-serif italic font-bold text-base text-slate-900 block">Aman Arora</span>
-                  <span className="font-bold text-[11px] text-slate-500">Director, Learning Coaching Center</span>
+
+                {/* Signatures & Live Verification Bar */}
+                <div className="pt-8 border-t-2 border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-slate-600 relative z-10">
+                  <div className="text-left space-y-1">
+                    <span className="font-mono text-[11px] block font-bold text-slate-500">
+                      Cert ID: LCC-CERT-2026-{(certifiedCourse?.id || '8842').toUpperCase().slice(-5)}-{currentStudent.id?.slice(-4) || '9921'}
+                    </span>
+                    <span className="text-[11px] text-slate-400 block font-medium">
+                      Date of Issue: {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 font-bold">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>Tamper-Proof Digital Credential</span>
+                    </span>
+                  </div>
+
+                  {/* Verification QR Code */}
+                  <div className="flex flex-col items-center">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(
+                        `https://lcc-coaching.edu/verify?cert=LCC-CERT-2026-${(certifiedCourse?.id || '8842').toUpperCase()}&student=${encodeURIComponent(currentStudent.name)}`
+                      )}`}
+                      alt="Verification QR Code"
+                      className="w-16 h-16 rounded-xl border border-slate-300 p-1 bg-white shadow-xs"
+                    />
+                    <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1">Scan to Verify</span>
+                  </div>
+
+                  <div className="text-right space-y-0.5">
+                    <span className="font-serif italic font-bold text-lg text-slate-900 block tracking-tight">
+                      Aman Arora
+                    </span>
+                    <span className="font-bold text-[11px] text-slate-700 block">Director & Head Faculty</span>
+                    <span className="text-[10px] text-slate-400 block">Learning Coaching Center (L.C.C.)</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 

@@ -127,6 +127,7 @@ export const StudentGoalModal: React.FC<StudentGoalModalProps> = ({ isOpen, onCl
                 return (
                   <button
                     key={c.id}
+                    id={`goal-class-${c.id.replace(/\s+/g, '-')}`}
                     type="button"
                     onClick={() => handleClassSelect(c.id)}
                     className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
@@ -221,6 +222,7 @@ export const StudentGoalModal: React.FC<StudentGoalModalProps> = ({ isOpen, onCl
         {/* Footer Action */}
         <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800">
           <button
+            id="goal-save-btn"
             type="button"
             onClick={handleSave}
             style={{ backgroundColor: '#0066FF', color: '#ffffff' }}

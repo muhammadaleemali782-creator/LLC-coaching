@@ -350,5 +350,97 @@
       "submittedAt": "",
       "createdAt": "2026-10-05T12:48:52.740Z"
     }
+  ],
+  "studyMaterials": [
+    {
+      "id": "mat-10-math-real",
+      "title": "Class 10 Mathematics: Real Numbers & Polynomials Formula Bank",
+      "category": "formulas",
+      "targetClass": "Class 10",
+      "subject": "Mathematics",
+      "chapter": "Real Numbers & Polynomials",
+      "pages": 14,
+      "downloadUrl": "/assets/sample_notes.pdf",
+      "isPremium": false,
+      "fileType": "pdf",
+      "dateAdded": "2026-09-25",
+      "downloadsCount": 342,
+      "previewContent": "Fundamental Theorem of Arithmetic, Real Numbers & Polynomials Formula Bank for CBSE Class 10."
+    },
+    {
+      "id": "mat-10-sci-chem",
+      "title": "Class 10 Science: Chemical Reactions & Electricity Concept Master",
+      "category": "pdf_notes",
+      "targetClass": "Class 10",
+      "subject": "Science",
+      "chapter": "Chemical Reactions & Electricity",
+      "pages": 18,
+      "downloadUrl": "/assets/sample_notes.pdf",
+      "isPremium": false,
+      "fileType": "pdf",
+      "dateAdded": "2026-09-24",
+      "downloadsCount": 420,
+      "previewContent": "Chemical Reactions, Balancing Equations, Ohm's Law and Circuit Analysis for Class 10."
+    },
+    {
+      "id": "mat-9-math-geom",
+      "title": "Class 9 Mathematics: Number Systems, Lines & Angles Core Theorems",
+      "category": "pdf_notes",
+      "targetClass": "Class 9",
+      "subject": "Mathematics",
+      "chapter": "Number Systems & Geometry",
+      "pages": 12,
+      "downloadUrl": "/assets/sample_notes.pdf",
+      "isPremium": false,
+      "fileType": "pdf",
+      "dateAdded": "2026-09-23",
+      "downloadsCount": 215,
+      "previewContent": "Irrational Numbers, Decimal Expansions, Parallel Lines & Transversals for Class 9."
+    },
+    {
+      "id": "mat-12-phys-electro",
+      "title": "Class 12 Physics: Electrostatics & Magnetism High-Score Blueprint",
+      "category": "formulas",
+      "targetClass": "Class 12",
+      "subject": "Physics",
+      "chapter": "Electrostatics & Current",
+      "pages": 22,
+      "downloadUrl": "/assets/sample_notes.pdf",
+      "isPremium": true,
+      "fileType": "pdf",
+      "dateAdded": "2026-09-22",
+      "downloadsCount": 290,
+      "previewContent": "Coulomb's Law, Gauss Theorem, Capacitance and Biot-Savart Law for Class 12."
+    },
+    {
+      "id": "mat-dca-fund",
+      "title": "DCA Computer: Hardware, Windows & MS Office Automation Handbook",
+      "category": "pdf_notes",
+      "targetClass": "Computer / DCA",
+      "subject": "Computer Science",
+      "chapter": "Computer Fundamentals & MS Office",
+      "pages": 25,
+      "downloadUrl": "/assets/sample_notes.pdf",
+      "isPremium": false,
+      "fileType": "pdf",
+      "dateAdded": "2026-09-21",
+      "downloadsCount": 512,
+      "previewContent": "Computer Architecture, Windows OS, Word, Excel Formulas and Tally Prime Basics."
+    },
+    {
+      "id": "mat-good-manners",
+      "title": "Good Manners and Social Etiquette",
+      "category": "pdf_notes",
+      "targetClass": "Spoken English",
+      "subject": "English",
+      "chapter": "Daily Life Etiquette",
+      "pages": 8,
+      "downloadUrl": "/assets/sample_notes.pdf",
+      "isPremium": false,
+      "fileType": "pdf",
+      "dateAdded": "2026-09-20",
+      "downloadsCount": 610,
+      "previewContent": "Essential polite phrases, formal greetings and conversational confidence."
+    }
   ]
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
-import { MessageSquare, X, Send, CheckCircle2, Check, Sparkles, User, GraduationCap } from 'lucide-react';
+import { MessageSquare, X, Send, CheckCircle2, Check, Sparkles, User, GraduationCap, Calculator } from 'lucide-react';
+import { solveAcademicQuery } from '../../utils/mathSolverAgent';
 
 interface ChatMessage {
   id: string;
@@ -13,16 +14,18 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'msg-welcome-1',
     sender: 'counselor',
-    text: 'Namaste! 🙏 Welcome to L.C.C. Live Student Helpdesk & Counseling. Aap yahan admission, fees, batch timings, notes ya kisi bhi doubt ke bare me pooch sakte hain. How can we help you today?',
+    text: 'Namaste! 🙏 Welcome to L.C.C. AI Math Tutor & Live Student Helpdesk (100% Free). Aap yahan koi bhi math problem (e.g. "solve 2x + 5 = 25", "15% of 1200", formulas) solve karwa sakte hain, ya admission, fees, batch timings ke bare me pooch sakte hain. How can I help you today?',
     time: 'Just now'
   }
 ];
 
 const QUICK_CHIPS = [
   '🎯 Admission 2026 & Fee Structure',
-  '🕒 Batch Timings (Morning & Evening)',
-  '💻 Computer DCA & Tally Prime',
-  '❓ Doubt Clearing with Aman Sir'
+  '🧮 Solve: 2x + 5 = 25',
+  '💡 15% of 1200',
+  '🕒 Batch Timings & Location',
+  '💻 Computer DCA & Tally',
+  '📐 Area of Circle Radius 7'
 ];
 
 export const LiveSupportChatModal: React.FC = () => {
@@ -51,23 +54,6 @@ export const LiveSupportChatModal: React.FC = () => {
 
   if (!isLiveSupportChatOpen) return null;
 
-  const getSmartReply = (userMsg: string): string => {
-    const q = userMsg.toLowerCase();
-    if (q.includes('fee') || q.includes('admission') || q.includes('admission 2026') || q.includes('enroll') || q.includes('paisa')) {
-      return 'Admissions for Session 2026-27 are currently open at L.C.C.! Classes 1–12 monthly tuition starts from ₹499/mo, and DCA Computer Diploma is ₹4,999. Sunday scholarship test me appear hokar aap up to 50% fee concession bhi le sakte hain. Aap direct campus visit kar sakte hain (Palahipatti, Sindhora Road).';
-    }
-    if (q.includes('time') || q.includes('timing') || q.includes('schedule') || q.includes('kab')) {
-      return 'L.C.C. campus batches run 6 days a week (Mon–Sat): Morning batches: 7:00 AM – 11:30 AM | Evening batches: 3:00 PM – 8:00 PM. Sundays ko Director Aman Arora sir ke special 1:1 Doubt Clinics conduct hote hain.';
-    }
-    if (q.includes('computer') || q.includes('dca') || q.includes('adca') || q.includes('tally')) {
-      return 'Humara Computer Department 1:1 dedicated PC provide karta hai with ISO Certified DCA, ADCA & Tally Prime with GST. Daily practical hands-on labs conduct hote hain.';
-    }
-    if (q.includes('doubt') || q.includes('aman') || q.includes('sir') || q.includes('question') || q.includes('math') || q.includes('science')) {
-      return 'Aapka doubt Academic Counseling Desk pe record ho gaya hai. Director Aman Arora and senior faculty members daily live doubt sessions conduct karte hain. Aap campus me bhi direct Aman Sir se mil sakte hain.';
-    }
-    return 'Thank you for reaching out to L.C.C. Support! Aapki query Counseling Team ne note kar li hai. Agar aapka question solve ho gaya ho to upar "Mark as Resolved" pe tap karein.';
-  };
-
   const handleSendMessage = (textToSend?: string) => {
     const text = (textToSend || inputText).trim();
     if (!text || isResolved) return;
@@ -84,16 +70,17 @@ export const LiveSupportChatModal: React.FC = () => {
     setIsTyping(true);
 
     setTimeout(() => {
-      const replyText = getSmartReply(text);
+      // 100% Free Client-Side AI Math & Counseling Agent
+      const agentRes = solveAcademicQuery(text);
       const counselorMsg: ChatMessage = {
         id: `msg-reply-${Date.now()}`,
         sender: 'counselor',
-        text: replyText,
+        text: agentRes.reply,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, counselorMsg]);
       setIsTyping(false);
-    }, 600);
+    }, 500);
   };
 
   const handleResolve = () => {
@@ -146,11 +133,11 @@ export const LiveSupportChatModal: React.FC = () => {
             </div>
             <div className="min-w-0">
               <h3 className="text-xs sm:text-sm font-black text-slate-900 leading-tight truncate">
-                L.C.C. Student Helpdesk
+                L.C.C. AI Math & Student Helpdesk
               </h3>
               <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Director & Counseling Active
+                AI Agent Active • 100% Free
               </p>
             </div>
           </div>
@@ -202,7 +189,7 @@ export const LiveSupportChatModal: React.FC = () => {
                 className={`flex flex-col ${isStudent ? 'items-end' : 'items-start'}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed shadow-xs ${
+                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed shadow-xs whitespace-pre-line ${
                     isStudent
                       ? 'bg-[#0066FF] text-white rounded-br-xs font-medium'
                       : 'bg-white text-slate-800 rounded-bl-xs border border-slate-200 font-normal'

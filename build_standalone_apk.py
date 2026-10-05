@@ -486,3 +486,12 @@ size_mb = os.path.getsize(final_apk) / (1024 * 1024)
 print("\nSUCCESS! Standalone APK generated at:")
 print(final_apk)
 print(f"File size: {size_mb:.2f} MB")
+
+# Copy to user Downloads directory
+downloads_apk = r"C:\Users\suppo\Downloads\LCC-Coaching-v1.0.apk"
+try:
+    shutil.copy2(final_apk, downloads_apk)
+    print(f"Successfully copied APK to user Downloads: {downloads_apk}")
+except Exception as e:
+    print(f"Notice: Could not copy to Downloads: {e}")
+

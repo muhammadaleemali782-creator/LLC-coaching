@@ -99,10 +99,24 @@ const MainContent: React.FC = () => {
     isDrawerOpen,
     setIsDrawerOpen,
     isOfflineVaultOpen,
-    setIsOfflineVaultOpen
+    setIsOfflineVaultOpen,
+    setIsLiveSupportChatOpen,
+    setSelectedCourseForPayment,
+    setSelectedDocForPreview,
+    courses
   } = useApp();
 
   const isAuthenticated = Boolean(currentStudent || currentStaff || isAdminAuthenticated);
+
+  // Expose automation helpers
+  React.useEffect(() => {
+    (window as any).__lcc_navigate = navigateTo;
+    (window as any).__lcc_open_support = () => setIsLiveSupportChatOpen(true);
+    (window as any).__lcc_open_payment = (course?: any) => {
+      setSelectedCourseForPayment(course || courses[0]);
+    };
+    (window as any).__lcc_close_doc = () => setSelectedDocForPreview(null);
+  }, [navigateTo, setIsLiveSupportChatOpen, setSelectedCourseForPayment, setSelectedDocForPreview, courses]);
 
   // On Mobile App Open (< 1024px): Immediately prompt Login / Register if user is not authenticated
   React.useEffect(() => {
