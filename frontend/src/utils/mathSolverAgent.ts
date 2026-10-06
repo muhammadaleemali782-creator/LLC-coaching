@@ -473,7 +473,37 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
     }
   }
 
-  // D. Pythagoras Theorem
+  // D. Square Root / Cube Root (e.g., "sqrt 144", "square root of 144", "cube root of 125")
+  const sqrtMatch = q.match(/(?:sqrt|square\s*root(?:\s*of)?|vargmool)\s*[:=]?\s*(\d+(?:\.\d+)?)/i) ||
+                    q.match(/(\d+(?:\.\d+)?)\s*ka\s*(?:sqrt|square\s*root|vargmool)/i);
+  if (sqrtMatch) {
+    const val = parseFloat(sqrtMatch[1]);
+    const ans = Math.sqrt(val);
+    return {
+      type: 'math',
+      reply: `✨ [L.C.C. AI Study Assistant - Square Root]\n\n√${val} = ${ans}\n\n✅ Answer: The square root of ${val} is ${ans} (because ${ans} × ${ans} = ${val}).`
+    };
+  }
+
+  // E. Trigonometry Ratios (sin 30, cos 60, tan 45, etc.)
+  const trigMatch = q.match(/\b(sin|cos|tan|cot|sec|cosec)\s*(0|30|45|60|90|180)\b/i);
+  if (trigMatch) {
+    const fn = trigMatch[1].toLowerCase();
+    const deg = trigMatch[2];
+    const table: Record<string, Record<string, string>> = {
+      sin: { '0': '0', '30': '1/2 (0.5)', '45': '1/√2 (0.7071)', '60': '√3/2 (0.8660)', '90': '1' },
+      cos: { '0': '1', '30': '√3/2 (0.8660)', '45': '1/√2 (0.7071)', '60': '1/2 (0.5)', '90': '0' },
+      tan: { '0': '0', '30': '1/√3 (0.5774)', '45': '1', '60': '√3 (1.732)', '90': 'Undefined (∞)' }
+    };
+    if (table[fn] && table[fn][deg]) {
+      return {
+        type: 'math',
+        reply: `✨ [L.C.C. AI Study Assistant - Trigonometric Ratio]\n\n📐 ${fn.toUpperCase()}(${deg}°) = ${table[fn][deg]}\n\nTrigonometry Standard Table (0°, 30°, 45°, 60°, 90°) L.C.C. Board notes se verified hai.`
+      };
+    }
+  }
+
+  // F. Pythagoras Theorem
   if (q.includes('pythagoras') || (q.includes('hypotenuse') && q.includes('triangle'))) {
     return {
       type: 'math',
@@ -481,19 +511,112 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
     };
   }
 
-  // E. Arithmetic Expression Evaluation (e.g. "4+5", "25*4", "100/5")
-  const cleanArithmetic = q.replace(/^(?:solve|calculate|what is|batao|karo|result of)\s+/i, '').trim();
-  if (/^[\d\s\+\-\*\/\(\)\.\^]+$/.test(cleanArithmetic) && /[\+\-\*\/]/.test(cleanArithmetic)) {
-    try {
-      const sanitized = cleanArithmetic.replace(/\^/g, '**');
-      const evaluated = Function(`'use strict'; return (${sanitized});`)();
-      if (typeof evaluated === 'number' && !isNaN(evaluated) && isFinite(evaluated)) {
-        return {
-          type: 'math',
-          reply: `✨ [L.C.C. AI Study Assistant - Calculation]\n\nExpression: ${cleanArithmetic}\n\n✅ Result: ${evaluated}`
-        };
+  // G. Comprehensive Arithmetic & BODMAS Evaluator
+  // Supports Unicode multiplication (×), division (÷), minus (−), powers (^), large BigInts, and natural language surrounding
+  const normalizedArithmetic = raw
+    .replace(/[\u00d7\u2715\u2716\u00b7]/g, '*')
+    .replace(/(\d)\s*[xX]\s*(\d)/g, '$1 * $2')
+    .replace(/[\u00f7]/g, '/')
+    .replace(/[\u2212\u2013\u2014]/g, '-')
+    .replace(/\^/g, '**');
+
+  const mathExprMatch = normalizedArithmetic.match(/[\d\(][\d\s\+\-\*\/\(\)\.\*\*]{1,}[\d\)]/);
+  if (mathExprMatch && /[\+\-\*\/]/.test(mathExprMatch[0])) {
+    const expr = mathExprMatch[0].trim();
+    const cleanExpr = expr.replace(/\s+/g, '');
+    const isIntOnly = !cleanExpr.includes('.') && !cleanExpr.includes('/') && !cleanExpr.includes('**');
+    let answerStr = '';
+
+    if (isIntOnly) {
+      try {
+        const bigIntExpr = cleanExpr.replace(/(\d+)/g, '$1n');
+        const bigRes = new Function(`'use strict'; return (${bigIntExpr});`)();
+        answerStr = bigRes.toString();
+      } catch (e) {}
+    }
+
+    if (!answerStr) {
+      try {
+        const numRes = new Function(`'use strict'; return (${cleanExpr});`)();
+        if (typeof numRes === 'number' && !isNaN(numRes) && isFinite(numRes)) {
+          answerStr = Number.isInteger(numRes) ? numRes.toString() : numRes.toFixed(4).replace(/\.?0+$/, '');
+        }
+      } catch (e) {}
+    }
+
+    if (answerStr) {
+      const formatCommas = (s: string) => {
+        const parts = s.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        return parts.join('.');
+      };
+
+      const displayExpr = cleanExpr
+        .replace(/\*\*/g, ' ^ ')
+        .replace(/\*/g, ' × ')
+        .replace(/\//g, ' ÷ ')
+        .replace(/\+/g, ' + ')
+        .replace(/\-/g, ' - ');
+
+      const formattedAns = formatCommas(answerStr);
+
+      // Build step-by-step BODMAS explanation
+      const steps: string[] = [];
+      steps.push('📐 Niyam: BODMAS (Bracket, Orders/Powers, Division, Multiplication, Addition, Subtraction)');
+
+      // If expression has multiplication
+      const multMatches = [...cleanExpr.matchAll(/(\d+)\*(\d+)/g)];
+      if (multMatches.length > 0 && (cleanExpr.includes('+') || cleanExpr.includes('-') || cleanExpr.includes('/'))) {
+        steps.push('\nStep 1 (Multiplication / Guna pehle hal karein):');
+        for (const m of multMatches) {
+          try {
+            const prod = (BigInt(m[1]) * BigInt(m[2])).toString();
+            steps.push(`• ${formatCommas(m[1])} × ${formatCommas(m[2])} = ${formatCommas(prod)}`);
+          } catch (e) {}
+        }
       }
-    } catch (e) {}
+
+      // If expression has division
+      const divMatches = [...cleanExpr.matchAll(/(\d+)\/(\d+)/g)];
+      if (divMatches.length > 0 && (cleanExpr.includes('+') || cleanExpr.includes('-') || cleanExpr.includes('*'))) {
+        steps.push('\nStep (Division / Bhaag pehle hal karein):');
+        for (const d of divMatches) {
+          try {
+            const quot = (parseFloat(d[1]) / parseFloat(d[2])).toFixed(4).replace(/\.?0+$/, '');
+            steps.push(`• ${formatCommas(d[1])} ÷ ${formatCommas(d[2])} = ${formatCommas(quot)}`);
+          } catch (e) {}
+        }
+      }
+
+      if (cleanExpr.includes('+') || cleanExpr.includes('-')) {
+        steps.push('\nStep 2 (Addition & Subtraction / Jod aur Ghatana):');
+        steps.push('• Sabhi sankhyaon ko kramanusar jod aur ghata lene par:');
+      }
+
+      return {
+        type: 'math',
+        reply: [
+          `✨ [L.C.C. AI Study Assistant - Step-by-Step Math Solution]`,
+          ``,
+          `🔢 Diya gaya Sawal (Given Expression):`,
+          `${displayExpr}`,
+          ``,
+          `📝 Step-by-Step Hal (Explanation):`,
+          steps.join('\n'),
+          ``,
+          `✅ Final Answer (Antim Uttar):`,
+          `👉 ${formattedAns} (${answerStr})`
+        ].join('\n')
+      };
+    }
+  }
+
+  // H. General Math Question Guidance
+  if (q.includes('math') || q.includes('ganit') || q.includes('hisab') || q.includes('formula') || q.includes('bodmas') || q.includes('calculation')) {
+    return {
+      type: 'math',
+      reply: `✨ [L.C.C. AI Study Assistant - Mathematics]\n\n📐 Math me aap koi bhi calculation ya sawal pooch sakte hain:\n\n1. Arithmetic & BODMAS: (jaise 23833827272+3838-272727272×733873)\n2. Equations: (jaise 2x + 5 = 25 ya x² - 5x + 6 = 0)\n3. Trigonometry: (jaise sin 30, cos 60, tan 45)\n4. Percentages: (jaise 15% of 1200)\n5. Square Roots & Powers: (jaise sqrt 144, 25^2)\n\nApna sawal likhiye, hum turant step-by-step hal karenge!`
+    };
   }
 
   // ══════════════════════════════════════════════
