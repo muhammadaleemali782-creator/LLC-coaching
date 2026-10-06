@@ -35,7 +35,24 @@ export const StudyMaterialSection: React.FC = () => {
 
   const classFilters = ['all', 'Class 8', 'Class 9', 'Class 10', 'Class 12', 'Computer / DCA', 'English Speaking'];
 
-  const filteredMaterials = studyMaterials.filter(mat => {
+  const uniqueMaterials = React.useMemo(() => {
+    const seenIds = new Set<string>();
+    const seenTitles = new Set<string>();
+    const result: typeof studyMaterials = [];
+    for (const mat of studyMaterials) {
+      if (!mat) continue;
+      const cleanId = (mat.id || '').trim();
+      const normTitle = (mat.title || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      if (!normTitle) continue;
+      if ((cleanId && seenIds.has(cleanId)) || seenTitles.has(normTitle)) continue;
+      if (cleanId) seenIds.add(cleanId);
+      seenTitles.add(normTitle);
+      result.push(mat);
+    }
+    return result;
+  }, [studyMaterials]);
+
+  const filteredMaterials = uniqueMaterials.filter(mat => {
     if (!mat) return false;
     const matchesCat = selectedCategory === 'all' || mat.category === selectedCategory;
     const matchesClass = selectedClass === 'all' || (mat.targetClass || '').toLowerCase().includes(selectedClass.toLowerCase());

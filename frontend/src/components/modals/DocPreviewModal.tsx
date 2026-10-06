@@ -174,6 +174,7 @@ export const DocPreviewModal: React.FC = () => {
             <div className="flex items-center bg-slate-200/90 dark:bg-slate-800 p-0.5 rounded-xl text-xs font-bold shrink-0">
               <button
                 type="button"
+                id="tab-digital-book"
                 onClick={() => setActiveTab('notes')}
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
                   activeTab === 'notes'
@@ -188,6 +189,7 @@ export const DocPreviewModal: React.FC = () => {
               {pdfCanvasUrl && (
                 <button
                   type="button"
+                  id="tab-canvas-view"
                   onClick={() => setActiveTab('pdf')}
                   className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
                     activeTab === 'pdf'

@@ -327,15 +327,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {}
   };
 
+  const deduplicateStudyMaterials = (list: StudyMaterial[]): StudyMaterial[] => {
+    const seenIds = new Set<string>();
+    const seenTitles = new Set<string>();
+    const result: StudyMaterial[] = [];
+    for (const item of list) {
+      if (!item) continue;
+      const cleanId = (item.id || '').trim();
+      const normTitle = (item.title || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      if (!normTitle) continue;
+      if ((cleanId && seenIds.has(cleanId)) || seenTitles.has(normTitle)) {
+        continue;
+      }
+      if (cleanId) seenIds.add(cleanId);
+      seenTitles.add(normTitle);
+      result.push(item);
+    }
+    return result;
+  };
+
   const [courses, setCourses] = useState<Course[]>(() => loadSaved('lcc_courses', INITIAL_COURSES));
   const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(() => {
     const fakeIds = ['mat-dca-fund', 'mat-12-phys-electro', 'mat-9-math-geom', 'mat-10-sci-chem', 'mat-10-math-real'];
     const saved = loadSaved<StudyMaterial[]>('lcc_study_materials', INITIAL_STUDY_MATERIALS);
     const valid = Array.isArray(saved) && saved.length > 0 ? saved : INITIAL_STUDY_MATERIALS;
     const cleaned = valid.filter(m => !fakeIds.includes(m.id));
-    const finalMaterials = cleaned.length > 0 ? cleaned : INITIAL_STUDY_MATERIALS;
-    localStorage.setItem('lcc_study_materials', JSON.stringify(finalMaterials));
-    return finalMaterials;
+    const deduped = deduplicateStudyMaterials(cleaned.length > 0 ? cleaned : INITIAL_STUDY_MATERIALS);
+    localStorage.setItem('lcc_study_materials', JSON.stringify(deduped));
+    return deduped;
   });
   const [syllabuses, setSyllabuses] = useState<SyllabusItem[]>(() => loadSaved('lcc_syllabus', INITIAL_SYLLABUS));
   const [notices, setNotices] = useState<Notice[]>(() => loadSaved('lcc_notices', INITIAL_NOTICES));
@@ -539,13 +558,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
           } catch (e) {}
 
-          const baseList = cloudPdfs.length > 0 ? cloudPdfs : (localMaterials.length > 0 ? localMaterials : INITIAL_STUDY_MATERIALS);
-          const merged = [...baseList];
-          localMaterials.forEach(loc => {
-            if (!merged.some(m => m.id === loc.id)) {
-              merged.push(loc);
-            }
-          });
+          const allCandidates = [...cloudPdfs, ...localMaterials, ...INITIAL_STUDY_MATERIALS];
+          const merged = deduplicateStudyMaterials(allCandidates.filter(m => !fakeIds.includes(m.id)));
           setStudyMaterials(merged);
           saveItem('lcc_study_materials', merged);
         }

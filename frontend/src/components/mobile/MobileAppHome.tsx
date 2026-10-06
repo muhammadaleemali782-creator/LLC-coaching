@@ -200,8 +200,26 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
   });
   const displayPersonalizedCourses = matchedCourses.length > 0 ? matchedCourses.slice(0, 4) : courses.slice(0, 4);
 
+  // Guaranteed deduplicated Study Materials (prevent any accidental duplicate cards)
+  const uniqueStudyMaterials = React.useMemo(() => {
+    const seenIds = new Set<string>();
+    const seenTitles = new Set<string>();
+    const result: any[] = [];
+    for (const m of studyMaterials) {
+      if (!m) continue;
+      const cleanId = (m.id || '').trim();
+      const normTitle = (m.title || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      if (!normTitle) continue;
+      if ((cleanId && seenIds.has(cleanId)) || seenTitles.has(normTitle)) continue;
+      if (cleanId) seenIds.add(cleanId);
+      seenTitles.add(normTitle);
+      result.push(m);
+    }
+    return result;
+  }, [studyMaterials]);
+
   // Personalized Study Materials matching survey class & subjects
-  const matchedMaterials = studyMaterials.filter(m => {
+  const matchedMaterials = uniqueStudyMaterials.filter(m => {
     const mClass = (m.targetClass || '').toLowerCase();
     const mSubj = (m.subject || '').toLowerCase();
     const gClass = studentGoal.toLowerCase();
@@ -210,7 +228,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
     const matchSubj = studentSubjects.some(s => mSubj.includes(s.toLowerCase()) || s.toLowerCase().includes(mSubj));
     return matchClass || matchSubj;
   });
-  const displayPersonalizedNotes = matchedMaterials.length > 0 ? matchedMaterials.slice(0, 4) : studyMaterials.slice(0, 4);
+  const displayPersonalizedNotes = matchedMaterials.length > 0 ? matchedMaterials.slice(0, 4) : uniqueStudyMaterials.slice(0, 4);
 
   // Offline Download Handler
   const handleSaveOffline = (mat: any) => {
