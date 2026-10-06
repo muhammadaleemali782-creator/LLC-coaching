@@ -1,18 +1,51 @@
 // 100% Free Client-Side All-Subject Academic & Helpdesk AI Agent for L.C.C. Live Chat
 // Runs 100% on client-side JavaScript without API keys, zero token fees, and zero latency.
 // Fully supports English, Hinglish, and Hindi for:
-// 1. English (Verbs, Spoken English, Grammar, Tenses, Vocabulary)
-// 2. Social Studies / SST (History, Civics, Samvidhan, Geography, Economics)
-// 3. Computer & DCA / Tally / IT (Hardware, Software, Internet, Excel, Shortcuts)
-// 4. Science (Physics, Chemistry, Biology)
-// 5. Mathematics (Formulas, Equations, Percentages, Calculations)
-// 6. Institute Faculty, Admissions & Fees
+// 1. Spoken English (Daily Conversations, Translations, Situational Speaking, Hesitation Removal)
+// 2. English Grammar (Verbs, Tenses, Active/Passive Voice, Direct/Indirect, Modals, Prepositions)
+// 3. Mathematics (BODMAS Arithmetic, Big Numbers, Tables, LCM/HCF, Algebra, Geometry, Trigonometry, Commercial Math)
+// 4. Social Studies / SST (Constitution/Samvidhan, History, Civics, Geography)
+// 5. Computer & DCA / IT (Hardware, Software, Internet, Excel, Shortcuts)
+// 6. Science (Physics, Chemistry, Biology)
+// 7. Institute Faculty, Admissions & Fees
 
 export interface AgentResponse {
   type: 'academic' | 'math' | 'counseling' | 'general';
   reply: string;
 }
 
+// ─────────────────────────────────────────────────────────
+// HELPER FUNCTIONS
+// ─────────────────────────────────────────────────────────
+const formatCommas = (s: string | number | bigint): string => {
+  const parts = s.toString().split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return parts.join('.');
+};
+
+const gcdBigInt = (a: bigint, b: bigint): bigint => {
+  return b === 0n ? a : gcdBigInt(b, a % b);
+};
+
+const lcmBigInt = (a: bigint, b: bigint): bigint => {
+  if (a === 0n || b === 0n) return 0n;
+  const g = gcdBigInt(a, b);
+  return (a * b) / (g < 0n ? -g : g);
+};
+
+const isPrime = (n: number): boolean => {
+  if (n <= 1) return false;
+  if (n <= 3) return true;
+  if (n % 2 === 0 || n % 3 === 0) return false;
+  for (let i = 5; i * i <= n; i += 6) {
+    if (n % i === 0 || n % (i + 2) === 0) return false;
+  }
+  return true;
+};
+
+// ─────────────────────────────────────────────────────────
+// MAIN ACADEMIC QUERY SOLVER
+// ─────────────────────────────────────────────────────────
 export const solveAcademicQuery = (query: string): AgentResponse => {
   const raw = query.trim();
   const q = raw.toLowerCase();
@@ -32,7 +65,7 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
   ) {
     return {
       type: 'general',
-      reply: `✨ [L.C.C. AI Study Assistant]\n\nNamaste! 🙏 Kya problem hai aapko? Hamein batayein — English, SST, Computer, Science, Math ya Admission, hum turant hal karenge!`
+      reply: `✨ [L.C.C. AI Study Assistant]\n\nNamaste! 🙏 Kya problem hai aapko? Hamein batayein — Spoken English, Grammar, Mathematics, Science, Computer ya Admission, hum turant step-by-step hal karenge!`
     };
   }
 
@@ -86,329 +119,65 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
   }
 
   // ══════════════════════════════════════════════
-  // 3. ENGLISH GRAMMAR, SPOKEN ENGLISH & VERBS
+  // 3. MATHEMATICS: DYNAMIC ENGINES
   // ══════════════════════════════════════════════
 
-  // A. Verbs & Kriya (Definition, Types, Examples)
-  if (
-    q.includes('verb') ||
-    q.includes('verbs') ||
-    q.includes('kriya') ||
-    q.includes('helping verb') ||
-    q.includes('modal verb') ||
-    q.includes('main verb')
-  ) {
-    // Specific irregular verb past tense lookups
-    const verbMap: Record<string, { v1: string; v2: string; v3: string; meaning: string }> = {
-      'go': { v1: 'Go', v2: 'Went', v3: 'Gone', meaning: 'जाना' },
-      'eat': { v1: 'Eat', v2: 'Ate', v3: 'Eaten', meaning: 'खाना' },
-      'come': { v1: 'Come', v2: 'Came', v3: 'Come', meaning: 'आना' },
-      'see': { v1: 'See', v2: 'Saw', v3: 'Seen', meaning: 'देखना' },
-      'write': { v1: 'Write', v2: 'Wrote', v3: 'Written', meaning: 'लिखना' },
-      'read': { v1: 'Read', v2: 'Read (red)', v3: 'Read (red)', meaning: 'पढ़ना' },
-      'do': { v1: 'Do / Does', v2: 'Did', v3: 'Done', meaning: 'करना' },
-      'take': { v1: 'Take', v2: 'Took', v3: 'Taken', meaning: 'लेना' },
-      'give': { v1: 'Give', v2: 'Gave', v3: 'Given', meaning: 'देना' },
-      'teach': { v1: 'Teach', v2: 'Taught', v3: 'Taught', meaning: 'सिखाना / पढ़ाना' },
-      'run': { v1: 'Run', v2: 'Ran', v3: 'Run', meaning: 'दौड़ना' },
-      'speak': { v1: 'Speak', v2: 'Spoke', v3: 'Spoken', meaning: 'बोलना' },
-      'buy': { v1: 'Buy', v2: 'Bought', v3: 'Bought', meaning: 'खरीदना' }
-    };
-
-    for (const [verbKey, info] of Object.entries(verbMap)) {
-      if (q.includes(verbKey) && (q.includes('past') || q.includes('v2') || q.includes('v3') || q.includes('form') || q.includes('second') || q.includes('third'))) {
-        return {
-          type: 'academic',
-          reply: `✨ [L.C.C. AI Study Assistant - English Verb Forms]\n\n📖 Verb Forms for "${info.v1}" (${info.meaning}):\n\n• V1 (Present Form): ${info.v1}\n• V2 (Past Tense): ${info.v2} ✅\n• V3 (Past Participle): ${info.v3}\n• V4 (Present Participle / ing): ${info.v1}ing\n\n💡 Example in Sentence:\n👉 Present: I ${info.v1.toLowerCase()} to school.\n👉 Past Tense: I ${info.v2.toLowerCase()} to school yesterday. (कल मैं स्कूल गया था)`
-        };
+  // A. Multiplication Tables (e.g. "table of 17", "19 ka pahada")
+  const tableMatch = q.match(/(?:table\s*of|pahada\s*of|ka\s*pahada)\s*(\d+)/i) || q.match(/(\d+)\s*(?:ka\s*pahada|table)/i);
+  if (tableMatch) {
+    const num = parseInt(tableMatch[1], 10);
+    if (!isNaN(num) && num > 0 && num <= 1000) {
+      let tblText = `Multiplication Table of ${num} (${num} का पहाड़ा):\n`;
+      for (let i = 1; i <= 10; i++) {
+        tblText += `• ${num} × ${i} = ${formatCommas(num * i)}\n`;
       }
+      return {
+        type: 'math',
+        reply: `✨ [L.C.C. AI Study Assistant - Multiplication Table]\n\n🔢 ${tblText}\n💡 Tip: Roz 1 se 20 tak ke pahade revise karein calculation speed badhane ke liye!`
+      };
     }
+  }
 
+  // B. LCM and HCF / GCD (e.g. "lcm of 12 and 18", "hcf of 24 and 36")
+  const lcmHcfMatch = q.match(/(lcm|hcf|gcd)\s*(?:of|nikalo)?\s*(\d+)\s*(?:and|aur|,|&)\s*(\d+)/i);
+  if (lcmHcfMatch) {
+    const type = lcmHcfMatch[1].toLowerCase();
+    const a = BigInt(lcmHcfMatch[2]);
+    const b = BigInt(lcmHcfMatch[3]);
+    const hcfVal = gcdBigInt(a, b);
+    const lcmVal = lcmBigInt(a, b);
+
+    if (type === 'lcm') {
+      return {
+        type: 'math',
+        reply: `✨ [L.C.C. AI Study Assistant - LCM Calculation]\n\n🔢 Numbers: ${a} and ${b}\n• HCF: ${hcfVal}\n• Formula: LCM = (Number 1 × Number 2) ÷ HCF\n\n✅ LCM: ${formatCommas(lcmVal.toString())}`
+      };
+    } else {
+      return {
+        type: 'math',
+        reply: `✨ [L.C.C. AI Study Assistant - HCF / GCD Calculation]\n\n🔢 Numbers: ${a} and ${b}\n• Highest Common Factor (HCF / महत्तम समापवर्तक): ${formatCommas(hcfVal.toString())}\n• LCM: ${formatCommas(lcmVal.toString())}\n\n✅ HCF: ${formatCommas(hcfVal.toString())}`
+      };
+    }
+  }
+
+  // C. Prime Numbers & Factors
+  if (q.includes('prime number') || q.includes('abhyajya sankhya') || q.match(/\bis\s*(\d+)\s*prime\b/i)) {
+    const pCheck = q.match(/(\d+)/);
+    if (pCheck) {
+      const num = parseInt(pCheck[1], 10);
+      const isP = isPrime(num);
+      return {
+        type: 'math',
+        reply: `✨ [L.C.C. AI Study Assistant - Prime Number Check]\n\n🔢 Number: ${num}\n${isP ? `✅ ${num} ek Prime Number (अभाज्य संख्या) hai! (Yeh sirf 1 aur khud apne se divide hota hai).` : `❌ ${num} ek Composite Number hai (Prime nahi hai).`}`
+      };
+    }
     return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - English Grammar]\n\n🔤 Verbs (क्रिया) Kya Hote Hain:\n\nVerb wah shabd hota hai jo kisi subject ke kaam karne (action), sthiti (state), ya hone (occurrence) ko darshata hai. Verb ke bina koi sentence poora nahi hota.\n\nExamples: Play (खेलना), Study (पढ़ना), Eat (खाना), Go (जाना), Teach (पढ़ाना).\n\n📚 Types of Verbs (क्रिया के प्रकार):\n1. Main Verbs (मुख्य क्रिया): Jo mukhya action batate hain (e.g. He runs fast, She writes a letter).\n2. Helping / Auxiliary Verbs (सहायक क्रिया): Jo tense banane me madad karte hain (is, am, are, was, were, has, have, had, will).\n3. Modal Verbs: Jo ability, permission ya obligation dikhate hain (can, could, may, might, should, must).\n4. Transitive (सकर्मक - jisme object chahiye) vs Intransitive (अकर्मक - jisme direct object nahi hota).\n\n💡 Example: 'Aman sir teaches mathematics' me 'teaches' Main Verb hai!`
+      type: 'math',
+      reply: `✨ [L.C.C. AI Study Assistant - Prime Numbers]\n\n🔢 Prime Numbers (अभाज्य संख्याएं):\n• Wah sankhya jo sirf 1 aur swayam se divide hoti hai.\n• 1 se 50 ke beech ke Prime Numbers: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47.\n💡 Note: 2 akeli aisi prime sankhya hai jo Even (सम) hai!`
     };
   }
 
-  // B. Spoken English & English Speaking Sentences
-  if (
-    q.includes('spoken english') ||
-    q.includes('english speaking') ||
-    q.includes('english bolna') ||
-    q.includes('english bolne') ||
-    q.includes('kaise bole') ||
-    q.includes('conversation') ||
-    q.includes('daily use sentence') ||
-    q.includes('speaking tips')
-  ) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Spoken English & Conversation]\n\n🗣️ Daily Use English Sentences (रोजमर्रा के जरूरी वाक्य):\n\n1. Greetings & Introductions:\n• How are you? = Aap kaise hain? (Reply: I am good, thank you!)\n• What is your name? = Aapka naam kya hai? (Reply: My name is Rohit.)\n• Where do you study? = Aap kahan padhte hain? (Reply: I study at L.C.C. Coaching.)\n• Nice to meet you! = Aapse milkar bohot khushi hui!\n\n2. Daily Requests & Polite Phrases:\n• Could you please help me? = Kya aap kripya meri madad karenge?\n• What are you doing right now? = Aap abhi kya kar rahe hain?\n• I didn't understand, please repeat. = Mujhe samajh nahi aaya, kripya dobara batayein.\n\n💡 Spoken English Rule: Roz 15-20 minute loud reading karein aur galti hone se bilkul mat dariye!`
-    };
-  }
-
-  // C. Tenses (काल)
-  if (q.includes('tense') || q.includes('kaal') || q.includes('present tense') || q.includes('past tense') || q.includes('future tense')) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - English Grammar]\n\n📖 Tenses in English (काल):\n\nEnglish me 3 main tenses hote hain, aur har tense ke 4 sub-types hote hain (Total 12 Tenses):\n\n1. Present Tense (वर्तमान काल):\n• Simple Present: Subject + V1(s/es) + Object (He plays cricket)\n• Present Continuous: Sub + is/am/are + V1+ing + Obj (He is playing)\n• Present Perfect: Sub + has/have + V3 + Obj (He has played)\n• Present Perfect Continuous: Sub + has/have been + V1+ing + since/for\n\n2. Past Tense (भूतकाल):\n• Simple Past: Sub + V2 + Obj (He played)\n• Past Continuous: Sub + was/were + V1+ing + Obj\n• Past Perfect: Sub + had + V3 + Obj\n\n3. Future Tense (भविष्य काल):\n• Simple Future: Sub + will + V1 + Obj (He will play)\n• Future Continuous: Sub + will be + V1+ing + Obj\n• Future Perfect: Sub + will have + V3 + Obj`
-    };
-  }
-
-  // D. Articles (A, An, The) & Vowels
-  if (q.includes('article') || q.includes('vowel') || q.includes('consonant') || q.includes('a an the') || q.includes('an kab lagta')) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - English Grammar]\n\n🔤 Articles (A, An, The) Rules:\n\n1. 'A' ka use: Consonant sound (व्यंजन ध्वनि - क, ख, ग...) se shuru hone wale singular nouns ke aage (e.g. A boy, A car, A university — 'yu' sound).\n\n2. 'An' ka use: Vowel sound (स्वर ध्वनि - अ, आ, इ, ई, ए, ओ...) se shuru hone wale singular nouns ke aage (e.g. An apple, An umbrella, An honest person — silent 'h', 'ऑ' sound).\n\n3. 'The' (Definite Article): Kisi vishisht vastu, historical monuments, rivers, holy books ke aage (e.g. The Sun, The Ganga, The Taj Mahal).`
-    };
-  }
-
-  // E. Parts of Speech & Noun / Pronoun / Adjective / Preposition
-  if (
-    q.includes('parts of speech') ||
-    q.includes('noun') ||
-    q.includes('sangya') ||
-    q.includes('pronoun') ||
-    q.includes('sarvanam') ||
-    q.includes('adjective') ||
-    q.includes('preposition') ||
-    q.includes('conjunction')
-  ) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - English Grammar]\n\n📚 8 Parts of Speech:\n\n1. Noun (संज्ञा): Person, place ya thing ka naam (Ram, Varanasi, Book).\n2. Pronoun (सर्वनाम): Noun ki jagah aane wale shabd (He, She, It, They).\n3. Verb (क्रिया): Action ya state darshane wale shabd (Play, Learn, Eat).\n4. Adjective (विशेषण): Noun/Pronoun ki visheshta batane wale (Smart, Tall, Blue).\n5. Adverb (क्रिया विशेषण): Verb ko modify karne wale (Quickly, Very, Well).\n6. Preposition (संबंधबोधक): Relation darshane wale (In, On, At, Under, Between).\n7. Conjunction (समुच्चयबोधक): Do sentences ya words ko jodne wale (And, But, Because).\n8. Interjection (विस्मयादिबोधक): Feelings express karne wale (Wow!, Alas!).`
-    };
-  }
-
-  // ══════════════════════════════════════════════
-  // 4. SOCIAL STUDIES / SOCIAL SCIENCE (SST)
-  // ══════════════════════════════════════════════
-
-  // A. Samvidhan (Constitution) & Dr. Ambedkar
-  if (
-    q.includes('samvidhan') ||
-    q.includes('constitution') ||
-    q.includes('ambedkar') ||
-    q.includes('ganatantra') ||
-    q.includes('republic')
-  ) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Social Studies / Civics]\n\n📜 Bhartiya Samvidhan (Indian Constitution):\n\n• Samvidhan Bharat ka sarvochha kanoon (Supreme Law) hai.\n• Iska praroop Dr. B.R. Ambedkar ji ki adhyakshata me Drafting Committee dwara banaya gaya.\n• Samvidhan banne me kul 2 saal 11 mahine aur 18 din ka samay laga.\n• 26 November 1949 ko samvidhan apnaya gaya (Samvidhan Diwas).\n• 26 January 1950 ko yeh poore desh me lagu hua (Ganatantra Diwas / Republic Day).\n• Bharat ka samvidhan vishwa ka sabse bada likhit samvidhan hai.`
-    };
-  }
-
-  // B. Fundamental Rights (मौलिक अधिकार)
-  if (
-    q.includes('maulik adhikar') ||
-    q.includes('fundamental right') ||
-    q.includes('fundamental rights') ||
-    q.includes('adhikar')
-  ) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Social Studies / Civics]\n\n🇮🇳 6 Fundamental Rights (मौलिक अधिकार - Part III, Articles 12-35):\n\n1. Right to Equality (समानता का अधिकार - Art 14-18)\n2. Right to Freedom (स्वतंत्रता का अधिकार - Art 19-22)\n3. Right against Exploitation (शोषण के विरुद्ध अधिकार - Art 23-24)\n4. Right to Freedom of Religion (धार्मिक स्वतंत्रता - Art 25-28)\n5. Cultural & Educational Rights (संस्कृति व शिक्षा का अधिकार - Art 29-30)\n6. Right to Constitutional Remedies (संवैधानिक उपचारों का अधिकार - Art 32 - Samvidhan ki Aatma).`
-    };
-  }
-
-  // C. 1857 Revolt / Freedom Movement (इतिहास)
-  if (
-    q.includes('1857') ||
-    q.includes('kranti') ||
-    q.includes('mangal pandey') ||
-    q.includes('swatantrata sangram')
-  ) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Social Studies / History]\n\n⚔️ 1857 Ka Swatantrata Sangram (Revolt of 1857):\n\n• Shuruat: 10 May 1857 ko Meerut chhavni se hui.\n• Nayak: Mangal Pandey (Barrackpore), Rani Lakshmibai (Jhansi), Nana Saheb (Kanpur), Kunwar Singh (Bihar), Bahadur Shah Zafar (Delhi).\n• Tatkalik Kaaran: Enfiled rifle ke kartoos me charbi hone ki khabar.\n• Parinaam: British East India Company ka shasan samapt hua aur Bharat seedhe British Crown ke adhikar me aa gaya.`
-    };
-  }
-
-  // D. Mahatma Gandhi & Freedom Movements
-  if (
-    q.includes('gandhi') ||
-    q.includes('mahatma') ||
-    q.includes('dandi') ||
-    q.includes('satyagraha') ||
-    q.includes('andolan')
-  ) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Social Studies / History]\n\n🕊️ Mahatma Gandhi & Swatantrata Andolan:\n\n• Sidhhant: Satya aur Ahimsa (Truth & Non-Violence).\n• Pramukh Jan-Andolan:\n1. Champaran Satyagraha (1917) - Bihar me Neel kisaano ke haq me.\n2. Asahayoga Andolan (Non-Cooperation Movement - 1920).\n3. Dandi Yatra / Namak Satyagraha (Salt March - 1930 - 240 miles paidal yatra).\n4. Bharat Chhodo Andolan (Quit India Movement - 1942 - 'Karo ya Maro' naara).`
-    };
-  }
-
-  // E. Solar System & Geography (भूगोल)
-  if (
-    q.includes('saurmandal') ||
-    q.includes('solar system') ||
-    q.includes('graha') ||
-    q.includes('planet') ||
-    q.includes('prithvi') ||
-    q.includes('earth') ||
-    q.includes('mitti') ||
-    q.includes('soil')
-  ) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Social Studies / Geography]\n\n🪐 Saurmandal & Prithvi (Solar System & Earth):\n\n• Total 8 Graha (Planets): Mercury (Budh - sabse chhota), Venus (Shukra - sabse chamkila/garm), Earth (Prithvi - Neela grah), Mars (Mangal - Laal grah), Jupiter (Brihaspati - sabse bada), Saturn (Shani), Uranus, Neptune.\n\n🌍 Prithvi Ki Partien (Layers):\n1. Crust (भूपर्पटी - upari satah)\n2. Mantle (मेंटल - madhya parat)\n3. Core (क्रोड - sabse bheetri loha/nickel parat).\n\n🌱 Bharat ki Mitti: Alluvial (जलोढ़ - sabse upjau), Black Soil (काली मिट्टी - कपास के लिए उत्तम).`
-    };
-  }
-
-  // F. Economics (GDP, RBI, Mehengai)
-  if (
-    q.includes('gdp') ||
-    q.includes('arthashastra') ||
-    q.includes('economics') ||
-    q.includes('mehengai') ||
-    q.includes('inflation') ||
-    q.includes('rbi') ||
-    q.includes('sst') ||
-    q.includes('social science') ||
-    q.includes('social study') ||
-    q.includes('samajik')
-  ) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Social Studies / Economics]\n\n📊 Economy & Commerce Fundamentals:\n\n• GDP (Gross Domestic Product / सकल घरेलू उत्पाद): Ek saal me desh ke andar utpadit sabhi antim goods aur services ki total monetary value.\n• RBI (Reserve Bank of India): Bharat ka central bank (est. 1935). Ye currency notes issue karta hai aur monetary policy control karta hai.\n• Inflation (महंगाई): Jab goods aur services ke daam lagatar badhte hain aur rupee ki purchasing power ghatti hai.`
-    };
-  }
-
-  // ══════════════════════════════════════════════
-  // 5. COMPUTER & DCA / IT CONCEPTS
-  // ══════════════════════════════════════════════
-
-  // A. Computer Definition, Hardware vs Software
-  if (
-    q.includes('computer kya hai') ||
-    q.includes('what is computer') ||
-    q.includes('hardware') ||
-    q.includes('software') ||
-    q.includes('input device') ||
-    q.includes('output device') ||
-    (q.includes('computer') && (q.includes('kya') || q.includes('batao') || q.includes('notes')))
-  ) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Computer & DCA Fundamentals]\n\n💻 Computer Kya Hai:\nComputer ek high-speed electronic machine hai jo user se Data (Input) leti hai, use CPU me Process karti hai, aur useful Information (Output) pradaan karti hai.\n👉 IPO Cycle: Input ──> Process ──> Output ──> Storage.\n• Father of Computer: Charles Babbage.\n\n🖥️ Hardware vs Software:\n• Hardware: Physical parts jinhe chhoo sakte hain (Keyboard, Mouse, Monitor, RAM, Hard Disk).\n• Software: Programs aur instructions ka set (Windows 11, MS Office, Chrome, Tally).\n\n🔌 Input vs Output Devices:\n• Input: Keyboard, Mouse, Scanner, Microphone.\n• Output: Monitor, Printer, Speaker, Projector.`
-    };
-  }
-
-  // B. Operating System, Internet & Browsers
-  if (
-    q.includes('operating system') ||
-    q.includes('os kya hai') ||
-    q.includes('internet') ||
-    q.includes('browser') ||
-    q.includes('search engine')
-  ) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Computer & Networking]\n\n🌐 OS & Internet Concepts:\n\n• Operating System (OS): Software jo user aur hardware ke beech interface banata hai (e.g. Windows 10/11, Linux, macOS, Android).\n• Internet: Puri duniya ke computers ka aapas me juda global interconnected network.\n• Web Browser: Websites access karne ka software (Google Chrome, Microsoft Edge, Mozilla Firefox).\n• Search Engine: Internet par kisi bhi jankari ko dhoondhne wala portal (Google, Bing).`
-    };
-  }
-
-  // C. MS Excel Formulas & MS Office
-  if (
-    q.includes('excel') ||
-    q.includes('ms word') ||
-    q.includes('powerpoint') ||
-    q.includes('spreadsheet')
-  ) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - MS Office Mastery]\n\n📊 Key MS Excel Formulas:\n\nExcel me sabhi formula '=' sign se shuru hote hain:\n• =SUM(A1:A10) : Cells ka kul jod (Total) nikalna.\n• =AVERAGE(A1:A10) : Ausat (Average) nikalna.\n• =MAX(A1:A10) & =MIN(A1:A10) : Maximum aur Minimum value.\n• =COUNT(A1:A10) : Entries ki sankhya ginna.\n• =IF(Condition, True, False) : Shart ke aadhar par result dena.`
-    };
-  }
-
-  // D. Full Forms (CPU, RAM, ROM, etc.)
-  if (
-    q.includes('cpu') ||
-    q.includes('ram') ||
-    q.includes('rom') ||
-    q.includes('http') ||
-    q.includes('html') ||
-    q.includes('full form')
-  ) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Computer Full Forms]\n\n💻 Essential Computer Full Forms:\n\n• CPU: Central Processing Unit (Brain of Computer)\n• RAM: Random Access Memory (Temporary/Volatile)\n• ROM: Read Only Memory (Permanent/Non-volatile)\n• ALU: Arithmetic Logic Unit\n• HTTP: Hypertext Transfer Protocol\n• HTML: Hypertext Markup Language\n• URL: Uniform Resource Locator\n• OS: Operating System`
-    };
-  }
-
-  // E. Keyboard Shortcuts
-  if (q.includes('shortcut') || q.includes('ctrl') || q.includes('copy paste')) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Keyboard Shortcuts]\n\n⌨️ Most Important Keyboard Shortcuts:\n\n• Ctrl + C : Copy (कॉपी करना)\n• Ctrl + X : Cut (काटना)\n• Ctrl + V : Paste (पेस्ट करना)\n• Ctrl + Z : Undo (पिछला काम वापस लाना)\n• Ctrl + Y : Redo\n• Ctrl + S : Save (फाइल सेव करना)\n• Ctrl + A : Select All\n• Ctrl + P : Print document\n• Alt + F4 : Close active window / Shut down`
-    };
-  }
-
-  // F. Tally Prime & Accounting Golden Rules
-  if (q.includes('tally') || q.includes('golden rule') || q.includes('ledger') || q.includes('debit') || q.includes('credit')) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Commerce & Tally Prime]\n\n📊 Golden Rules of Accounting:\n\n1. Personal Account: Debit the Receiver | Credit the Giver\n2. Real Account (Assets/Cash): Debit what comes in | Credit what goes out\n3. Nominal Account (Expenses/Income): Debit all expenses and losses | Credit all incomes and gains\n\n💡 Key Tally Keys: F4 (Contra), F5 (Payment), F6 (Receipt), F8 (Sales), F9 (Purchase).`
-    };
-  }
-
-  // ══════════════════════════════════════════════
-  // 6. SCIENCE (Physics, Chemistry, Biology)
-  // ══════════════════════════════════════════════
-
-  // A. Photosynthesis (प्रकाश संश्लेषण)
-  if (q.includes('photosynthesis') || q.includes('prakash') || q.includes('sanshleshan') || (q.includes('paudhe') && q.includes('khana'))) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Biology / Science]\n\n🌿 Photosynthesis (प्रकाश संश्लेषण):\n\nHare paudhe sunlight aur chlorophyll ki presence me Carbon Dioxide (CO₂) aur Water (H₂O) ka upyog karke apna bhojan (Glucose) banate hain aur Oxygen (O₂) release karte hain.\n\n🧪 Chemical Equation:\n6CO₂ + 6H₂O ──[Sunlight / Chlorophyll]──> C₆H₁₂O₆ + 6O₂\n\n1. Sunlight\n2. Chlorophyll (leaves ka hara rang)\n3. CO₂ (hava se)\n4. H₂O (roots se)\n\nResult: Glucose + Oxygen.`
-    };
-  }
-
-  // B. Newton's Laws of Motion
-  if (q.includes('newton') || q.includes('gati ke niyam') || q.includes('laws of motion') || q.includes('motion law')) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Physics / Science]\n\n🍎 Newton's Three Laws of Motion (गति के तीन नियम):\n\n1️⃣ First Law (Law of Inertia / जड़त्व का नियम):\nHar object apni rest ya uniform motion me tab tak rehta hai jab tak uspar koi external force na lagaya jaye.\n\n2️⃣ Second Law (Force Formula):\nF = m × a (Force = Mass × Acceleration). Unit: Newton (N).\n\n3️⃣ Third Law (Action-Reaction / क्रिया-प्रतिक्रिया):\nEvery action has an equal and opposite reaction (Har kriya ki barabar aur viprit pratikriya hoti hai).`
-    };
-  }
-
-  // C. Ohm's Law (ओम का नियम)
-  if (q.includes('ohm') || q.includes('resistance') || q.includes('pratirodh') || q.includes('v = ir') || q.includes('v=ir')) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Physics / Science]\n\n⚡ Ohm's Law (ओम का नियम):\n\nConstant temperature par conductor me flow hone wala current (I) uske ends ke potential difference (V) ke directly proportional hota hai.\n\n👉 Formula: V = I × R\n• V = Potential Difference (Volt - V)\n• I = Electric Current (Ampere - A)\n• R = Electrical Resistance / प्रतिरोध (Ohm - Ω)`
-    };
-  }
-
-  // D. Acids & Bases (अम्ल और क्षार)
-  if (q.includes('acid') || q.includes('base') || q.includes('aml') || q.includes('kshar') || q.includes('ph value') || q.includes('ph scale')) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Chemistry / Science]\n\n🧪 Acids, Bases & pH Scale:\n\n1. Acids (अम्ल): Swad me khatte, H⁺ ions dete hain, Blue litmus ko RED karte hain, pH < 7 (e.g. HCl, Lemon juice).\n2. Bases (क्षार): Swad me kadve aur soapy, OH⁻ ions dete hain, Red litmus ko BLUE karte hain, pH > 7 (e.g. NaOH, Baking soda).\n3. Neutral: pH = 7 (Pure water).\nReaction: Acid + Base ──> Salt + Water (Neutralization).`
-    };
-  }
-
-  // E. Cell & Mitochondria (कोशिका)
-  if (q.includes('cell') || q.includes('koshika') || q.includes('mitochondria') || q.includes('powerhouse')) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Biology / Science]\n\n🔬 Cell & Mitochondria:\n\n• Cell Definition: Sabhi jeevon ki structural aur functional basic unit ko Cell kehte hain. Khoj: Robert Hooke (1665).\n• Mitochondria (Powerhouse of the Cell): Cellular respiration ke zariye ATP (Adenosine Triphosphate) ke roop me energy produce karta hai. ATP ko 'Energy Currency' kehte hain.`
-    };
-  }
-
-  // F. Light, Optics, Gravitation
-  if (q.includes('reflection') || q.includes('refraction') || q.includes('mirror formula') || q.includes('lens formula')) {
-    return {
-      type: 'academic',
-      reply: `✨ [L.C.C. AI Study Assistant - Physics / Optics]\n\n🔦 Light Formulas:\n\n• Mirror Formula: 1/f = 1/v + 1/u\n• Lens Formula: 1/f = 1/v - 1/u\n• Laws of Reflection: Angle of Incidence (∠i) = Angle of Reflection (∠r).`
-    };
-  }
-
-  // ══════════════════════════════════════════════
-  // 7. MATHEMATICS CALCULATIONS & EQUATIONS
-  // ══════════════════════════════════════════════
-
-  // A. Percentage Calculation (e.g., "15% of 1200", "500 ka 10%")
+  // D. Percentage Calculation (e.g., "15% of 1200", "500 ka 10%")
   const percentMatch =
     q.match(/(\d+(?:\.\d+)?)\s*(?:%|percent)\s*(?:of|ka|pe|me)?\s*(\d+(?:\.\d+)?)/i) ||
     q.match(/(\d+(?:\.\d+)?)\s*(?:ka|of)\s*(\d+(?:\.\d+)?)\s*(?:%|percent)/i);
@@ -423,11 +192,11 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
     const result = (p / 100) * total;
     return {
       type: 'math',
-      reply: `✨ [L.C.C. AI Study Assistant - Percentage Calculation]\n\nFormula: (${p} / 100) × ${total}\n\n✅ Result: ${result}\n\nExplanation: ${p}% of ${total} is equal to ${result}.`
+      reply: `✨ [L.C.C. AI Study Assistant - Percentage Calculation]\n\nFormula: (${p} / 100) × ${total}\n\n✅ Result: ${formatCommas(result)}\n\nExplanation: ${p}% of ${total} is equal to ${result}.`
     };
   }
 
-  // B. Quadratic Equations (e.g., "x^2 - 5x + 6 = 0")
+  // E. Quadratic Equations (e.g., "x^2 - 5x + 6 = 0")
   const quadMatch = q.match(/([+-]?\s*\d*)\s*x(?:\^2|2)\s*([+-]\s*\d*)\s*x\s*([+-]\s*\d+)\s*=\s*0/i);
   if (quadMatch) {
     let aStr = quadMatch[1].replace(/\s+/g, '');
@@ -452,7 +221,7 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
     }
   }
 
-  // C. Linear Equation in One Variable (e.g., "2x + 5 = 25")
+  // F. Linear Equation in One Variable (e.g., "2x + 5 = 25")
   const linearMatch = q.match(/([+-]?\s*\d*)\s*x\s*([+-]\s*\d+)?\s*=\s*([+-]?\s*\d+)/i);
   if (linearMatch && !q.includes('^') && !q.includes('x2')) {
     let aStr = linearMatch[1].replace(/\s+/g, '');
@@ -473,7 +242,7 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
     }
   }
 
-  // D. Square Root / Cube Root (e.g., "sqrt 144", "square root of 144", "cube root of 125")
+  // G. Square Root / Cube Root (e.g., "sqrt 144", "square root of 144", "cube root of 125")
   const sqrtMatch = q.match(/(?:sqrt|square\s*root(?:\s*of)?|vargmool)\s*[:=]?\s*(\d+(?:\.\d+)?)/i) ||
                     q.match(/(\d+(?:\.\d+)?)\s*ka\s*(?:sqrt|square\s*root|vargmool)/i);
   if (sqrtMatch) {
@@ -485,7 +254,7 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
     };
   }
 
-  // E. Trigonometry Ratios (sin 30, cos 60, tan 45, etc.)
+  // H. Trigonometry Ratios (sin 30, cos 60, tan 45, etc.)
   const trigMatch = q.match(/\b(sin|cos|tan|cot|sec|cosec)\s*(0|30|45|60|90|180)\b/i);
   if (trigMatch) {
     const fn = trigMatch[1].toLowerCase();
@@ -503,7 +272,7 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
     }
   }
 
-  // F. Pythagoras Theorem
+  // I. Pythagoras Theorem
   if (q.includes('pythagoras') || (q.includes('hypotenuse') && q.includes('triangle'))) {
     return {
       type: 'math',
@@ -511,7 +280,29 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
     };
   }
 
-  // G. Comprehensive Arithmetic & BODMAS Evaluator
+  // J. Geometry Formulas (Circle, Rectangle, Triangle, Cylinder)
+  if (q.includes('area of circle') || q.includes('vrit ka kshetraphal')) {
+    return {
+      type: 'math',
+      reply: `✨ [L.C.C. AI Study Assistant - Circle Geometry]\n\n⭕ Circle Formulas:\n• Area = πr² (Where π ≈ 22/7 or 3.1416)\n• Circumference (Paridhi) = 2πr\n• Diameter = 2r`
+    };
+  }
+
+  if (q.includes('simple interest') || q.includes('sadharan byaj') || q.includes('compound interest')) {
+    return {
+      type: 'math',
+      reply: `✨ [L.C.C. AI Study Assistant - Commercial Mathematics]\n\n💰 Interest Formulas:\n• Simple Interest (SI) = (P × R × T) / 100\n  (P = Principal, R = Rate%, T = Time in years)\n• Total Amount = P + SI\n• Compound Interest (CI) = P(1 + R/100)^T - P`
+    };
+  }
+
+  if (q.includes('algebra formula') || q.includes('algebra identities') || q.includes('(a+b)^2') || q.includes('(a-b)^2')) {
+    return {
+      type: 'math',
+      reply: `✨ [L.C.C. AI Study Assistant - Algebraic Identities]\n\n📐 Top Algebraic Formulas:\n1. (a + b)² = a² + 2ab + b²\n2. (a - b)² = a² - 2ab + b²\n3. a² - b² = (a - b)(a + b)\n4. (a + b)³ = a³ + b³ + 3ab(a + b)\n5. (a - b)³ = a³ - b³ - 3ab(a - b)`
+    };
+  }
+
+  // K. Comprehensive Arithmetic & BODMAS Evaluator
   // Supports Unicode multiplication (×), division (÷), minus (−), powers (^), large BigInts, and natural language surrounding
   const normalizedArithmetic = raw
     .replace(/[\u00d7\u2715\u2716\u00b7]/g, '*')
@@ -545,12 +336,6 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
     }
 
     if (answerStr) {
-      const formatCommas = (s: string) => {
-        const parts = s.split('.');
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        return parts.join('.');
-      };
-
       const displayExpr = cleanExpr
         .replace(/\*\*/g, ' ^ ')
         .replace(/\*/g, ' × ')
@@ -611,16 +396,248 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
     }
   }
 
-  // H. General Math Question Guidance
-  if (q.includes('math') || q.includes('ganit') || q.includes('hisab') || q.includes('formula') || q.includes('bodmas') || q.includes('calculation')) {
+  // ══════════════════════════════════════════════
+  // 4. SPOKEN ENGLISH TRANSLATIONS & DAILY PHRASES
+  // (Instant Translation Engine: Lakho ways of speaking!)
+  // ══════════════════════════════════════════════
+
+  const translationDatabase: Array<{ test: RegExp; en: string; alt?: string; tip?: string }> = [
+    { test: /pani pina|paani peena|pani peena|paani pina|pani chahiye|paani chahiye|water|drink water/i, en: 'I want to drink water.', alt: 'May I drink water, please? / Could you please give me a glass of water?', tip: 'Classroom me permission ke liye "May I drink water, please?" sabse best hota hai.' },
+    { test: /khana khana|bhookh lagi|bhukh lagi|khana chahiye|food/i, en: 'I want to eat food.', alt: 'I am feeling hungry. / May I have something to eat?', tip: '"I am starving" tab bolte hain jab bohot zyada bhookh lagi ho.' },
+    { test: /sone ja raha|neend aa rahi|sleep|sleeping/i, en: 'I am going to sleep.', alt: 'I am feeling sleepy. / I am going to bed now.', tip: 'Informal English me "I am hitting the sack" bhi bolte hain.' },
+    { test: /padhai karni|padhna hai|study|studying/i, en: 'I have to study.', alt: 'I need to prepare for my exams.', tip: '"Hit the books" ka matlab hota hai dil lagakar padhai shuru karna.' },
+    { test: /coaching jana|school jana|college jana|office jana/i, en: 'I have to go to coaching.', alt: 'I am heading to class right now.' },
+    { test: /ghar jana|ghar pahunch/i, en: 'I want to go home.', alt: 'I have reached home safely.' },
+    { test: /kahan ja rahe|kaha ja rahe|where going/i, en: 'Where are you going?', alt: 'Where are you heading to?' },
+    { test: /der ho gayi|late ho gaya|late ho gayi/i, en: 'I got late.', alt: 'I am running late. / Sorry for the delay.', tip: 'Professional English me "Apologies for the delay" bolein.' },
+    { test: /andar aa sakta|may i come in/i, en: 'May I come in, sir/ma\'am?', tip: 'Classroom me hamesha "May I..." use karein (permission ke liye).' },
+    { test: /samajh nahi aaya|samajh nhi aaya|not understand/i, en: 'I did not understand.', alt: 'Could you please explain that again?' },
+    { test: /aap kaise ho|aap kaise hain|how are you/i, en: 'How are you?', alt: 'How have you been? / Hope you are doing well!' },
+    { test: /naam kya hai|what is your name/i, en: 'What is your name?', alt: 'May I know your name, please?' },
+    { test: /madad chahiye|help chahiye|meri madad/i, en: 'Could you please help me?', alt: 'I need some assistance.' },
+    { test: /kya hua|kya baat hai/i, en: 'What happened?', alt: 'What is the matter?' },
+    { test: /chalo chalte hain|chalo chalein/i, en: 'Let us go! / Shall we leave?' },
+    { test: /mujhe nahi pata|mujhe nhi pta|i dont know/i, en: 'I do not know.', alt: 'I have no idea about it.' },
+    { test: /main theek hoon|mai thik hu/i, en: 'I am fine, thank you.', alt: 'Doing great, thanks for asking!' },
+    { test: /mujhe jana hai|i have to go/i, en: 'I have to go now.', alt: 'I must leave now.' },
+    { test: /firse bolo|dobara bolo/i, en: 'Pardon, please? / Could you please repeat that?' },
+    { test: /kitna time hua|kya samay hua/i, en: 'What is the time right now?', alt: 'Could you tell me the time, please?' },
+    { test: /kitne ka hai|price kya hai/i, en: 'How much does this cost?', alt: 'What is the price of this item?' },
+    { test: /dhanyawad|shukriya|thank you/i, en: 'Thank you very much!', alt: 'I truly appreciate your help.' },
+    { test: /maaf kijiye|galti ho gayi|sorry/i, en: 'I am extremely sorry.', alt: 'My sincere apologies for the mistake.' }
+  ];
+
+  for (const item of translationDatabase) {
+    if (item.test.test(q)) {
+      return {
+        type: 'academic',
+        reply: `✨ [L.C.C. AI Study Assistant - Spoken English Translation]\n\n🗣️ Kaise Bolein (English Translation):\n\n👉 Standard: "${item.en}"\n${item.alt ? `👉 Professional / Fluent: "${item.alt}"\n` : ''}${item.tip ? `\n💡 Fluency Tip: ${item.tip}` : ''}`
+      };
+    }
+  }
+
+  // ══════════════════════════════════════════════
+  // 5. SITUATIONAL SPOKEN ENGLISH WAYS
+  // ══════════════════════════════════════════════
+
+  // A. Self Introduction
+  if (q.includes('intro') || q.includes('introduction') || q.includes('apna parichay') || q.includes('introduce myself')) {
     return {
-      type: 'math',
-      reply: `✨ [L.C.C. AI Study Assistant - Mathematics]\n\n📐 Math me aap koi bhi calculation ya sawal pooch sakte hain:\n\n1. Arithmetic & BODMAS: (jaise 23833827272+3838-272727272×733873)\n2. Equations: (jaise 2x + 5 = 25 ya x² - 5x + 6 = 0)\n3. Trigonometry: (jaise sin 30, cos 60, tan 45)\n4. Percentages: (jaise 15% of 1200)\n5. Square Roots & Powers: (jaise sqrt 144, 25^2)\n\nApna sawal likhiye, hum turant step-by-step hal karenge!`
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Self Introduction in English]\n\n🗣️ Best Self-Introduction Format:\n\n1. Greeting: "Good morning/afternoon, Sir/Ma'am."\n2. Name: "My name is [Aapka Naam]."\n3. Location: "I belong to Varanasi, Uttar Pradesh."\n4. Education: "Currently, I am studying in Class [Class] at Learning Coaching Center (L.C.C.)."\n5. Strengths: "I am hardworking, punctual, and eager to learn new skills."\n6. Ambition: "My goal is to achieve 95%+ in my board exams and become a [Career Goal]."\n7. Closing: "Thank you for giving me this opportunity."\n\n💡 Rule: Confidence ke saath eye contact banakar bolein!`
+    };
+  }
+
+  // B. Job Interview Tips & Answers
+  if (q.includes('interview') || q.includes('job interview')) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Job Interview Mastery]\n\n💼 Essential Interview Speaking Ways:\n\n1. Entering the Room: "Good morning Sir, may I take a seat?"\n2. "Tell me about yourself": Focus 60% on your skills & achievements, 40% on background.\n3. Handling difficult questions: "That is an interesting question. In my perspective..."\n4. Asking questions back: "What does a typical day in this role look like?"\n5. Thanking: "Thank you very much for your valuable time today."`
+    };
+  }
+
+  // C. Restaurant / Ordering Food
+  if (q.includes('restaurant') || q.includes('hotel me') || q.includes('order kaise karein') || q.includes('food order')) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Restaurant & Food Ordering]\n\n🍽️ Restaurant Conversation Phrases:\n\n• Table booking: "A table for two, please."\n• Asking menu: "Could we please see the menu?"\n• Ordering food: "I would like to order a paneer butter masala and butter naans."\n• Asking bill: "Could you please bring the bill / check?"\n• Compliment: "The food was delicious, thank you!"`
+    };
+  }
+
+  // D. Phone Call Etiquette
+  if (q.includes('phone par') || q.includes('phone call') || q.includes('telephonic')) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Phone Call Conversation]\n\n📱 Professional Phone Call Phrases:\n\n• Answering: "Hello, this is [Name] speaking. How can I help you today?"\n• Asking who is calling: "May I know who is calling, please?"\n• Putting on hold: "Could you please hold the line for a moment?"\n• Voice not clear: "I am sorry, your voice is breaking up. Could you please repeat?"\n• Ending call: "Thank you for calling. Have a great day ahead!"`
+    };
+  }
+
+  // E. Hesitation Removal & Overcoming Fear of English
+  if (q.includes('hesitation') || q.includes('dar lagta') || q.includes('confidence') || q.includes('sharam')) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Overcoming English Speaking Fear]\n\n🚀 5 Golden Rules to Remove Hesitation:\n\n1. Stop Translating in Mind: Hindi se English sochne ke bajaye seedha English me sochna shuru karein.\n2. Do Not Fear Mistakes: Shuruat me har koi galti karta hai. Bolne ki aadat daaliye!\n3. Mirror Practice: Roz 10 minute aaine ke saamne khade hokar kisi bhi topic par bolein.\n4. Loud Reading: Newspaper ya NCERT English book ko 15 minute tez aawaz me padhein.\n5. Partner Practice: L.C.C. classmate ya friend ke saath roz 5-10 minute English me baatcheet karein.`
     };
   }
 
   // ══════════════════════════════════════════════
-  // 8. ADMISSION, FEES & TIMINGS
+  // 6. ENGLISH GRAMMAR: VERBS, TENSES & VOICE
+  // ══════════════════════════════════════════════
+
+  // A. Verbs & Kriya
+  if (
+    q.includes('verb') ||
+    q.includes('verbs') ||
+    q.includes('kriya') ||
+    q.includes('helping verb') ||
+    q.includes('modal verb') ||
+    q.includes('main verb')
+  ) {
+    const verbMap: Record<string, { v1: string; v2: string; v3: string; meaning: string }> = {
+      'go': { v1: 'Go', v2: 'Went', v3: 'Gone', meaning: 'जाना' },
+      'eat': { v1: 'Eat', v2: 'Ate', v3: 'Eaten', meaning: 'खाना' },
+      'come': { v1: 'Come', v2: 'Came', v3: 'Come', meaning: 'आना' },
+      'see': { v1: 'See', v2: 'Saw', v3: 'Seen', meaning: 'देखना' },
+      'write': { v1: 'Write', v2: 'Wrote', v3: 'Written', meaning: 'लिखना' },
+      'read': { v1: 'Read', v2: 'Read (red)', v3: 'Read (red)', meaning: 'पढ़ना' },
+      'do': { v1: 'Do / Does', v2: 'Did', v3: 'Done', meaning: 'करना' },
+      'take': { v1: 'Take', v2: 'Took', v3: 'Taken', meaning: 'लेना' },
+      'give': { v1: 'Give', v2: 'Gave', v3: 'Given', meaning: 'देना' },
+      'teach': { v1: 'Teach', v2: 'Taught', v3: 'Taught', meaning: 'सिखाना / पढ़ाना' },
+      'run': { v1: 'Run', v2: 'Ran', v3: 'Run', meaning: 'दौड़ना' },
+      'speak': { v1: 'Speak', v2: 'Spoke', v3: 'Spoken', meaning: 'बोलना' },
+      'buy': { v1: 'Buy', v2: 'Bought', v3: 'Bought', meaning: 'खरीदना' }
+    };
+
+    for (const [verbKey, info] of Object.entries(verbMap)) {
+      if (q.includes(verbKey) && (q.includes('past') || q.includes('v2') || q.includes('v3') || q.includes('form') || q.includes('second') || q.includes('third'))) {
+        return {
+          type: 'academic',
+          reply: `✨ [L.C.C. AI Study Assistant - English Verb Forms]\n\n📖 Verb Forms for "${info.v1}" (${info.meaning}):\n\n• V1 (Present Form): ${info.v1}\n• V2 (Past Tense): ${info.v2} ✅\n• V3 (Past Participle): ${info.v3}\n• V4 (Present Participle / ing): ${info.v1}ing\n\n💡 Example in Sentence:\n👉 Present: I ${info.v1.toLowerCase()} to school.\n👉 Past Tense: I ${info.v2.toLowerCase()} to school yesterday. (कल मैं स्कूल गया था)`
+        };
+      }
+    }
+
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - English Grammar]\n\n🔤 Verbs (क्रिया) Kya Hote Hain:\n\nVerb wah shabd hota hai jo kisi subject ke kaam karne (action), sthiti (state), ya hone (occurrence) ko darshata hai. Verb ke bina koi sentence poora nahi hota.\n\nExamples: Play (खेलना), Study (पढ़ना), Eat (खाना), Go (जाना), Teach (पढ़ाना).\n\n📚 Types of Verbs (क्रिया के प्रकार):\n1. Main Verbs (मुख्य क्रिया): Jo mukhya action batate hain (e.g. He runs fast, She writes a letter).\n2. Helping / Auxiliary Verbs (सहायक क्रिया): Jo tense banane me madad karte hain (is, am, are, was, were, has, have, had, will).\n3. Modal Verbs: Jo ability, permission ya obligation dikhate hain (can, could, may, might, should, must).\n4. Transitive (सकर्मक - jisme object chahiye) vs Intransitive (अकर्मक - jisme direct object nahi hota).\n\n💡 Example: 'Aman sir teaches mathematics' me 'teaches' Main Verb hai!`
+    };
+  }
+
+  // B. Active & Passive Voice
+  if (q.includes('active voice') || q.includes('passive voice') || q.includes('voice change')) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Active & Passive Voice]\n\n🗣️ Voice Rules in English:\n\n1. Active Voice: Subject kaam karta hai.\n• Structure: Subject + Verb + Object\n• Example: "Rohit wrote a letter."\n\n2. Passive Voice: Object par kaam hota hai.\n• Structure: Object + Helping Verb + V3 (Past Participle) + by + Subject\n• Example: "A letter was written by Rohit."\n\n💡 Golden Rule: Passive Voice me hamesha Verb ki 3rd Form (V3) hi lagti hai!`
+    };
+  }
+
+  // C. Direct & Indirect Speech
+  if (q.includes('direct indirect') || q.includes('narration') || q.includes('reported speech')) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Direct & Indirect Speech]\n\n📜 Narration Rules:\n\n1. Direct Speech: Kisi ke kahe hue shabdon ko jaisa ka taisa bolna.\n• Example: He said, "I am happy."\n\n2. Indirect Speech: Uski baat ko apne shabdon me batana.\n• Example: He said that he was happy.\n\n💡 Key Changes:\n• Inverted commas hatakar 'that' lagate hain.\n• Present Tense -> Past Tense me badalta hai (is/am -> was, have -> had).`
+    };
+  }
+
+  // D. Modals (Can, Could, Should, Would, May, Might, Must)
+  if (q.includes('modal') || q.includes('should') || q.includes('could') || q.includes('would') || q.includes('must')) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Modal Verbs]\n\n🔑 Common Modal Auxiliary Verbs:\n\n• Can: Ability / Yogyata ("I can speak English fluently.")\n• Could: Past ability ya polite request ("Could you please help me?")\n• Should: Salah / Advice ("You should study 4 hours daily.")\n• Must: Compulsion / Jaruri ("You must attend classes on time.")\n• May: Formal permission ya possibility ("May I come in, sir?")\n• Would: Polite offer ("Would you like some tea?")`
+    };
+  }
+
+  // E. Tenses (काल)
+  if (q.includes('tense') || q.includes('kaal') || q.includes('present tense') || q.includes('past tense') || q.includes('future tense')) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - English Grammar]\n\n📖 Tenses in English (काल):\n\nEnglish me 3 main tenses hote hain, aur har tense ke 4 sub-types hote hain (Total 12 Tenses):\n\n1. Present Tense (वर्तमान काल):\n• Simple Present: Subject + V1(s/es) + Object (He plays cricket)\n• Present Continuous: Sub + is/am/are + V1+ing + Obj (He is playing)\n• Present Perfect: Sub + has/have + V3 + Obj (He has played)\n• Present Perfect Continuous: Sub + has/have been + V1+ing + since/for\n\n2. Past Tense (भूतकाल):\n• Simple Past: Sub + V2 + Obj (He played)\n• Past Continuous: Sub + was/were + V1+ing + Obj\n• Past Perfect: Sub + had + V3 + Obj\n\n3. Future Tense (भविष्य काल):\n• Simple Future: Sub + will + V1 + Obj (He will play)\n• Future Continuous: Sub + will be + V1+ing + Obj\n• Future Perfect: Sub + will have + V3 + Obj`
+    };
+  }
+
+  // F. Articles & Prepositions
+  if (q.includes('article') || q.includes('vowel') || q.includes('a an the') || q.includes('preposition')) {
+    if (q.includes('preposition')) {
+      return {
+        type: 'academic',
+        reply: `✨ [L.C.C. AI Study Assistant - Prepositions]\n\n📍 Common Prepositions:\n\n• In: Big cities, months, years, inside closed space ("In Varanasi", "In January")\n• On: Days, dates, surfaces ("On Monday", "On the table")\n• At: Exact time, small places ("At 5:00 PM", "At the bus stop")\n• Between: Do vyaktiyon/vastuon ke beech me ("Between Ram and Shyam")\n• Among: Do se adhik logon ke beech me ("Among the students")\n• Since: Fixed starting point of time ("Since 2020", "Since morning")\n• For: Duration of time ("For 2 hours", "For 5 years")`
+      };
+    }
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - English Grammar]\n\n🔤 Articles (A, An, The) Rules:\n\n1. 'A' ka use: Consonant sound se shuru hone wale singular nouns ke aage (A boy, A car, A university — 'yu' sound).\n2. 'An' ka use: Vowel sound (अ, आ, इ, ई, ए, ओ...) se shuru hone wale singular nouns ke aage (An apple, An honest person — silent 'h').\n3. 'The' (Definite Article): Kisi vishisht vastu, historical monuments, rivers, holy books ke aage (The Sun, The Ganga, The Taj Mahal).`
+    };
+  }
+
+  // ══════════════════════════════════════════════
+  // 7. SOCIAL STUDIES / SOCIAL SCIENCE (SST)
+  // ══════════════════════════════════════════════
+
+  if (
+    q.includes('samvidhan') ||
+    q.includes('constitution') ||
+    q.includes('ambedkar') ||
+    q.includes('ganatantra') ||
+    q.includes('republic')
+  ) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Social Studies / Civics]\n\n📜 Bhartiya Samvidhan (Indian Constitution):\n\n• Samvidhan Bharat ka sarvochha kanoon (Supreme Law) hai.\n• Iska praroop Dr. B.R. Ambedkar ji ki adhyakshata me Drafting Committee dwara banaya gaya.\n• Samvidhan banne me kul 2 saal 11 mahine aur 18 din ka samay laga.\n• 26 November 1949 ko samvidhan apnaya gaya (Samvidhan Diwas).\n• 26 January 1950 ko yeh poore desh me lagu hua (Ganatantra Diwas / Republic Day).\n• Bharat ka samvidhan vishwa ka sabse bada likhit samvidhan hai.`
+    };
+  }
+
+  if (q.includes('democracy') || q.includes('loktantra') || q.includes('prajatantra')) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Civics / Pol Science]\n\n🗳️ Loktantra (Democracy):\n\n"Democracy is government of the people, by the people, for the people." — Abraham Lincoln\n\nKey Principles of Indian Democracy:\n1. Universal Adult Suffrage: 18 saal se upar har nagrik ko vote dene ka adhikar.\n2. Fundamental Rights: Samvidhan dwara 6 maulik adhikar pradan kiye gaye hain.\n3. Independent Judiciary: Nishpaksh nyaypalika jo nagrikon ke adhikaron ki raksha karti hai.`
+    };
+  }
+
+  // ══════════════════════════════════════════════
+  // 8. COMPUTER & IT (DCA / TALLY / PROGRAMMING)
+  // ══════════════════════════════════════════════
+
+  if (
+    q.includes('hardware') ||
+    q.includes('software') ||
+    q.includes('computer kya hai') ||
+    q.includes('computer') ||
+    q.includes('dca')
+  ) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Computer & DCA]\n\n💻 Computer Hardware vs Software:\n\n1. Hardware (हार्डवेयर): Computer ke wah physical bhag jinhe hum chu aur dekh sakte hain.\n• Examples: CPU, Keyboard, Mouse, Monitor, RAM, Hard Disk.\n\n2. Software (सॉफ्टवेयर): Instructions aur programs ka samuh jo computer ko kaam karna sikhata hai.\n• System Software: Operating System (Windows, Linux, Android).\n• Application Software: MS Office, Tally Prime, Web Browsers.\n\n💡 L.C.C. Campus me full AC computer practical lab available hai!`
+    };
+  }
+
+  if (q.includes('shortcut') || q.includes('keys') || q.includes('ctrl')) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Computer Shortcuts]\n\n⌨️ Top Keyboard Shortcuts:\n\n• Ctrl + C : Copy (कॉपी)\n• Ctrl + V : Paste (पेस्ट)\n• Ctrl + X : Cut (कट)\n• Ctrl + Z : Undo (वापस लाना)\n• Ctrl + S : Save (सुरक्षित करना)\n• Ctrl + A : Select All (सब चुनना)\n• Alt + Tab : Switch Apps\n• Alt + F4 : Close Active Window`
+    };
+  }
+
+  // ══════════════════════════════════════════════
+  // 9. SCIENCE (PHYSICS, CHEMISTRY, BIOLOGY)
+  // ══════════════════════════════════════════════
+
+  if (q.includes('photosynthesis') || q.includes('prakash sanshleshan') || q.includes('paudhe khana')) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Biology / Science]\n\n🌿 Photosynthesis (प्रकाश-संश्लेषण):\n\nWah prakriya jiske dwara hare paudhe Surya ke prakash (Sunlight), Chlorophyll, Carbon Dioxide (CO₂) aur Paani (H₂O) ki madad se apna bhojan (Glucose) banate hain aur Oxygen (O₂) chhodte hain.\n\nEquation: 6CO₂ + 6H₂O + Sunlight ➔ C₆H₁₂O₆ (Glucose) + 6O₂ (Oxygen)`
+    };
+  }
+
+  if (q.includes('reflection') || q.includes('refraction') || q.includes('mirror formula') || q.includes('lens formula')) {
+    return {
+      type: 'academic',
+      reply: `✨ [L.C.C. AI Study Assistant - Physics / Optics]\n\n🔦 Light Formulas:\n\n• Mirror Formula: 1/f = 1/v + 1/u\n• Lens Formula: 1/f = 1/v - 1/u\n• Laws of Reflection: Angle of Incidence (∠i) = Angle of Reflection (∠r).`
+    };
+  }
+
+  // ══════════════════════════════════════════════
+  // 10. ADMISSION, FEES & TIMINGS
   // ══════════════════════════════════════════════
   if (q.includes('fee') || q.includes('fees') || q.includes('paisa') || q.includes('kitna lagta') || q.includes('cost')) {
     return {
@@ -651,11 +668,10 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
   }
 
   // ══════════════════════════════════════════════
-  // 9. CLEAN, CONCISE DEFAULT GUIDANCE
-  // (No 12-line boilerplate essay!)
+  // 11. GENERAL SMART HELPDESK
   // ══════════════════════════════════════════════
   return {
     type: 'general',
-    reply: `✨ [L.C.C. AI Study Assistant]\n\nAapka sawal mil gaya! Kya problem hai aapko? Kripya apna topic thoda vistaar se batayein (jaise English Grammar/Verbs, SST, Computer, Science, ya Math) — hum turant step-by-step hal karenge!`
+    reply: `✨ [L.C.C. AI Study Assistant]\n\nAapka sawal mil gaya! Hum turant madad karenge:\n\n1. 🗣️ Spoken English & Sentence Translations (jaise: 'mujhe pani chahiye in english' ya 'self introduction')\n2. 📐 Math & Calculations (jaise: '23833827272+3838-272727272×733873', 'table of 17', 'lcm of 12 and 18', '2x + 5 = 25')\n3. 📚 English Grammar (Verbs, Tenses, Active/Passive Voice, Prepositions)\n4. 🔬 Science, SST & Computer DCA\n\nApna sawal likhein, hum step-by-step answer denge!`
   };
 };
