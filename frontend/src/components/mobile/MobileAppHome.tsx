@@ -482,6 +482,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           </h3>
           <button
             type="button"
+            id="btn-open-all-batches"
             onClick={() => setIsAllBatchesOpen(true)}
             className="text-[11px] font-bold flex items-center gap-0.5 cursor-pointer"
             style={{ color: '#0066FF' }}
@@ -896,18 +897,21 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
       {isAllBatchesOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div
-            className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-5"
+            className="w-full max-w-xl rounded-t-[32px] sm:rounded-3xl max-h-[90vh] sm:max-h-[85vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-5 overflow-hidden"
             style={{ backgroundColor: '#ffffff', color: '#1e293b' }}
           >
+            {/* Sheet Handle for Mobile */}
+            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-2.5 mb-0.5 sm:hidden shrink-0" />
+
             {/* Header */}
-            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0066FF] flex items-center justify-center font-bold">
+            <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#0066FF] flex items-center justify-center font-bold shadow-xs">
                   <BookOpen className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black">All Coaching Batches (2026-27)</h3>
-                  <p className="text-[10px] text-slate-500">Tap to enroll or view syllabus</p>
+                  <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">All Coaching Batches (2026-27)</h3>
+                  <p className="text-[11px] text-slate-500 font-medium">Session Admissions Open • Tap to Enroll</p>
                 </div>
               </div>
               <button
@@ -915,73 +919,90 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                 id="close-batches-sheet"
                 aria-label="Close Batches Sheet"
                 onClick={() => setIsAllBatchesOpen(false)}
-                className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center cursor-pointer transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Category Filter Chips */}
-            <div className="p-3 border-b border-slate-100 flex gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+            <div className="px-4 py-2.5 border-b border-slate-100 flex gap-2 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden overscroll-contain shrink-0">
               {[
                 { id: 'all', label: 'All Batches' },
-                { id: 'secondary', label: 'Class 9-10' },
-                { id: 'senior', label: 'Class 11-12' },
+                { id: 'secondary', label: 'Class 9–10' },
+                { id: 'senior', label: 'Class 11–12' },
                 { id: 'computer', label: 'Computer DCA' },
                 { id: 'language', label: 'Spoken English' },
-                { id: 'primary', label: 'Primary (1-5)' },
-                { id: 'middle', label: 'Middle (6-8)' }
-              ].map(cat => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setBatchCategoryFilter(cat.id)}
-                  className="px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 cursor-pointer transition-all"
-                  style={{
-                    backgroundColor: batchCategoryFilter === cat.id ? '#0066FF' : '#f1f5f9',
-                    color: batchCategoryFilter === cat.id ? '#ffffff' : '#475569'
-                  }}
-                >
-                  {cat.label}
-                </button>
-              ))}
+                { id: 'primary', label: 'Primary (1–5)' },
+                { id: 'middle', label: 'Middle (6–8)' }
+              ].map(cat => {
+                const isActive = batchCategoryFilter === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setBatchCategoryFilter(cat.id)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold shrink-0 cursor-pointer transition-all ${
+                      isActive
+                        ? 'bg-[#0066FF] text-white shadow-sm shadow-blue-500/25 scale-[1.02]'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Courses List */}
-            <div className="p-4 overflow-y-auto space-y-3 flex-1">
+            <div
+              id="modal-courses-scroll"
+              className="p-4 overflow-y-auto space-y-3.5 flex-1 pb-32 sm:pb-8"
+            >
               {courses
                 .filter(c => batchCategoryFilter === 'all' || c.category === batchCategoryFilter)
                 .map(c => (
                   <div
                     key={c.id}
-                    className="p-3 rounded-2xl border border-slate-200 bg-white flex flex-col gap-2.5 shadow-sm"
+                    className="p-3.5 rounded-2xl border border-slate-200/90 bg-white hover:border-blue-200 flex flex-col gap-3 shadow-xs hover:shadow-md transition-all active:scale-[0.99]"
                   >
-                    <div className="flex gap-3 items-start">
-                      <img
-                        src={c.image}
-                        alt={c.title}
-                        className="w-16 h-16 rounded-xl object-cover shrink-0"
-                      />
+                    <div className="flex gap-3.5 items-start">
+                      <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-slate-100 border border-slate-100 relative">
+                        <img
+                          src={c.image || 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80'}
+                          alt={c.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80';
+                          }}
+                        />
+                        {c.badge && (
+                          <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-blue-600/90 text-[8px] font-black text-white uppercase backdrop-blur-xs">
+                            {c.badge}
+                          </span>
+                        )}
+                      </div>
+
                       <div className="flex-1 min-w-0">
-                        <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-50 text-[#0066FF]">
+                        <span className="inline-block text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-blue-50 text-[#0066FF] border border-blue-200/50">
                           {c.targetClass}
                         </span>
-                        <h4 className="text-xs font-bold text-slate-900 leading-tight mt-1">
+                        <h4 className="text-xs sm:text-sm font-black text-slate-900 leading-snug line-clamp-2 mt-1">
                           {c.title}
                         </h4>
-                        <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
-                          {c.instructor}
+                        <p className="text-[11px] text-slate-500 font-medium line-clamp-1 mt-0.5 flex items-center gap-1">
+                          <span>👨‍🏫 {c.instructor}</span>
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                      <div>
-                        <span className="text-xs font-bold text-[#0066FF]">₹{c.discountFee || c.fee}</span>
+                    <div className="flex items-center justify-between pt-2.5 border-t border-slate-100">
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
+                        <span className="text-sm sm:text-base font-black text-[#0066FF]">₹{c.discountFee || c.fee}</span>
                         {c.discountFee && c.discountFee < c.fee && (
-                          <span className="text-[10px] line-through text-slate-400 ml-1">₹{c.fee}</span>
+                          <span className="text-[11px] line-through text-slate-400">₹{c.fee}</span>
                         )}
-                        <span className="text-[10px] text-slate-400 ml-2">• {c.duration}</span>
+                        <span className="text-[11px] text-slate-500 font-medium ml-1">• {c.duration}</span>
                       </div>
                       <button
                         type="button"
@@ -989,7 +1010,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                           setIsAllBatchesOpen(false);
                           setSelectedCourseForPayment(c);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-[#0066FF] text-white text-[10px] font-bold uppercase tracking-wider cursor-pointer"
+                        className="h-9 px-4 rounded-xl bg-gradient-to-r from-[#0066FF] to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs font-black uppercase tracking-wider shadow-sm shadow-blue-500/20 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
                       >
                         Enroll Now
                       </button>

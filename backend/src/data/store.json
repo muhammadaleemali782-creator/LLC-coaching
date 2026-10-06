@@ -295,7 +295,7 @@
       "discountFee": 2499,
       "rating": 4.8,
       "instructor": "Ms. Priyanshi Saxena",
-      "image": "/assets/debate.jpg",
+      "image": "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80",
       "description": "Transform your communication skills with real-time stage debates, extempore speeches, and accent correction.",
       "badge": "Confidence Booster",
       "features": [
