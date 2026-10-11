@@ -13,10 +13,15 @@ export const WebsiteSettings: React.FC = () => {
     instituteName: websiteSettings.instituteName || 'Learning Coaching Center (L.C.C.)',
     shortName: websiteSettings.shortName || 'L.C.C.',
     instituteTagline: websiteSettings.instituteTagline || 'Learning Coaching Center',
+    instituteSubtagline: websiteSettings.instituteSubtagline || '(A Premier Coaching Institute for School Academics, Computer DCA & Spoken English)',
+    ratingBadgeTop: websiteSettings.ratingBadgeTop || 'RATED',
+    ratingBadgeGrade: websiteSettings.ratingBadgeGrade || 'A++',
+    ratingBadgeSub: websiteSettings.ratingBadgeSub || 'TOP #1',
     logoUrl: websiteSettings.logoUrl || '/logo.jpg',
     faviconUrl: websiteSettings.faviconUrl || '/logo.jpg',
     directorName: websiteSettings.directorName || 'Aman Singh Gautam',
     contactPhone: websiteSettings.contactPhone || '+91 9250703092',
+    officeHours: websiteSettings.officeHours || 'Monday to Saturday: 7:00 AM – 7:30 PM\nSunday: 9:00 AM – 1:00 PM (Mock Tests & Doubt Clinics)',
     contactEmail: websiteSettings.contactEmail || 'admissions@lcc.edu',
     contactAddress: websiteSettings.contactAddress || 'Palahipatti, Varanasi, Sindhora Road — Near Union Bank',
     googleMapsEmbedUrl: websiteSettings.googleMapsEmbedUrl || '',
@@ -38,10 +43,15 @@ export const WebsiteSettings: React.FC = () => {
       instituteName: websiteSettings.instituteName || 'Learning Coaching Center (L.C.C.)',
       shortName: websiteSettings.shortName || 'L.C.C.',
       instituteTagline: websiteSettings.instituteTagline || 'Learning Coaching Center',
+      instituteSubtagline: websiteSettings.instituteSubtagline || '(A Premier Coaching Institute for School Academics, Computer DCA & Spoken English)',
+      ratingBadgeTop: websiteSettings.ratingBadgeTop || 'RATED',
+      ratingBadgeGrade: websiteSettings.ratingBadgeGrade || 'A++',
+      ratingBadgeSub: websiteSettings.ratingBadgeSub || 'TOP #1',
       logoUrl: websiteSettings.logoUrl || '/logo.jpg',
       faviconUrl: websiteSettings.faviconUrl || '/logo.jpg',
       directorName: websiteSettings.directorName || 'Aman Singh Gautam',
       contactPhone: websiteSettings.contactPhone || '+91 9250703092',
+      officeHours: websiteSettings.officeHours || 'Monday to Saturday: 7:00 AM – 7:30 PM\nSunday: 9:00 AM – 1:00 PM (Mock Tests & Doubt Clinics)',
       contactEmail: websiteSettings.contactEmail || 'admissions@lcc.edu',
       contactAddress: websiteSettings.contactAddress || 'Palahipatti, Varanasi, Sindhora Road — Near Union Bank',
       googleMapsEmbedUrl: websiteSettings.googleMapsEmbedUrl || '',
@@ -64,9 +74,12 @@ export const WebsiteSettings: React.FC = () => {
     setIsSaving(true);
     setSaveSuccess(false);
     try {
-      await updateWebsiteSettings(form);
+      await updateWebsiteSettings({
+        ...form,
+        phone: form.contactPhone
+      });
       setSaveSuccess(true);
-      showToast('Settings & Google Maps location permanently saved to MongoDB Atlas!', 'success');
+      showToast('Settings, branding & Google Maps location permanently saved to MongoDB Atlas!', 'success');
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err: any) {
       showToast('Failed to save settings: ' + err.message, 'error');
@@ -94,6 +107,45 @@ export const WebsiteSettings: React.FC = () => {
           <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
             <ImageIcon className="w-5 h-5 text-amber-400" />
             <h3 className="text-sm font-black text-white uppercase tracking-wider">Institute Name & Official Logo Controls</h3>
+          </div>
+
+          {/* Live Top Header Banner Preview */}
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
+              Live Website Header Banner Preview (Top of Public Website):
+            </span>
+            <div className="bg-white rounded-2xl p-4 sm:p-5 border-2 border-red-600/30 shadow-md flex items-center justify-between gap-3 text-slate-800">
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-amber-400 p-0.5 bg-white shadow-xs flex items-center justify-center shrink-0">
+                  <img
+                    src={form.logoUrl || '/logo.jpg'}
+                    alt="Logo"
+                    className="w-full h-full object-contain rounded-full"
+                    onError={(e: any) => { e.target.src = '/logo.jpg'; }}
+                  />
+                </div>
+              </div>
+
+              <div className="text-center flex-1 space-y-0.5">
+                <h4 className="text-xs sm:text-base font-black text-[#0B3B95] tracking-tight uppercase leading-snug">
+                  {form.instituteName || 'LEARNING COACHING CENTER (L.C.C.)'}
+                </h4>
+                <p className="text-[11px] sm:text-xs font-black text-[#D32F2F] tracking-wide leading-tight">
+                  {form.instituteTagline || 'EXCELLENCE IN EDUCATION • VARANASI'}
+                </p>
+                <p className="text-[9px] sm:text-[11px] font-bold text-slate-600">
+                  {form.instituteSubtagline || '(A Premier Coaching Institute for School Academics, Computer DCA & Spoken English)'}
+                </p>
+              </div>
+
+              <div className="shrink-0 flex items-center">
+                <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full border-2 border-amber-500 bg-amber-50 flex flex-col items-center justify-center shadow-xs">
+                  <span className="text-[7px] sm:text-[8px] font-bold text-amber-900 leading-none">{form.ratingBadgeTop || 'RATED'}</span>
+                  <span className="text-xs sm:text-sm font-black text-amber-600 leading-none">{form.ratingBadgeGrade || 'A++'}</span>
+                  <span className="text-[6px] sm:text-[7px] font-bold text-amber-900 leading-none">{form.ratingBadgeSub || 'TOP #1'}</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -145,16 +197,63 @@ export const WebsiteSettings: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1">Institute Tagline / Subtitle *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Learning Coaching Center"
-                  value={form.instituteTagline}
-                  onChange={e => setForm({ ...form, instituteTagline: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Institute Tagline / Subtitle *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Learning Coaching Center"
+                    value={form.instituteTagline}
+                    onChange={e => setForm({ ...form, instituteTagline: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Header 3rd Line (Mission / Affiliation)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. (A Premier Coaching Institute for School Academics, Computer DCA & Spoken English)"
+                    value={form.instituteSubtagline}
+                    onChange={e => setForm({ ...form, instituteSubtagline: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+              </div>
+
+              {/* Rating Badge 3-Fields */}
+              <div className="grid grid-cols-3 gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 block mb-1">Badge Top Text</label>
+                  <input
+                    type="text"
+                    placeholder="RATED"
+                    value={form.ratingBadgeTop}
+                    onChange={e => setForm({ ...form, ratingBadgeTop: e.target.value })}
+                    className="w-full px-2.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 block mb-1">Badge Grade</label>
+                  <input
+                    type="text"
+                    placeholder="A++"
+                    value={form.ratingBadgeGrade}
+                    onChange={e => setForm({ ...form, ratingBadgeGrade: e.target.value })}
+                    className="w-full px-2.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 block mb-1">Badge Subtext</label>
+                  <input
+                    type="text"
+                    placeholder="TOP #1"
+                    value={form.ratingBadgeSub}
+                    onChange={e => setForm({ ...form, ratingBadgeSub: e.target.value })}
+                    className="w-full px-2.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
               </div>
 
               <ImageUploaderInput
@@ -175,7 +274,7 @@ export const WebsiteSettings: React.FC = () => {
                 label="Director / Founder Official Photo (File Upload or URL)"
                 value={form.directorPhotoUrl}
                 onChange={url => setForm({ ...form, directorPhotoUrl: url })}
-                placeholder="Upload Director Aman Arora photo or paste URL..."
+                placeholder="Upload Director photo or paste URL..."
               />
             </div>
 
@@ -282,6 +381,17 @@ export const WebsiteSettings: React.FC = () => {
                 value={form.contactAddress}
                 onChange={e => setForm({ ...form, contactAddress: e.target.value })}
                 className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="text-xs font-bold text-slate-300 block mb-1">Class & Office Hours (Shown in Public Contact Card)</label>
+              <textarea
+                rows={2}
+                placeholder="Monday to Saturday: 7:00 AM – 7:30 PM&#10;Sunday: 9:00 AM – 1:00 PM (Mock Tests & Doubt Clinics)"
+                value={form.officeHours}
+                onChange={e => setForm({ ...form, officeHours: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF] font-sans"
               />
             </div>
 

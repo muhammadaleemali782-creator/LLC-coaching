@@ -205,7 +205,7 @@ export const createVideo = async (req, res) => {
     views: req.body.views || '1.2K',
     subject: subject || 'General Knowledge',
     targetClass: targetClass || 'All Students',
-    instructor: instructor || 'Aman Arora',
+    instructor: instructor || 'Aman Singh Gautam',
     isPublished: Boolean(isPublished),
     isFeatured: Boolean(isFeatured),
     dateAdded: req.body.dateAdded || new Date().toISOString().split('T')[0]

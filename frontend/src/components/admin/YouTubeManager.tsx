@@ -7,7 +7,7 @@ import { ImageUploaderInput } from '../common/ImageUploaderInput';
 import { detectPlatform, extractVideoId, extractThumbnailFromUrl, fetchMediaDetails } from '../../utils/mediaExtractor';
 
 export const YouTubeManager: React.FC = () => {
-  const { videos, addVideoLecture, updateVideoLecture, deleteVideoLecture, showToast } = useApp();
+  const { videos, addVideoLecture, updateVideoLecture, deleteVideoLecture, showToast, websiteSettings } = useApp();
   const [isAdding, setIsAdding] = useState(false);
   const [editingVideo, setEditingVideo] = useState<VideoLecture | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -29,7 +29,7 @@ export const YouTubeManager: React.FC = () => {
     duration: '15:00',
     subject: 'Mathematics',
     targetClass: 'Class 10',
-    instructor: 'Aman Arora'
+    instructor: websiteSettings?.directorName || 'Aman Singh Gautam'
   });
 
   const handleNewUrlChange = (url: string) => {
@@ -116,7 +116,7 @@ export const YouTubeManager: React.FC = () => {
       duration: '15:00',
       subject: 'Mathematics',
       targetClass: 'Class 10',
-      instructor: 'Aman Arora'
+      instructor: websiteSettings?.directorName || 'Aman Singh Gautam'
     });
     showToast(`${platform.toUpperCase()} video lecture published!`, 'success');
   };

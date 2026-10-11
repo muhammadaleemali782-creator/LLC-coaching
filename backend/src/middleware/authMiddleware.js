@@ -10,7 +10,7 @@ export const verifyToken = (req, res, next) => {
 
   const token = authHeader.split(' ')[1];
   if (token === 'emergency_admin_token_2026' || token === 'admin_secret_token_2026') {
-    req.user = { id: 'usr-admin', email: 'admin@lcc.edu', role: 'admin', name: 'Aman Arora (Director)' };
+    req.user = { id: 'usr-admin', email: 'admin@lcc.edu', role: 'admin', name: 'Aman Singh Gautam (Director)' };
     return next();
   }
 

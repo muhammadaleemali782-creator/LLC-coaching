@@ -47,8 +47,11 @@ export const StaffBranchCommandCenter: React.FC = () => {
     adminResetTeacherPassword,
     assignTaskToTeacher,
     refreshStaffData,
-    showToast
+    showToast,
+    websiteSettings
   } = useApp();
+
+  const directorDisplayName = websiteSettings?.directorName || 'Aman Singh Gautam';
 
   const [selectedBranch, setSelectedBranch] = useState('All Branches');
   const [searchQuery, setSearchQuery] = useState('');
@@ -520,7 +523,7 @@ export const StaffBranchCommandCenter: React.FC = () => {
                 Today&apos;s Absence & Leave Reasons Log
               </h2>
               <p className="text-xs text-amber-200/80">
-                Documented reasons provided by faculty for Director Aman Arora&apos;s review
+                Documented reasons provided by faculty for Director {directorDisplayName}&apos;s review
               </p>
             </div>
           </div>
@@ -1647,7 +1650,7 @@ export const StaffBranchCommandCenter: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <a
                 href={`https://api.whatsapp.com/send?${shareCredentialsTeacher.phone ? `phone=${shareCredentialsTeacher.phone.replace(/[^0-9]/g, '')}&` : ''}text=${encodeURIComponent(
-                  `*L.C.C. (Learning Coaching Center) Faculty Onboarding*\n\nNamaste *${shareCredentialsTeacher.name}* ji,\nAapka faculty account create kar diya gaya hai.\n\n🏢 *Assigned Branch:* ${shareCredentialsTeacher.branch}\n🌐 *Portal Link:* https://lccedu.vercel.app\n📧 *Email:* ${shareCredentialsTeacher.email}\n🔑 *Password:* ${shareCredentialsTeacher.password || 'Staff@123'}\n\nKripya portal par login karke apni daily attendance aur assigned batches verify karein.\n\n— Director Aman Arora, L.C.C.`
+                  `*L.C.C. (Learning Coaching Center) Faculty Onboarding*\n\nNamaste *${shareCredentialsTeacher.name}* ji,\nAapka faculty account create kar diya gaya hai.\n\n🏢 *Assigned Branch:* ${shareCredentialsTeacher.branch}\n🌐 *Portal Link:* https://lccedu.vercel.app\n📧 *Email:* ${shareCredentialsTeacher.email}\n🔑 *Password:* ${shareCredentialsTeacher.password || 'Staff@123'}\n\nKripya portal par login karke apni daily attendance aur assigned batches verify karein.\n\n— Director ${directorDisplayName}, L.C.C.`
                 )}`}
                 target="_blank"
                 rel="noreferrer"

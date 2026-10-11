@@ -325,7 +325,7 @@ const MainContent: React.FC = () => {
                         {notice.description}
                       </p>
                       <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                        <span>Issued by: Aman Arora (Director)</span>
+                        <span>Issued by: {websiteSettings?.directorName || 'Aman Singh Gautam'} (Director)</span>
                         <span className="font-semibold text-emerald-600">Active</span>
                       </div>
                     </div>

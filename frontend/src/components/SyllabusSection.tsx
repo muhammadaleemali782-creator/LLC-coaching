@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { BookOpen, Download, ChevronDown, ChevronUp, CheckCircle2, Sparkles, Clock, Target, Layers, FileText, Award, ShieldCheck, Flame, BookCheck } from 'lucide-react';
 
 export const SyllabusSection: React.FC = () => {
-  const { syllabuses, showToast } = useApp();
+  const { syllabuses, showToast, websiteSettings } = useApp();
   const [selectedClass, setSelectedClass] = useState<string>('Class 10');
   const [openChapterIdx, setOpenChapterIdx] = useState<number | null>(0); // Default first chapter expanded
 
@@ -28,7 +28,7 @@ export const SyllabusSection: React.FC = () => {
     const chaptersText = (activeSyllabus.chapters || []).map((c, i) =>
       `${i + 1}. ${c?.name || 'Unit'} [${c?.weightage || 'Marks'}] - Est. ${c?.estimatedHours || 5} Hours\n   Topics: ${(c?.subtopics || []).join(', ')}`
     ).join('\n\n');
-    const file = new Blob([`L.C.C. (Learning Coaching Center) Official Syllabus Blueprint\nClass: ${activeSyllabus.targetClass}\nSubject: ${activeSyllabus.subject}\nTotal Marks: ${activeSyllabus.totalMarks} Marks\nExam Board: ${activeSyllabus.examBoard}\n\nChapter Breakdown:\n${chaptersText || 'Full details available at center office.'}\n\nDirector: Aman Arora\nHelpline: +91 98765 43210`], { type: 'text/plain' });
+    const file = new Blob([`L.C.C. (Learning Coaching Center) Official Syllabus Blueprint\nClass: ${activeSyllabus.targetClass}\nSubject: ${activeSyllabus.subject}\nTotal Marks: ${activeSyllabus.totalMarks} Marks\nExam Board: ${activeSyllabus.examBoard}\n\nChapter Breakdown:\n${chaptersText || 'Full details available at center office.'}\n\nDirector: ${websiteSettings?.directorName || 'Aman Singh Gautam'}\nHelpline: ${websiteSettings?.phone || websiteSettings?.contactPhone || '+91 9250703092'}`], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
     element.download = `syllabus_${selectedClass.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
     document.body.appendChild(element);

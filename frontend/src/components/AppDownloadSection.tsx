@@ -386,7 +386,7 @@ export const AppDownloadSection: React.FC = () => {
             </h3>
 
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-              The upcoming <strong>Learner by L.C.C.</strong> mobile app brings high-speed video lectures, daily practice sheets, photo question recognition, and direct mentor chats with Aman Arora and faculty.
+              The upcoming <strong>Learner by L.C.C.</strong> mobile app brings high-speed video lectures, daily practice sheets, photo question recognition, and direct mentor chats with {websiteSettings?.directorName || 'Aman Singh Gautam'} and faculty.
             </p>
 
             {/* Pre-Register Box */}

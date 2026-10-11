@@ -262,6 +262,12 @@ export interface WebsiteSettings {
   defaultPlaylistRedirectUrl?: string;
   heroPosterUrl?: string;
   directorPhotoUrl?: string;
+  instituteSubtagline?: string;
+  ratingBadgeTop?: string;
+  ratingBadgeGrade?: string;
+  ratingBadgeSub?: string;
+  officeHours?: string;
+  phone?: string;
   visualOverrides?: Record<string, VisualOverrideItem>;
   sectionOrder?: string[];
   heroColumnsOrder?: string[];

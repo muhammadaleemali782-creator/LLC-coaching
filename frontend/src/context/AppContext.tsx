@@ -233,7 +233,7 @@ const INITIAL_ADS: Advertisement[] = [
   {
     id: 'ad-feed-1',
     title: '🗣️ English Fluency & Stage Public Speaking Bootcamp',
-    description: 'Overcome stage fright in 30 days with daily interactive GD sessions led by Aman Arora.',
+    description: 'Overcome stage fright in 30 days with daily interactive GD sessions led by Aman Singh Gautam.',
     imageUrl: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80',
     destinationUrl: '#courses-section',
     placement: 'between_sections',
@@ -283,12 +283,19 @@ const INITIAL_SOCIALS: SocialLink[] = [
 
 const INITIAL_SETTINGS: WebsiteSettings = {
   instituteName: 'Learning Coaching Center (L.C.C.)',
+  shortName: 'L.C.C.',
+  instituteTagline: 'Learning Coaching Center',
+  instituteSubtagline: '(A Premier Coaching Institute for School Academics, Computer DCA & Spoken English)',
+  ratingBadgeTop: 'RATED',
+  ratingBadgeGrade: 'A++',
+  ratingBadgeSub: 'TOP #1',
   directorName: 'Aman Singh Gautam',
   directorPhotoUrl: '/assets/founder.png',
   logoUrl: './logo.jpg',
   contactPhone: '+91 9250703092',
   contactEmail: 'admissions@lcc.edu',
   contactAddress: 'Palahipatti, Varanasi, Sindhora Road — Near Union Bank',
+  officeHours: 'Monday to Saturday: 7:00 AM – 7:30 PM\nSunday: 9:00 AM – 1:00 PM (Mock Tests & Doubt Clinics)',
   emergencyAlertText: 'Admissions Open for Session 2026-2027 (Scholarship Test on Sunday)',
   noticeTickerSpeed: 'normal',
   heroBadgeText: "INDIA'S TOP RATED COACHING & EDTECH",
@@ -382,6 +389,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(() => loadSaved('lcc_social_links', INITIAL_SOCIALS));
   const [websiteSettings, setWebsiteSettings] = useState<WebsiteSettings>(() => {
     const saved = loadSaved<WebsiteSettings>('lcc_website_settings', INITIAL_SETTINGS);
+    if (saved) {
+      if (saved.directorName === 'Aman Arora') {
+        saved.directorName = 'Aman Singh Gautam';
+      }
+      if (!saved.officeHours) {
+        saved.officeHours = INITIAL_SETTINGS.officeHours;
+      }
+      if (!saved.instituteSubtagline) {
+        saved.instituteSubtagline = INITIAL_SETTINGS.instituteSubtagline;
+      }
+      if (!saved.ratingBadgeGrade) {
+        saved.ratingBadgeGrade = 'A++';
+        saved.ratingBadgeTop = 'RATED';
+        saved.ratingBadgeSub = 'TOP #1';
+      }
+    }
     const overrides = loadSaved<Record<string, any>>('lcc_visual_overrides', {});
     if (overrides && Object.keys(overrides).length > 0) {
       saved.visualOverrides = { ...(saved.visualOverrides || {}), ...overrides };
@@ -589,14 +612,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               || allOverrides['section#about-section > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > img:nth-of-type(1)']?.value;
             const resolvedDirectorPhoto = cloudSets.directorPhotoUrl || directorOverride || prev.directorPhotoUrl || '/assets/founder.png';
 
+            const resolvedDirectorName = (cloudSets.directorName && cloudSets.directorName !== 'Aman Arora')
+              ? cloudSets.directorName
+              : (prev.directorName && prev.directorName !== 'Aman Arora' ? prev.directorName : 'Aman Singh Gautam');
+
             const merged: WebsiteSettings = {
               ...prev,
               ...cloudSets,
               directorPhotoUrl: resolvedDirectorPhoto,
               logoUrl: (cloudSets.logoUrl && !cloudSets.logoUrl.startsWith('/')) ? cloudSets.logoUrl : (prev.logoUrl && !prev.logoUrl.startsWith('/') ? prev.logoUrl : './logo.jpg'),
               heroPosterUrl: cloudSets.heroPosterUrl || prev.heroPosterUrl,
-              directorName: cloudSets.directorName || prev.directorName || 'Aman Singh Gautam',
+              directorName: resolvedDirectorName,
               contactPhone: cloudSets.contactPhone || prev.contactPhone || '+91 9250703092',
+              officeHours: cloudSets.officeHours || prev.officeHours || 'Monday to Saturday: 7:00 AM – 7:30 PM\nSunday: 9:00 AM – 1:00 PM (Mock Tests & Doubt Clinics)',
+              instituteSubtagline: cloudSets.instituteSubtagline || prev.instituteSubtagline || '(A Premier Coaching Institute for School Academics, Computer DCA & Spoken English)',
+              ratingBadgeTop: cloudSets.ratingBadgeTop || prev.ratingBadgeTop || 'RATED',
+              ratingBadgeGrade: cloudSets.ratingBadgeGrade || prev.ratingBadgeGrade || 'A++',
+              ratingBadgeSub: cloudSets.ratingBadgeSub || prev.ratingBadgeSub || 'TOP #1',
               contactAddress: cloudSets.contactAddress || prev.contactAddress || 'Palahipatti, Varanasi, Sindhora Road — Near Union Bank',
               visualOverrides: allOverrides
             };
@@ -734,7 +766,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('lcc_admin_token', res.token);
         localStorage.setItem('lcc_admin_authenticated', 'true');
         setIsAdminAuthenticated(true);
-        showToast('Welcome Director Aman Arora! Opening Director Hub...', 'success');
+        showToast(`Welcome Director ${websiteSettings?.directorName || 'Aman Singh Gautam'}! Opening Director Hub...`, 'success');
         navigateTo('admin-panel');
         return true;
       } catch (err: any) {
@@ -742,7 +774,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           localStorage.setItem('lcc_admin_token', 'emergency_admin_token_2026');
           localStorage.setItem('lcc_admin_authenticated', 'true');
           setIsAdminAuthenticated(true);
-          showToast('Welcome Director Aman Arora! Opening Director Hub...', 'success');
+          showToast(`Welcome Director ${websiteSettings?.directorName || 'Aman Singh Gautam'}! Opening Director Hub...`, 'success');
           navigateTo('admin-panel');
           return true;
         }
@@ -757,7 +789,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('lcc_admin_token', res.token);
         localStorage.setItem('lcc_admin_authenticated', 'true');
         setIsAdminAuthenticated(true);
-        showToast('Welcome Director Aman Arora! Opening Director Hub...', 'success');
+        showToast(`Welcome Director ${websiteSettings?.directorName || 'Aman Singh Gautam'}! Opening Director Hub...`, 'success');
         navigateTo('admin-panel');
         return true;
       }
@@ -1011,7 +1043,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ? 'staff-ananya'
             : 'staff-amit',
           name: clean.includes('aman')
-            ? 'Aman Arora (Director & Head Faculty)'
+            ? `${websiteSettings?.directorName || 'Aman Singh Gautam'} (Director & Head Faculty)`
             : clean.includes('rajesh')
             ? 'Rajesh Verma (Senior Faculty)'
             : clean.includes('ananya')
@@ -1561,7 +1593,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Backend UTR submission note:', e);
     }
 
-    showToast('Payment evidence & UTR submitted! Pending verification by Director Aman Arora.', 'info');
+    showToast(`Payment evidence & UTR submitted! Pending verification by Director ${websiteSettings?.directorName || 'Aman Singh Gautam'}.`, 'info');
     return true;
   };
 

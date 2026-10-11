@@ -315,7 +315,7 @@ const defaultData = {
   users: [
     {
       id: 'usr-admin',
-      name: 'Aman Arora (Director)',
+      name: 'Aman Singh Gautam (Director)',
       email: 'admin@lcc.edu',
       phone: '+919876543210',
       passwordHash: bcrypt.hashSync(process.env.ADMIN_INITIAL_PASSWORD || 'AmanLCC@2026!', 10),
@@ -420,7 +420,7 @@ const defaultData = {
       discountFee: 6999,
       rating: 5.0,
       enrolledCount: 380,
-      instructor: 'Aman Arora (Managing Director) & Senior Mentors',
+      instructor: 'Aman Singh Gautam (Managing Director) & Senior Mentors',
       image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
       badge: 'Topper Choice',
       features: ['CBSE & State Board Syllabus Mastery', '10 Years PYQs with Model Solutions', '5 Full-length Mock Board Exams', 'Answer Writing Skill Workshop'],
@@ -438,7 +438,7 @@ const defaultData = {
       discountFee: 9999,
       rating: 4.9,
       enrolledCount: 295,
-      instructor: 'Aman Arora & Senior Mentors',
+      instructor: 'Aman Singh Gautam & Senior Mentors',
       image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80',
       badge: 'Rankers Batch',
       features: ['Physics, Chemistry, Maths & Biology', 'Formula Booklets & Derivation Guides', 'Competitive Exam Foundation (JEE/NEET/CUET)', '1-on-1 Mentorship & Test Analysis'],
@@ -526,7 +526,7 @@ const defaultData = {
       platform: 'youtube',
       videoId: 'kJQP7kiw5Fk',
       thumbnail: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80',
-      instructor: 'Aman Arora',
+      instructor: 'Aman Singh Gautam',
       views: '18.4K views',
       isFeatured: true
     },
@@ -613,7 +613,7 @@ const defaultData = {
     {
       id: 'ig-3',
       imageUrl: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80',
-      caption: 'Spoken English stage debate on "AI in Modern Education" by Aman Arora. Great energy in class today! 🔥🎙️',
+      caption: 'Spoken English stage debate on "AI in Modern Education" by Aman Singh Gautam. Great energy in class today! 🔥🎙️',
       likes: 1250,
       comments: 67,
       postUrl: 'https://instagram.com/lcc_coaching_official',
@@ -678,7 +678,7 @@ const defaultData = {
     {
       id: 'ad-feed-1',
       title: '🗣️ English Fluency & Stage Public Speaking Bootcamp',
-      description: 'Overcome stage fright in 30 days with daily interactive GD sessions led by Aman Arora.',
+      description: 'Overcome stage fright in 30 days with daily interactive GD sessions led by Aman Singh Gautam.',
       imageUrl: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80',
       destinationUrl: '#courses-section',
       placement: 'between_sections',

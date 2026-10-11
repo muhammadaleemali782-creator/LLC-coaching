@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
 
 interface PdfCanvasViewerProps {
   url: string;
@@ -17,6 +18,8 @@ export const PdfCanvasViewer: React.FC<PdfCanvasViewerProps> = ({
   contentSnippet = '',
   totalDocPages = 2
 }) => {
+  const { websiteSettings } = useApp();
+  const directorUpper = (websiteSettings?.directorName || 'Aman Singh Gautam').toUpperCase();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [pdfDoc, setPdfDoc] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -231,7 +234,7 @@ export const PdfCanvasViewer: React.FC<PdfCanvasViewerProps> = ({
 
           ctx.fillStyle = '#854d0e';
           ctx.font = 'bold 11.5px system-ui, -apple-system, sans-serif';
-          ctx.fillText('DIRECTOR AMAN ARORA\'S ENGLISH FLUENCY ADVICE:', 40, 600);
+          ctx.fillText(`DIRECTOR ${directorUpper}'S ENGLISH FLUENCY ADVICE:`, 40, 600);
 
           ctx.font = 'italic 11px system-ui, -apple-system, sans-serif';
           ctx.fillStyle = '#713f12';
@@ -324,7 +327,7 @@ export const PdfCanvasViewer: React.FC<PdfCanvasViewerProps> = ({
 
           ctx.fillStyle = '#854d0e';
           ctx.font = 'bold 11.5px system-ui, -apple-system, sans-serif';
-          ctx.fillText('DIRECTOR AMAN ARORA\'S DAILY FLUENCY CHALLENGE:', 40, 616);
+          ctx.fillText(`DIRECTOR ${directorUpper}'S DAILY FLUENCY CHALLENGE:`, 40, 616);
 
           ctx.font = 'italic 11px system-ui, -apple-system, sans-serif';
           ctx.fillStyle = '#713f12';
@@ -389,7 +392,7 @@ export const PdfCanvasViewer: React.FC<PdfCanvasViewerProps> = ({
 
           ctx.fillStyle = '#854d0e';
           ctx.font = 'bold 11.5px system-ui, -apple-system, sans-serif';
-          ctx.fillText('DIRECTOR AMAN ARORA\'S MESSAGE ON VALUES:', 40, 600);
+          ctx.fillText(`DIRECTOR ${directorUpper}'S MESSAGE ON VALUES:`, 40, 600);
 
           ctx.font = 'italic 11px system-ui, -apple-system, sans-serif';
           ctx.fillStyle = '#713f12';
@@ -488,7 +491,7 @@ export const PdfCanvasViewer: React.FC<PdfCanvasViewerProps> = ({
 
           ctx.fillStyle = '#854d0e';
           ctx.font = 'bold 11.5px system-ui, -apple-system, sans-serif';
-          ctx.fillText('DIRECTOR AMAN ARORA\'S LIFE ADVICE:', 40, 616);
+          ctx.fillText(`DIRECTOR ${directorUpper}'S LIFE ADVICE:`, 40, 616);
 
           ctx.font = 'italic 11px system-ui, -apple-system, sans-serif';
           ctx.fillStyle = '#713f12';

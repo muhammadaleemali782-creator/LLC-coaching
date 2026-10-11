@@ -50,7 +50,7 @@ export const DEFAULT_SECTION_ORDER = [
 
 export const SECTION_LABELS: Record<string, string> = {
   hero: 'Photo Slider & Quick Links Portal (Top)',
-  about: 'About Institute & Director Aman Arora Card',
+  about: 'About Institute & Managing Director Card',
   methodology: 'Mission & Pedagogy (What We Do)',
   ad_top: 'Top Offer Banner',
   courses: 'Coaching Courses Grid',
@@ -216,7 +216,7 @@ export const getElementFriendlyInfo = (el: HTMLElement): { name: string; subtitl
   if (leadership && (el === leadership || el.closest('#hero-leadership-header') || el.classList.contains('bg-white'))) {
     return {
       name: 'Director & Leadership Spotlight Card',
-      subtitle: 'Aman Arora Director Showcase Card',
+      subtitle: 'Director Showcase Card',
       targetEl: leadership
     };
   }

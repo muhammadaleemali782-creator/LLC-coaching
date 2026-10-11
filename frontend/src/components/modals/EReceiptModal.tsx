@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { CheckCircle2, Download, Printer, X, ShieldCheck, Share2 } from 'lucide-react';
 import { Transaction } from '../../types';
@@ -7,6 +7,7 @@ export const EReceiptModal: React.FC<{ transaction: Transaction | null; onClose:
   transaction,
   onClose
 }) => {
+  const { websiteSettings } = useApp();
   if (!transaction) return null;
 
   const handlePrint = () => {
@@ -88,7 +89,7 @@ export const EReceiptModal: React.FC<{ transaction: Transaction | null; onClose:
           {/* Director Seal */}
           <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
             <span>Institute: L.C.C. Coaching</span>
-            <span className="font-bold text-slate-700">Director: Aman Arora</span>
+            <span className="font-bold text-slate-700">Director: {websiteSettings?.directorName || 'Aman Singh Gautam'}</span>
           </div>
 
           {/* Action Buttons */}

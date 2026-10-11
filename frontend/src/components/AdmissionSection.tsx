@@ -1,9 +1,9 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Award, CheckCircle2, MessageSquare, Send, Sparkles, User, Phone, Mail, MapPin } from 'lucide-react';
 
 export const AdmissionSection: React.FC = () => {
-  const { submitAdmissionInquiry, showToast } = useApp();
+  const { submitAdmissionInquiry, showToast, websiteSettings } = useApp();
   const [formData, setFormData] = useState({
     studentName: '',
     parentName: '',
@@ -100,7 +100,7 @@ export const AdmissionSection: React.FC = () => {
                 </div>
                 <h4 className="text-xl font-black text-slate-900">Application Received!</h4>
                 <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
-                  Thank you, <strong>{formData.studentName}</strong>. Director Aman Arora & our admission team will contact you on <strong>{formData.phone}</strong> shortly.
+                  Thank you, <strong>{formData.studentName}</strong>. Director {websiteSettings?.directorName || 'Aman Singh Gautam'} & our admission team will contact you on <strong>{formData.phone}</strong> shortly.
                 </p>
                 <button
                   onClick={() => setIsSubmitted(false)}

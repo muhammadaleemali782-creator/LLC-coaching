@@ -10,9 +10,10 @@ export const ContactSection: React.FC = () => {
   const [sent, setSent] = useState(false);
 
   const director = websiteSettings?.directorName || 'Aman Singh Gautam';
-  const phone = websiteSettings?.contactPhone || '+91 9250703092';
+  const phone = websiteSettings?.contactPhone || websiteSettings?.phone || '+91 9250703092';
   const email = websiteSettings?.contactEmail || 'admissions@lcc.edu';
   const address = websiteSettings?.contactAddress || 'Palahipatti, Varanasi, Sindhora Road — Near Union Bank';
+  const officeHours = websiteSettings?.officeHours || 'Monday to Saturday: 7:00 AM – 7:30 PM\nSunday: 9:00 AM – 1:00 PM (Mock Tests & Doubt Clinics)';
   const mapEmbedUrl = getGoogleMapEmbedUrl(websiteSettings?.googleMapsEmbedUrl, address);
   const mapAppUrl = getGoogleMapAppUrl(websiteSettings?.googleMapsEmbedUrl, address);
 
@@ -82,9 +83,8 @@ export const ContactSection: React.FC = () => {
               </div>
               <div>
                 <h4 className="text-sm font-black text-slate-900 mb-1">Class & Office Hours</h4>
-                <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                  Monday to Saturday: 7:00 AM – 7:30 PM<br />
-                  Sunday: 9:00 AM – 1:00 PM (Mock Tests & Doubt Clinics)
+                <p className="text-xs text-slate-600 font-medium leading-relaxed whitespace-pre-line">
+                  {officeHours}
                 </p>
               </div>
             </div>

@@ -4,7 +4,7 @@ import { Play, Clock, Eye, ExternalLink, Sparkles } from 'lucide-react';
 import { Youtube, Instagram, Facebook } from './SocialIcons';
 
 export const YouTubeSection: React.FC = () => {
-  const { videos, setSelectedVideoForPlayer } = useApp();
+  const { videos, setSelectedVideoForPlayer, websiteSettings } = useApp();
 
   return (
     <section id="videos-section" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-950 border-t border-slate-200/80 dark:border-slate-800 relative transition-colors">
@@ -21,7 +21,7 @@ export const YouTubeSection: React.FC = () => {
               Watch <span className="text-rose-600">Lectures & Short Concept Reels</span>
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-base mt-2 font-medium">
-              Watch chapter concept boosters, derivation marathons, and reels by Director Aman Arora across YouTube, Instagram, and Facebook.
+              Watch chapter concept boosters, derivation marathons, and reels by Director {websiteSettings?.directorName || 'Aman Singh Gautam'} across YouTube, Instagram, and Facebook.
             </p>
           </div>
 

@@ -309,7 +309,7 @@ export const submitManualUTR = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Payment evidence & UTR submitted successfully! Pending verification by Director Aman Arora.',
+      message: 'Payment evidence & UTR submitted successfully! Pending verification by Director Aman Singh Gautam.',
       transaction: transactionRecord
     });
   } catch (err) {

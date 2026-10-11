@@ -277,34 +277,46 @@ export const MobileAppDrawer: React.FC<MobileAppDrawerProps> = ({
             </button>
           </div>
 
+          {/* Section: Employee & Staff Portal */}
+          <div className="space-y-1 pt-2" style={{ borderTop: '1px solid #f1f5f9' }}>
+            <span className="text-[10px] font-bold uppercase tracking-wider block px-2 mb-1" style={{ color: '#94a3b8' }}>
+              Faculty & Employee Desk
+            </span>
+
+            <button
+              id="drawer-staff-portal-btn"
+              onClick={() => {
+                navigateTo('staff-portal');
+                onClose();
+              }}
+              className="w-full flex items-center justify-between p-2.5 rounded-xl transition-colors cursor-pointer text-left"
+              style={{ backgroundColor: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' }}
+            >
+              <div className="flex items-center gap-2">
+                <GraduationCap className="w-4 h-4 text-indigo-600" />
+                <span className="font-bold">
+                  {currentStaff ? `Staff Portal (${currentStaff.name})` : 'Employee & Teacher Portal'}
+                </span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-indigo-400" />
+            </button>
+          </div>
+
           {/* Section: Staff & Admin Switching */}
-          {(isAdminAuthenticated || currentStaff) && (
+          {isAdminAuthenticated && (
             <div className="space-y-1 pt-2" style={{ borderTop: '1px solid #f1f5f9' }}>
               <span className="text-[10px] font-bold uppercase tracking-wider block px-2 mb-1" style={{ color: '#94a3b8' }}>
-                Management
+                Director Desk
               </span>
 
-              {isAdminAuthenticated && (
-                <button
-                  onClick={() => { navigateTo('admin-panel'); onClose(); }}
-                  className="w-full flex items-center gap-2.5 p-2 rounded-xl font-bold cursor-pointer"
-                  style={{ color: '#059669' }}
-                >
-                  <Shield className="w-4 h-4" />
-                  <span>{t.adminDesk}</span>
-                </button>
-              )}
-
-              {currentStaff && (
-                <button
-                  onClick={() => { navigateTo('staff-portal'); onClose(); }}
-                  className="w-full flex items-center gap-2.5 p-2 rounded-xl font-bold cursor-pointer"
-                  style={{ color: '#4f46e5' }}
-                >
-                  <Users className="w-4 h-4" />
-                  <span>{t.staffPortal} ({currentStaff.name})</span>
-                </button>
-              )}
+              <button
+                onClick={() => { navigateTo('admin-panel'); onClose(); }}
+                className="w-full flex items-center gap-2.5 p-2 rounded-xl font-bold cursor-pointer"
+                style={{ color: '#059669' }}
+              >
+                <Shield className="w-4 h-4" />
+                <span>{t.adminDesk}</span>
+              </button>
             </div>
           )}
 

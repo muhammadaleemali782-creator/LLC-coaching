@@ -610,7 +610,7 @@ export const StudentDashboard: React.FC = () => {
                                 subject: item.subject || 'Lecture',
                                 targetClass: item.targetClass || 'All Classes',
                                 duration: item.duration || '15 min',
-                                instructor: 'Director Aman Arora',
+                                instructor: `Director ${websiteSettings?.directorName || 'Aman Singh Gautam'}`,
                                 thumbnail: '/logo.jpg',
                                 youtubeUrl: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
                                 views: '120 views',
@@ -681,7 +681,7 @@ export const StudentDashboard: React.FC = () => {
                       </div>
                       <h4 className="text-base font-black text-slate-900">{p.courseName}</h4>
                       <p className="text-xs text-amber-900 leading-relaxed font-medium">
-                        Payment of ₹{p.amount} submitted with UTR/receipt proof. Director Aman Arora is currently verifying bank clearance. Your batch lectures and study vault materials will be activated upon approval.
+                        Payment of ₹{p.amount} submitted with UTR/receipt proof. Director {websiteSettings?.directorName || 'Aman Singh Gautam'} is currently verifying bank clearance. Your batch lectures and study vault materials will be activated upon approval.
                       </p>
                       <div className="pt-2">
                         <div className="flex justify-between text-xs text-slate-600 mb-1 font-bold">
@@ -1154,7 +1154,7 @@ export const StudentDashboard: React.FC = () => {
                           <div className="space-y-2">
                             <h4 className="text-sm font-black text-[#0066FF]">1. Core Concepts & Chapter Overview</h4>
                             <p className="whitespace-pre-line leading-relaxed">
-                              {readingOfflineDoc.contentSnippet || 'Fundamental principles, comprehensive syllabus definitions, and step-by-step conceptual derivations curated for academic mastery by Director Aman Arora.'}
+                              {readingOfflineDoc.contentSnippet || `Fundamental principles, comprehensive syllabus definitions, and step-by-step conceptual derivations curated for academic mastery by Director ${websiteSettings?.directorName || 'Aman Singh Gautam'}.`}
                             </p>
                           </div>
 
@@ -1376,7 +1376,7 @@ export const StudentDashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-black text-slate-900">Verified Academic Completion Certificate</h3>
-                <p className="text-xs text-slate-500 font-medium">Official verified credential issued by Director Aman Arora.</p>
+                <p className="text-xs text-slate-500 font-medium">Official verified credential issued by Director {websiteSettings?.directorName || 'Aman Singh Gautam'}.</p>
               </div>
               {isCertificateUnlocked && (
                 <button
@@ -1404,7 +1404,7 @@ export const StudentDashboard: React.FC = () => {
                     100% Course Completion Required
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-                    Official completion certificates signed by Director Aman Arora are awarded only upon enrolling in a batch and achieving 100% curriculum completion.
+                    Official completion certificates signed by Director {websiteSettings?.directorName || 'Aman Singh Gautam'} are awarded only upon enrolling in a batch and achieving 100% curriculum completion.
                   </p>
                 </div>
 
@@ -1543,7 +1543,7 @@ export const StudentDashboard: React.FC = () => {
 
                   <div className="text-right space-y-0.5">
                     <span className="font-serif italic font-bold text-lg text-slate-900 block tracking-tight">
-                      Aman Arora
+                      {websiteSettings?.directorName || 'Aman Singh Gautam'}
                     </span>
                     <span className="font-bold text-[11px] text-slate-700 block">Director & Head Faculty</span>
                     <span className="text-[10px] text-slate-400 block">Learning Coaching Center (L.C.C.)</span>

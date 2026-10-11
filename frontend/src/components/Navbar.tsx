@@ -142,15 +142,15 @@ export const Navbar: React.FC = () => {
             {websiteSettings?.instituteTagline || 'EXCELLENCE IN EDUCATION • VARANASI'}
           </h2>
           <p className="text-[10px] sm:text-xs font-bold text-slate-600 hidden sm:block">
-            (A Premier Coaching Institute for School Academics, Computer DCA & Spoken English)
+            {websiteSettings?.instituteSubtagline || '(A Premier Coaching Institute for School Academics, Computer DCA & Spoken English)'}
           </p>
         </div>
 
         <div className="shrink-0 flex items-center gap-2">
           <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-amber-500 bg-amber-50 flex flex-col items-center justify-center shadow-xs">
-            <span className="text-[8px] sm:text-[9px] font-bold text-amber-900 leading-none">RATED</span>
-            <span className="text-xs sm:text-base font-black text-amber-600 leading-none">A++</span>
-            <span className="text-[7px] sm:text-[8px] font-bold text-amber-900 leading-none">TOP #1</span>
+            <span className="text-[8px] sm:text-[9px] font-bold text-amber-900 leading-none">{websiteSettings?.ratingBadgeTop || 'RATED'}</span>
+            <span className="text-xs sm:text-base font-black text-amber-600 leading-none">{websiteSettings?.ratingBadgeGrade || 'A++'}</span>
+            <span className="text-[7px] sm:text-[8px] font-bold text-amber-900 leading-none">{websiteSettings?.ratingBadgeSub || 'TOP #1'}</span>
           </div>
         </div>
       </div>
@@ -262,15 +262,28 @@ export const Navbar: React.FC = () => {
               </button>
             </div>
           ) : (
-            <button
-              onClick={() => setIsStudentAuthModalOpen(true)}
-              style={{ backgroundColor: '#fbbf24', color: '#020617' }}
-              className="px-4 py-1.5 sm:py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] sm:text-xs font-black uppercase tracking-wider shadow-md transition-all flex items-center gap-1.5 cursor-pointer border border-amber-300"
-              title="Student & Staff Portal Login"
-            >
-              <User className="w-3.5 h-3.5 text-slate-950 shrink-0" />
-              <span className="whitespace-nowrap font-black">Portal Login</span>
-            </button>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <button
+                id="btn-public-staff-portal"
+                onClick={() => navigateTo('staff-portal')}
+                className="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer border border-indigo-400/30"
+                title="Employee & Faculty Portal"
+              >
+                <GraduationCap className="w-3.5 h-3.5 text-white shrink-0" />
+                <span className="whitespace-nowrap">Employee / Staff</span>
+              </button>
+
+              <button
+                id="btn-public-student-portal"
+                onClick={() => setIsStudentAuthModalOpen(true)}
+                style={{ backgroundColor: '#fbbf24', color: '#020617' }}
+                className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-md transition-all flex items-center gap-1.5 cursor-pointer border border-amber-300"
+                title="Student Portal Login"
+              >
+                <User className="w-3.5 h-3.5 text-slate-950 shrink-0" />
+                <span className="whitespace-nowrap font-black">Student Portal</span>
+              </button>
+            </div>
           )}
 
           {/* Mobile Hamburger Toggle */}
@@ -325,8 +338,21 @@ export const Navbar: React.FC = () => {
                   <span>Staff Portal ({currentStaff.name})</span>
                 </button>
               ) : (
-                <>
+                <div className="space-y-2">
                   <button
+                    id="mobile-staff-portal-btn"
+                    onClick={() => {
+                      navigateTo('staff-portal');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider text-center shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <GraduationCap className="w-4 h-4 text-white" />
+                    <span>Employee / Staff Portal</span>
+                  </button>
+
+                  <button
+                    id="mobile-student-portal-btn"
                     onClick={() => {
                       if (currentStudent) {
                         navigateTo('student-portal');
@@ -336,12 +362,12 @@ export const Navbar: React.FC = () => {
                       setIsMobileMenuOpen(false);
                     }}
                     style={{ backgroundColor: '#fbbf24', color: '#020617' }}
-                    className="w-full py-3 rounded-2xl bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider text-center shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-2.5 rounded-2xl bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider text-center shadow-md flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <User className="w-4 h-4 text-slate-950" />
-                    <span>{currentStudent ? `Student Portal (${currentStudent.name})` : 'Student & Staff Portal'}</span>
+                    <span>{currentStudent ? `Student Portal (${currentStudent.name})` : 'Student Portal'}</span>
                   </button>
-                </>
+                </div>
               )}
             </div>
           </div>

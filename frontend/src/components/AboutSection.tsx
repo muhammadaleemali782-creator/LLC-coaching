@@ -164,7 +164,7 @@ export const AboutSection: React.FC = () => {
               <span>MILESTONES & PROVEN RECORD</span>
             </div>
             <h3 className="text-2xl sm:text-3xl font-black text-slate-900">Our Journey of Excellence</h3>
-            <p className="text-xs sm:text-sm text-slate-500 font-medium">10+ Years of inspiring students under Aman Arora's leadership</p>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">10+ Years of inspiring students under {director}&apos;s leadership</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">

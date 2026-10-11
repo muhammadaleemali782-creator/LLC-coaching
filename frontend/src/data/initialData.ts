@@ -278,7 +278,7 @@ export const INITIAL_VIDEOS: VideoLecture[] = [
     videoId: 't1a9Kmd_cS8',
     youtubeUrl: 'https://www.youtube.com/watch?v=t1a9Kmd_cS8',
     thumbnail: 'https://img.youtube.com/vi/t1a9Kmd_cS8/hqdefault.jpg',
-    instructor: 'Director Aman Arora',
+    instructor: 'Director Aman Singh Gautam',
     views: '1.2K views',
     isFeatured: true,
     notesPdfUrl: '#'

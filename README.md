@@ -2,7 +2,7 @@
 
 > **Official Website:** [Learning Coaching Center](https://lccedu.vercel.app/)  
 > **Institute Name:** Learning Coaching Center (L.C.C. / LLC)  
-> **Director & Lead Academician:** Aman Arora  
+> **Director & Lead Academician:** Aman Singh Gautam  
 > **Campus Address:** Near City Central, Main Market Road, Education Hub, Varanasi, Uttar Pradesh 221001, India  
 > **Helpline:** +91 9250703092 | **Admissions 2026–27:** [https://lccedu.vercel.app/](https://lccedu.vercel.app/)  
 > **Courses:** Classes 1–12 (CBSE & UP Board), Computer DCA / ADCA Diploma, Spoken English, NEET / JEE Foundation
@@ -15,7 +15,7 @@ This project is separated into **Frontend** and **Backend** folders:
 lcc-coaching/
 ├── frontend/          # React + TypeScript + Vite + Tailwind CSS (Deploy to Vercel/Render)
 │   ├── src/           # React Components & Context State
-│   ├── public/assets/ # All images (Aman Arora photo, Hero poster, Debate images)
+│   ├── public/assets/ # All images (Director photo, Hero poster, Debate images)
 │   ├── vercel.json    # Vercel SPA routing configuration
 │   ├── render.yaml    # Render Static Site configuration
 │   └── package.json

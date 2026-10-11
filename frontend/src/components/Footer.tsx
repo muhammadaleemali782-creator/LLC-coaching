@@ -87,12 +87,23 @@ export const Footer: React.FC = () => {
                 <span>Admin Desk</span>
               </button>
             ) : (
-              <button
-                onClick={() => navigateTo('student-portal')}
-                className="hover:text-[#0066FF] transition-colors text-[#0066FF] font-bold cursor-pointer"
-              >
-                Student Portal
-              </button>
+              <>
+                <button
+                  id="footer-staff-portal-btn"
+                  onClick={() => navigateTo('staff-portal')}
+                  className="hover:text-indigo-600 transition-colors text-indigo-600 font-bold flex items-center gap-1 cursor-pointer"
+                  title="Employee & Teacher Portal"
+                >
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  <span>Employee / Staff</span>
+                </button>
+                <button
+                  onClick={() => navigateTo('student-portal')}
+                  className="hover:text-[#0066FF] transition-colors text-[#0066FF] font-bold cursor-pointer"
+                >
+                  Student Portal
+                </button>
+              </>
             )}
           </div>
 

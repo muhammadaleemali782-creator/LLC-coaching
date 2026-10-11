@@ -10,7 +10,7 @@ interface OfflineVaultModalProps {
 }
 
 export const OfflineVaultModal: React.FC<OfflineVaultModalProps> = ({ isOpen, onClose }) => {
-  const { language, showToast } = useApp();
+  const { language, showToast, websiteSettings } = useApp();
   const t = getTranslation(language);
 
   const [docs, setDocs] = useState<OfflineDoc[]>([]);
@@ -109,7 +109,7 @@ export const OfflineVaultModal: React.FC<OfflineVaultModalProps> = ({ isOpen, on
 
               <div className="pt-2 text-slate-800 dark:text-slate-200 whitespace-pre-line font-sans text-xs sm:text-sm">
                 {readingDoc.contentSnippet || (
-                  `[CHAPTER NOTES SUMMARY]\n\n• Institute: Learning Coaching Center (L.C.C.)\n• Class: ${readingDoc.targetClass}\n• Subject: ${readingDoc.subject || 'Comprehensive Topic'}\n• Title: ${readingDoc.title}\n\n1. Key Concepts:\nComprehensive study material curated by Director Aman Arora and senior faculty. Covers theory, solved examples, formula sheets, and board pattern practice questions.\n\n2. Formula / Rules Recap:\nReview definitions, theorems, and exam weightage before appearing for weekly chapter mock tests.\n\n3. High-Priority Examination Tips:\nFocus on conceptual clarity and neat diagrammatic representation to maximize board exam scoring.`
+                  `[CHAPTER NOTES SUMMARY]\n\n• Institute: Learning Coaching Center (L.C.C.)\n• Class: ${readingDoc.targetClass}\n• Subject: ${readingDoc.subject || 'Comprehensive Topic'}\n• Title: ${readingDoc.title}\n\n1. Key Concepts:\nComprehensive study material curated by Director ${websiteSettings?.directorName || 'Aman Singh Gautam'} and senior faculty. Covers theory, solved examples, formula sheets, and board pattern practice questions.\n\n2. Formula / Rules Recap:\nReview definitions, theorems, and exam weightage before appearing for weekly chapter mock tests.\n\n3. High-Priority Examination Tips:\nFocus on conceptual clarity and neat diagrammatic representation to maximize board exam scoring.`
                 )}
               </div>
 

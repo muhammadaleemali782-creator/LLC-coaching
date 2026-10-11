@@ -6,7 +6,7 @@ import { Youtube } from '../SocialIcons';
 import { ImageUploaderInput } from '../common/ImageUploaderInput';
 
 export const CourseManager: React.FC = () => {
-  const { courses, addCourse, updateCourse, deleteCourse, showToast } = useApp();
+  const { courses, addCourse, updateCourse, deleteCourse, showToast, websiteSettings } = useApp();
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,7 +21,7 @@ export const CourseManager: React.FC = () => {
     fee: 9500,
     discountFee: 6999,
     rating: 5.0,
-    instructor: 'Aman Arora',
+    instructor: websiteSettings?.directorName || 'Aman Singh Gautam',
     image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
     badge: 'Toppers Choice',
     features: ['10-Year PYQs Solved', 'Weekly Board Mocks', '1:1 Doubt Solving', 'Printed Theory Modules'],
@@ -52,7 +52,7 @@ export const CourseManager: React.FC = () => {
           fee: 9500,
           discountFee: 6999,
           rating: 5.0,
-          instructor: 'Aman Arora',
+          instructor: websiteSettings?.directorName || 'Aman Singh Gautam',
           image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80',
           badge: 'Toppers Choice',
           features: ['10-Year PYQs Solved', 'Weekly Board Mocks', '1:1 Doubt Solving'],

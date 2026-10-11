@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export const CourseSection: React.FC = () => {
-  const { courses, updateCourse, isAdminAuthenticated, navigateTo, showToast, startEnrollment } = useApp();
+  const { courses, updateCourse, isAdminAuthenticated, navigateTo, showToast, startEnrollment, websiteSettings } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -75,7 +75,7 @@ export const CourseSection: React.FC = () => {
             <span className="text-[#0066FF]">for growth</span>
           </h2>
           <p className="text-slate-600 text-xs sm:text-base leading-relaxed font-medium max-w-2xl mx-auto">
-            Join Learning Coaching Center (L.C.C.) for comprehensive school coaching (Classes 1 to 12), Computer DCA / ADCA / Tally, and fluent Spoken English led by Aman Arora.
+            Join Learning Coaching Center (L.C.C.) for comprehensive school coaching (Classes 1 to 12), Computer DCA / ADCA / Tally, and fluent Spoken English led by {websiteSettings?.directorName || 'Aman Singh Gautam'}.
           </p>
 
           {/* Quick Action Buttons */}
@@ -187,7 +187,7 @@ export const CourseSection: React.FC = () => {
               🏆 98.6% Board Examination Success
             </span>
             <span className="flex items-center gap-2 bg-white px-3 py-1 rounded-full border border-slate-200 shrink-0 shadow-2xs">
-              👨‍🏫 Mentor: Aman Arora
+              👨‍🏫 Mentor: {websiteSettings?.directorName || 'Aman Singh Gautam'}
             </span>
             {/* Loop Duplicate for Seamless Marquee */}
             <span className="flex items-center gap-2 bg-white px-3 py-1 rounded-full border border-slate-200 shrink-0 shadow-2xs">
@@ -203,7 +203,7 @@ export const CourseSection: React.FC = () => {
               🏆 98.6% Board Examination Success
             </span>
             <span className="flex items-center gap-2 bg-white px-3 py-1 rounded-full border border-slate-200 shrink-0 shadow-2xs">
-              👨‍🏫 Mentor: Aman Arora
+              👨‍🏫 Mentor: {websiteSettings?.directorName || 'Aman Singh Gautam'}
             </span>
           </div>
         </div>

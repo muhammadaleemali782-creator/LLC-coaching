@@ -20,16 +20,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   }
 ];
 
-const QUICK_CHIPS = [
-  '🗣️ Eng me verbs kya hote hain?',
-  '📜 Bharat ka Samvidhan (Constitution)',
-  '💻 Computer Hardware vs Software',
-  '🗣️ Spoken English sentences',
-  '🌿 Photosynthesis kya hota hai?',
-  '🧮 2x + 5 = 25',
-  '👨‍🏫 Director Aman Arora & Teachers',
-  '🎯 Admission 2026 & Fee Structure'
-];
+
 
 export const LiveSupportChatModal: React.FC = () => {
   const {
@@ -226,7 +217,16 @@ export const LiveSupportChatModal: React.FC = () => {
         {/* Quick Suggestion Chips */}
         {!isResolved && messages.length <= 3 && (
           <div className="px-3 py-1.5 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-            {QUICK_CHIPS.map((chip, i) => (
+            {[
+              '🗣️ Eng me verbs kya hote hain?',
+              '📜 Bharat ka Samvidhan (Constitution)',
+              '💻 Computer Hardware vs Software',
+              '🗣️ Spoken English sentences',
+              '🌿 Photosynthesis kya hota hai?',
+              '🧮 2x + 5 = 25',
+              `👨‍🏫 Director ${websiteSettings?.directorName || 'Aman Singh Gautam'} & Teachers`,
+              '🎯 Admission 2026 & Fee Structure'
+            ].map((chip, i) => (
               <button
                 key={i}
                 type="button"

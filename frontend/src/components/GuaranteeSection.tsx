@@ -1,9 +1,9 @@
-﻿import React from 'react';
+import React from 'react';
 import { useApp } from '../context/AppContext';
 import { ShieldCheck, Award, HeartHandshake, CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
 
 export const GuaranteeSection: React.FC = () => {
-  const { navigateTo } = useApp();
+  const { navigateTo, websiteSettings } = useApp();
 
   const services = [
     {
@@ -106,7 +106,7 @@ export const GuaranteeSection: React.FC = () => {
           </h3>
 
           <p className="text-slate-600 text-xs sm:text-base leading-relaxed font-medium max-w-2xl mx-auto">
-            Under the direct guidance of <strong className="text-slate-900 font-extrabold">Aman Arora</strong>, we assure complete conceptual clarity, dedicated 1:1 doubt clinics, and rigorous practice tests for guaranteed score elevation.
+            Under the direct guidance of <strong className="text-slate-900 font-extrabold">{websiteSettings?.directorName || 'Aman Singh Gautam'}</strong>, we assure complete conceptual clarity, dedicated 1:1 doubt clinics, and rigorous practice tests for guaranteed score elevation.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left pt-2">

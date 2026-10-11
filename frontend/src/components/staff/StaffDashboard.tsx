@@ -47,7 +47,8 @@ export const StaffDashboard: React.FC = () => {
     submitTeacherWorkReport,
     markBatchStudentAttendance,
     showToast,
-    navigateTo
+    navigateTo,
+    websiteSettings
   } = useApp();
 
   // Login form state (if not logged in)
@@ -880,7 +881,7 @@ export const StaffDashboard: React.FC = () => {
               <div className="text-center py-16 bg-slate-950/40 rounded-2xl border border-slate-800/80">
                 <ClipboardList className="w-12 h-12 text-slate-600 mx-auto mb-3" />
                 <p className="text-sm font-bold text-slate-300">No Pending Tasks Assigned</p>
-                <p className="text-xs text-slate-500 mt-1">You are all caught up! New tasks assigned by Director Aman Arora will appear here.</p>
+                <p className="text-xs text-slate-500 mt-1">You are all caught up! New tasks assigned by Director {websiteSettings?.directorName || 'Aman Singh Gautam'} will appear here.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

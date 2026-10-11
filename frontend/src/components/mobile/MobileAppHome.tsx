@@ -241,7 +241,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
       fileUrl: mat.downloadUrl || mat.googleDriveUrl || '',
       fileType: mat.fileType || 'pdf',
       fileSize: `${mat.pages || 12} Pages`,
-      contentSnippet: mat.previewContent || `[OFFLINE L.C.C. STUDY NOTES]\n• Chapter: ${mat.chapter || mat.title}\n• Subject: ${mat.subject}\n• Prepared by Director Aman Arora and L.C.C. Academic Council.`
+      contentSnippet: mat.previewContent || `[OFFLINE L.C.C. STUDY NOTES]\n• Chapter: ${mat.chapter || mat.title}\n• Subject: ${mat.subject}\n• Prepared by Director ${websiteSettings?.directorName || 'Aman Singh Gautam'} and L.C.C. Academic Council.`
     });
     showToast(`"${mat.title}" saved offline!`, 'success');
   };
@@ -551,7 +551,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                       {course.title}
                     </h4>
                     <p className="text-[10px] mt-1" style={{ color: '#94a3b8' }}>
-                      {course.instructor || 'Aman Arora & Senior Council'}
+                      {course.instructor || `${websiteSettings?.directorName || 'Aman Singh Gautam'} & Senior Council`}
                     </p>
                   </div>
 
@@ -726,7 +726,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                     {vid.title}
                   </h4>
                   <p className="text-[10px] mt-0.5" style={{ color: '#94a3b8' }}>
-                    {vid.instructor || 'Aman Arora Sir'}
+                    {vid.instructor || `${websiteSettings?.directorName || 'Aman Singh Gautam'} Sir`}
                   </p>
                 </div>
               </div>
@@ -800,7 +800,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
               Pending / Updating
             </span>
             <p className="text-xs font-bold text-slate-800 mt-1.5">Course Catalog Refreshing</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Classes 1–12 and DCA curriculum are being updated by Director Aman Arora.</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Classes 1–12 and DCA curriculum are being updated by Director {websiteSettings?.directorName || 'Aman Singh Gautam'}.</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -874,7 +874,7 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           <div className="p-3 rounded-2xl bg-white/80 border border-slate-100 space-y-1.5 text-[11px] text-slate-600">
             <div className="flex items-center gap-2">
               <span className="font-bold text-slate-900">Director:</span>
-              <span>{websiteSettings?.directorName || 'Aman Arora (Aman Singh Gautam)'}</span>
+              <span>{websiteSettings?.directorName || 'Aman Singh Gautam'}</span>
             </div>
             <div className="flex items-start gap-2">
               <span className="font-bold text-slate-900 shrink-0">Campus:</span>

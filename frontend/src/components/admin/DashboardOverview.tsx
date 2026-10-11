@@ -22,7 +22,7 @@ interface DashboardOverviewProps {
 }
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onSelectTab }) => {
-  const { courses, studyMaterials, videos, ads, reviews, students, inquiries } = useApp();
+  const { courses, studyMaterials, videos, ads, reviews, students, inquiries, websiteSettings } = useApp();
 
   const stats: { label: string; value: number; tab: AdminTab; icon: any; color: string; bg: string; action: string }[] = [
     { label: 'Registered Students', value: students.length, tab: 'users', icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20 hover:border-blue-500/50', action: 'Manage Students' },
@@ -43,7 +43,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onSelectTa
             Academic Session 2026–27
           </span>
           <h2 className="text-xl sm:text-2xl font-black text-white">
-            Welcome back, Director Aman Arora
+            Welcome back, Director {websiteSettings?.directorName || 'Aman Singh Gautam'}
           </h2>
           <p className="text-xs text-slate-300">
             Real-time verified data stream. Click any card below to open its dedicated manager desk.

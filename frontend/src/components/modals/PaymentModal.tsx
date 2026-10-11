@@ -461,7 +461,7 @@ export const PaymentModal: React.FC = () => {
                   <ShieldCheck className="w-4 h-4 text-amber-600" />
                   <span>Admin Verification In Progress</span>
                 </div>
-                <p>Director Aman Arora sir will verify your payment and approve your admission. Once approved, your course curriculum and certificate will be unlocked automatically in your Student Portal.</p>
+                <p>Director {websiteSettings?.directorName || 'Aman Singh Gautam'} sir will verify your payment and approve your admission. Once approved, your course curriculum and certificate will be unlocked automatically in your Student Portal.</p>
               </div>
             )}
 
@@ -520,7 +520,7 @@ export const PaymentModal: React.FC = () => {
                 <h4 className="text-xs sm:text-sm font-black text-slate-900 truncate mt-0.5">
                   {selectedCourseForPayment.title}
                 </h4>
-                <p className="text-[10px] text-slate-500 font-medium">Instructor: Director Aman Arora & Faculty</p>
+                <p className="text-[10px] text-slate-500 font-medium">Instructor: Director {websiteSettings?.directorName || 'Aman Singh Gautam'} & Faculty</p>
               </div>
               <div className="text-right shrink-0">
                 <span className="text-lg sm:text-xl font-black text-[#0066FF]">
@@ -685,7 +685,7 @@ export const PaymentModal: React.FC = () => {
                     {cleanPhone && (
                       <a
                         href={`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(
-                          `Hello Director Aman Arora Sir, I want to enroll in "${selectedCourseForPayment.title}" (Fee: ₹${selectedCourseForPayment.discountFee}). My Name: ${currentStudent.name}, Mobile: ${currentStudent.phone}. Please verify my payment evidence.`
+                          `Hello Director ${websiteSettings?.directorName || 'Aman Singh Gautam'} Sir, I want to enroll in "${selectedCourseForPayment.title}" (Fee: ₹${selectedCourseForPayment.discountFee}). My Name: ${currentStudent.name}, Mobile: ${currentStudent.phone}. Please verify my payment evidence.`
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"

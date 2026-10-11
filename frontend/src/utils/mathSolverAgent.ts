@@ -83,14 +83,17 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
     q.includes('mentor') ||
     q.includes('kaun hai') ||
     q.includes('aman arora') ||
+    q.includes('aman singh') ||
+    q.includes('aman sir') ||
+    q.includes('gautam') ||
     q.includes('rajesh') ||
     q.includes('ananya') ||
     q.includes('amit')
   ) {
-    if (q.includes('aman') || q.includes('director')) {
+    if (q.includes('aman') || q.includes('director') || q.includes('gautam')) {
       return {
         type: 'counseling',
-        reply: `✨ [L.C.C. AI Study Assistant - Director & Faculty]\n\n👨‍🏫 Aman Arora (Managing Director & Senior Mentor)\n• Subjects: Mathematics, Physics & Board Exam Mastery\n• Experience: 15+ years of dedicated coaching in Varanasi\n• Specialization: Conceptual clarity, shortcuts for competitive entrance, and personalized student mentoring.\n• Location: Palahipatti Main Campus.\n\n"Director Aman Arora sir personally mentors Class 9–12 students and monitors academic progress weekly."`
+        reply: `✨ [L.C.C. AI Study Assistant - Director & Faculty]\n\n👨‍🏫 Aman Singh Gautam (Managing Director & Senior Mentor)\n• Subjects: Mathematics, Physics & Board Exam Mastery\n• Experience: 15+ years of dedicated coaching in Varanasi\n• Specialization: Conceptual clarity, shortcuts for competitive entrance, and personalized student mentoring.\n• Location: Palahipatti Main Campus.\n\n"Director Aman Singh Gautam sir personally mentors Class 9–12 students and monitors academic progress weekly."`
       };
     }
     if (q.includes('rajesh')) {
@@ -114,7 +117,7 @@ export const solveAcademicQuery = (query: string): AgentResponse => {
 
     return {
       type: 'counseling',
-      reply: `✨ [L.C.C. AI Study Assistant - Our Distinguished Faculty]\n\nL.C.C. coaching me expert mentors ki team padhati hai:\n\n1. 👨‍🏫 Aman Arora (Managing Director & Senior Mentor) — Mathematics, Physics & Strategy\n2. 👨‍🏫 Rajesh Verma (Senior Faculty) — Class 9–10 Mathematics & Aptitude\n3. 👩‍🏫 Mrs. Ananya Sharma (Senior Faculty) — Science (Physics, Chemistry, Biology)\n4. 👨‍🏫 Amit Kumar (Computer Faculty) — DCA Diploma & Tally Prime with GST\n\nDaily 1-on-1 doubt clearing counters available hain.`
+      reply: `✨ [L.C.C. AI Study Assistant - Our Distinguished Faculty]\n\nL.C.C. coaching me expert mentors ki team padhati hai:\n\n1. 👨‍🏫 Aman Singh Gautam (Managing Director & Senior Mentor) — Mathematics, Physics & Strategy\n2. 👨‍🏫 Rajesh Verma (Senior Faculty) — Class 9–10 Mathematics & Aptitude\n3. 👩‍🏫 Mrs. Ananya Sharma (Senior Faculty) — Science (Physics, Chemistry, Biology)\n4. 👨‍🏫 Amit Kumar (Computer Faculty) — DCA Diploma & Tally Prime with GST\n\nDaily 1-on-1 doubt clearing counters available hain.`
     };
   }
 
