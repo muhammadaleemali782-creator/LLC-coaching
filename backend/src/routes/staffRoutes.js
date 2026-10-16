@@ -15,33 +15,34 @@ import {
   markStudentAttendance,
   updateStaff
 } from '../controllers/staffController.js';
+import { requireAdmin, requireStaffOrAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Staff accounts & directory
-router.get('/', getStaffList);
-router.post('/', createStaff);
-router.put('/:id', updateStaff);
-router.post('/reset-password', resetStaffPassword);
+// Staff accounts & directory (Admin only for creation/modifications)
+router.get('/', requireStaffOrAdmin, getStaffList);
+router.post('/', requireAdmin, createStaff);
+router.put('/:id', requireAdmin, updateStaff);
+router.post('/reset-password', requireAdmin, resetStaffPassword);
 
 // Staff Attendance
-router.get('/attendance', getAttendance);
-router.post('/attendance', markAttendance);
+router.get('/attendance', requireStaffOrAdmin, getAttendance);
+router.post('/attendance', requireStaffOrAdmin, markAttendance);
 
 // Student Branch Admissions & Visits
-router.get('/admissions', getAdmissions);
-router.post('/admissions', createAdmission);
+router.get('/admissions', requireStaffOrAdmin, getAdmissions);
+router.post('/admissions', requireStaffOrAdmin, createAdmission);
 
 // Consolidated Dashboard & Stats for Admin and Branch Analytics
-router.get('/stats', getDashboardStats);
+router.get('/stats', requireStaffOrAdmin, getDashboardStats);
 
 // Tasks & Work Reports
-router.get('/tasks', getTeacherTasks);
-router.post('/tasks', createTeacherTask);
-router.post('/tasks/report', submitTeacherTaskReport);
+router.get('/tasks', requireStaffOrAdmin, getTeacherTasks);
+router.post('/tasks', requireStaffOrAdmin, createTeacherTask);
+router.post('/tasks/report', requireStaffOrAdmin, submitTeacherTaskReport);
 
 // Student Daily Attendance & Leaves
-router.get('/student-attendance', getStudentAttendance);
-router.post('/student-attendance', markStudentAttendance);
+router.get('/student-attendance', requireStaffOrAdmin, getStudentAttendance);
+router.post('/student-attendance', requireStaffOrAdmin, markStudentAttendance);
 
 export default router;

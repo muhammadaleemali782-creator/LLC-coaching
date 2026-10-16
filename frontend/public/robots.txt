@@ -17,5 +17,5 @@ Allow: /
 User-agent: Googlebot
 Allow: /
 
+Sitemap: https://lcc-coaching-center.vercel.app/sitemap.xml
 Sitemap: https://lccedu.vercel.app/sitemap.xml
-Sitemap: https://lcc-edu.vercel.app/sitemap.xml

@@ -420,8 +420,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [selectedCourseForPayment, setSelectedCourseForPayment] = useState<Course | null>(null);
   const [pendingCourseForEnrollment, setPendingCourseForEnrollment] = useState<Course | null>(() => {
-    const saved = localStorage.getItem('lcc_pending_enroll_course');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('lcc_pending_enroll_course');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
   const [selectedDocForPreview, setSelectedDocForPreviewState] = useState<StudyMaterial | null>(null);
   const setSelectedDocForPreview = useCallback((doc: StudyMaterial | null) => {
@@ -927,7 +931,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const handlePostAuthResume = (studentName?: string) => {
     const saved = localStorage.getItem('lcc_pending_enroll_course');
-    const target = pendingCourseForEnrollment || (saved ? JSON.parse(saved) : null);
+    let target = pendingCourseForEnrollment;
+    if (!target && saved) {
+      try {
+        target = JSON.parse(saved);
+      } catch {
+        target = null;
+        localStorage.removeItem('lcc_pending_enroll_course');
+      }
+    }
     if (target) {
       setPendingCourseForEnrollment(null);
       localStorage.removeItem('lcc_pending_enroll_course');

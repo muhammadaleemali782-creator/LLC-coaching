@@ -322,7 +322,7 @@ export const verifyOTP = (req, res) => {
 };
 
 // 6. Reset Password
-export const resetPassword = (req, res) => {
+export const resetPassword = async (req, res) => {
   const { resetToken, newPassword } = req.body;
 
   if (!resetToken || !newPassword || newPassword.length < 6) {
@@ -335,14 +335,23 @@ export const resetPassword = (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid reset authorization token.' });
     }
 
-    const db = getDB();
-    const user = db.users.find(u => u.id === decoded.userId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User account not found.' });
+    const newHash = bcrypt.hashSync(newPassword, 10);
+
+    if (mongoose.connection.readyState === 1) {
+      await UserModel.findOneAndUpdate(
+        { $or: [{ id: decoded.userId }, { phone: decoded.mobile }] },
+        { passwordHash: newHash, tempPassword: '', mustChangePassword: false }
+      );
     }
 
-    user.passwordHash = bcrypt.hashSync(newPassword, 10);
-    saveDB(db);
+    const db = getDB();
+    const user = (db.users || []).find(u => u.id === decoded.userId || u.phone === decoded.mobile);
+    if (user) {
+      user.passwordHash = newHash;
+      user.mustChangePassword = false;
+      user.tempPassword = '';
+      saveDB(db);
+    }
 
     res.json({
       success: true,
@@ -474,8 +483,14 @@ export const updatePassword = async (req, res) => {
     if (mongoose.connection.readyState === 1) {
       const user = await UserModel.findOne({ email: cleanEmail });
       if (user) {
-        if (!user.mustChangePassword && currentPassword && !bcrypt.compareSync(currentPassword, user.passwordHash) && currentPassword !== user.tempPassword) {
-          return res.status(400).json({ success: false, message: 'Current/temporary password does not match.' });
+        if (!user.mustChangePassword) {
+          if (!currentPassword) {
+            return res.status(400).json({ success: false, message: 'Current password is required.' });
+          }
+          const isMatch = bcrypt.compareSync(currentPassword, user.passwordHash) || (user.tempPassword && currentPassword === user.tempPassword);
+          if (!isMatch) {
+            return res.status(400).json({ success: false, message: 'Current password does not match.' });
+          }
         }
         user.passwordHash = bcrypt.hashSync(newPassword, 10);
         user.mustChangePassword = false;
@@ -491,8 +506,14 @@ export const updatePassword = async (req, res) => {
   if (!user) {
     return res.status(404).json({ success: false, message: 'Student account not found.' });
   }
-  if (!user.mustChangePassword && currentPassword && !bcrypt.compareSync(currentPassword, user.passwordHash) && currentPassword !== user.tempPassword) {
-    return res.status(400).json({ success: false, message: 'Current/temporary password does not match.' });
+  if (!user.mustChangePassword) {
+    if (!currentPassword) {
+      return res.status(400).json({ success: false, message: 'Current password is required.' });
+    }
+    const isMatch = bcrypt.compareSync(currentPassword, user.passwordHash) || (user.tempPassword && currentPassword === user.tempPassword);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Current password does not match.' });
+    }
   }
   user.passwordHash = bcrypt.hashSync(newPassword, 10);
   user.mustChangePassword = false;

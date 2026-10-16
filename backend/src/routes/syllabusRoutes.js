@@ -1,5 +1,6 @@
 import express from 'express';
 import { getDB, saveDB, SyllabusModel } from '../config/db.js';
+import { requireAdmin } from '../middleware/authMiddleware.js';
 import mongoose from 'mongoose';
 
 const router = express.Router();
@@ -17,7 +18,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
   try {
     const syl = {
       id: `syl-${Date.now()}`,
@@ -37,7 +38,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     if (mongoose.connection.readyState === 1) {

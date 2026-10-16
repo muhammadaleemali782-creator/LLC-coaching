@@ -18,6 +18,7 @@ import syllabusRoutes from './src/routes/syllabusRoutes.js';
 import paymentRoutes from './src/routes/paymentRoutes.js';
 import staffRoutes from './src/routes/staffRoutes.js';
 import { getDB, saveDB, connectOnlineMongoDB, InquiryModel } from './src/config/db.js';
+import { requireStaffOrAdmin } from './src/middleware/authMiddleware.js';
 import mongoose from 'mongoose';
 
 dotenv.config();
@@ -28,10 +29,24 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware to ensure database connection on serverless invocations
+// Security hardening: Disable Express fingerprinting header
+app.disable('x-powered-by');
+
+// Security Headers Middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+// Middleware to ensure database connection on serverless invocations (only if disconnected)
 app.use(async (req, res, next) => {
   try {
-    await connectOnlineMongoDB();
+    if (mongoose.connection.readyState !== 1 && mongoose.connection.readyState !== 2) {
+      await connectOnlineMongoDB();
+    }
   } catch (e) {}
   next();
 });
@@ -44,6 +59,38 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Lightweight in-memory rate limiter for auth routes (Anti-DoS / Brute-force protection)
+const authAttempts = new Map();
+const rateLimitAuth = (limit = 20, windowMs = 60 * 1000) => (req, res, next) => {
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const record = authAttempts.get(ip) || { count: 0, resetTime: now + windowMs };
+
+  if (now > record.resetTime) {
+    record.count = 1;
+    record.resetTime = now + windowMs;
+  } else {
+    record.count++;
+  }
+  authAttempts.set(ip, record);
+
+  if (record.count > limit) {
+    return res.status(429).json({
+      success: false,
+      message: 'Too many authentication attempts. Please wait a minute before trying again.'
+    });
+  }
+  next();
+};
+
+// Periodically clean up rate limiter map every 10 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, record] of authAttempts.entries()) {
+    if (now > record.resetTime) authAttempts.delete(ip);
+  }
+}, 10 * 60 * 1000).unref();
 
 // Static uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -61,8 +108,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// REST API Endpoints
-app.use('/api/auth', authRoutes);
+// REST API Endpoints with rate-limiting on auth
+app.use('/api/auth', rateLimitAuth(25, 60 * 1000), authRoutes);
 app.use('/api/ads', adsRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/reviews', reviewsRoutes);
@@ -76,8 +123,8 @@ app.use('/api/syllabus', syllabusRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/staff', staffRoutes);
 
-// Inquiries Endpoints
-app.get('/api/inquiries', async (req, res) => {
+// Inquiries Endpoints (Protected for reading/updating, public for new student leads)
+app.get('/api/inquiries', requireStaffOrAdmin, async (req, res) => {
   try {
     if (mongoose.connection.readyState === 1) {
       const inquiries = await InquiryModel.find().sort({ _id: -1 });
@@ -112,7 +159,7 @@ app.post('/api/inquiries', async (req, res) => {
   }
 });
 
-app.patch('/api/inquiries/:id', async (req, res) => {
+app.patch('/api/inquiries/:id', requireStaffOrAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -135,10 +182,18 @@ app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Endpoint not found.' });
 });
 
-// Global Error Handler
+// Global Error Handler (Prevents server crash on unhandled route errors)
 app.use((err, req, res, next) => {
   console.error('Server Error:', err);
   res.status(500).json({ success: false, message: 'Internal server error occurred.' });
+});
+
+// Uncaught Exception & Promise Rejection Handlers to prevent Node.js crash
+process.on('uncaughtException', (err) => {
+  console.error('Critical Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Critical Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 // Start Server if run directly
