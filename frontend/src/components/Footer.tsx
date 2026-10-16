@@ -149,6 +149,21 @@ export const Footer: React.FC = () => {
             <span>•</span>
             <span>All Rights Reserved</span>
           </div>
+          {/* SEO Keyword & Regional Search Index Strip */}
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-1.5 text-[10px] text-slate-400/90 max-w-4xl mx-auto">
+            <span className="font-bold text-slate-500">Trending Searches:</span>
+            <span>LCC Coaching Varanasi</span>
+            <span>•</span>
+            <span>LLC Coaching Banaras</span>
+            <span>•</span>
+            <span>Learning Coaching Classes</span>
+            <span>•</span>
+            <span>Director Aman Singh Gautam (Aman Arora)</span>
+            <span>•</span>
+            <span>Top 10 Coaching in Varanasi</span>
+            <span>•</span>
+            <span>DCA Computer Center Banaras</span>
+          </div>
         </div>
 
       </div>
