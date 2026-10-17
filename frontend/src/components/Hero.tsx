@@ -57,6 +57,9 @@ export const Hero: React.FC = () => {
   return (
     <section className="bg-slate-100/70 border-b border-slate-200/90 pb-8 sm:pb-12 pt-3 sm:pt-4 px-2 sm:px-4 lg:px-6">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+        <h1 className="sr-only">
+          LCC Coaching Varanasi | Learning Coaching Center (LLC) Banaras | Top 10 Institute by Director Aman Singh Gautam (Aman Arora)
+        </h1>
 
         {/* PHYSICS WALLAH (PW) STYLE QUICK LEARNING HUB (Mobile-First 4x2 Grid) */}
         <div className="lg:hidden bg-white dark:bg-slate-900 rounded-2xl p-3 sm:p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2.5 transition-colors">
