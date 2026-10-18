@@ -1,10 +1,11 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Play, Clock, Eye, ExternalLink, Sparkles } from 'lucide-react';
-import { Youtube, Instagram, Facebook } from './SocialIcons';
+import { Play, Clock, Eye } from 'lucide-react';
+import { Youtube } from './SocialIcons';
+import { formatViewCount } from '../utils/mediaExtractor';
 
 export const YouTubeSection: React.FC = () => {
-  const { videos, setSelectedVideoForPlayer, websiteSettings } = useApp();
+  const { videos, setSelectedVideoForPlayer, websiteSettings, isInitialSyncLoading } = useApp();
 
   return (
     <section id="videos-section" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-950 border-t border-slate-200/80 dark:border-slate-800 relative transition-colors">
@@ -38,88 +39,106 @@ export const YouTubeSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Video Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {videos.map(vid => {
-            const rawUrl = vid.videoUrl || vid.youtubeUrl || '';
-            const platform = vid.platform || (rawUrl.includes('instagram') ? 'instagram' : rawUrl.includes('facebook') ? 'facebook' : rawUrl.includes('twitter') || rawUrl.includes('x.com') ? 'twitter' : 'youtube');
-
-            return (
-              <div
-                key={vid.id}
-                onClick={() => setSelectedVideoForPlayer(vid)}
-                className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-rose-300 dark:hover:border-rose-500/50 rounded-3xl overflow-hidden shadow-card-clean hover:shadow-learner-lg transition-all duration-300 transform hover:-translate-y-1.5 cursor-pointer group flex flex-col justify-between"
-              >
-                <div className="relative h-48 sm:h-52 overflow-hidden bg-slate-900">
-                  <img
-                    src={vid.thumbnail}
-                    alt={vid.title}
-                    onError={(e: any) => {
-                      e.target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80';
-                    }}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 filter brightness-90"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
-
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className={`w-14 h-14 rounded-full text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-all ${
-                      platform === 'instagram'
-                        ? 'bg-pink-600/90 group-hover:bg-pink-600'
-                        : platform === 'facebook'
-                        ? 'bg-blue-600/90 group-hover:bg-blue-600'
-                        : platform === 'twitter'
-                        ? 'bg-sky-500/90 group-hover:bg-sky-500'
-                        : 'bg-rose-600/90 group-hover:bg-rose-600'
-                    }`}>
-                      <Play className="w-6 h-6 fill-current ml-0.5" />
-                    </div>
-                  </div>
-
-                  <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-md bg-black/80 text-white text-[11px] font-mono font-bold flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-rose-400" />
-                    {vid.duration}
-                  </span>
-
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                    <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 text-xs font-black shadow-sm">
-                      {vid.targetClass}
-                    </span>
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase text-white shadow-sm ${
-                      platform === 'instagram'
-                        ? 'bg-gradient-to-r from-pink-500 to-purple-500'
-                        : platform === 'facebook'
-                        ? 'bg-blue-600'
-                        : platform === 'twitter'
-                        ? 'bg-sky-500'
-                        : 'bg-rose-600'
-                    }`}>
-                      {platform}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
-                  <div>
-                    <span className="text-xs font-black text-rose-600 dark:text-rose-400 uppercase tracking-wider mb-1.5 block">
-                      {vid.subject}
-                    </span>
-                    <h3 className="text-base font-extrabold text-slate-900 dark:text-white mb-3 line-clamp-2 leading-snug group-hover:text-rose-600 transition-colors">
-                      {vid.title}
-                    </h3>
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
-                    <span className="font-bold text-slate-700 dark:text-slate-300">By {vid.instructor}</span>
-                    <span className="flex items-center gap-1">
-                      <Eye className="w-3.5 h-3.5" />
-                      {vid.views}
-                    </span>
+        {/* Skeleton Shimmer Loaders on Reload */}
+        {isInitialSyncLoading && (!videos || videos.length === 0) ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {[1, 2, 3].map(n => (
+              <div key={n} className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl overflow-hidden shadow-card-clean flex flex-col justify-between">
+                <div className="h-48 sm:h-52 skeleton-shimmer" />
+                <div className="p-5 sm:p-6 space-y-3">
+                  <div className="h-3 rounded-md skeleton-shimmer w-1/3" />
+                  <div className="h-5 rounded-md skeleton-shimmer w-4/5" />
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between">
+                    <div className="h-3 rounded skeleton-shimmer w-1/3" />
+                    <div className="h-3 rounded skeleton-shimmer w-1/4" />
                   </div>
                 </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {videos.map(vid => {
+              const rawUrl = vid.videoUrl || vid.youtubeUrl || '';
+              const platform = vid.platform || (rawUrl.includes('instagram') ? 'instagram' : rawUrl.includes('facebook') ? 'facebook' : rawUrl.includes('twitter') || rawUrl.includes('x.com') ? 'twitter' : 'youtube');
+
+              return (
+                <div
+                  key={vid.id}
+                  onClick={() => setSelectedVideoForPlayer(vid)}
+                  className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-rose-300 dark:hover:border-rose-500/50 rounded-3xl overflow-hidden shadow-card-clean hover:shadow-learner-lg transition-all duration-300 transform hover:-translate-y-1.5 cursor-pointer group flex flex-col justify-between"
+                >
+                  <div className="relative h-48 sm:h-52 overflow-hidden bg-slate-900">
+                    <img
+                      src={vid.thumbnail}
+                      alt={vid.title}
+                      onError={(e: any) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80';
+                      }}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 filter brightness-90"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className={`w-14 h-14 rounded-full text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-all ${
+                        platform === 'instagram'
+                          ? 'bg-pink-600/90 group-hover:bg-pink-600'
+                          : platform === 'facebook'
+                          ? 'bg-blue-600/90 group-hover:bg-blue-600'
+                          : platform === 'twitter'
+                          ? 'bg-sky-500/90 group-hover:bg-sky-500'
+                          : 'bg-rose-600/90 group-hover:bg-rose-600'
+                      }`}>
+                        <Play className="w-6 h-6 fill-current ml-0.5" />
+                      </div>
+                    </div>
+
+                    <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-md bg-black/80 text-white text-[11px] font-mono font-bold flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-rose-400" />
+                      {vid.duration}
+                    </span>
+
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                      <span className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 text-xs font-black shadow-sm">
+                        {vid.targetClass}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase text-white shadow-sm ${
+                        platform === 'instagram'
+                          ? 'bg-gradient-to-r from-pink-500 to-purple-500'
+                          : platform === 'facebook'
+                          ? 'bg-blue-600'
+                          : platform === 'twitter'
+                          ? 'bg-sky-500'
+                          : 'bg-rose-600'
+                      }`}>
+                        {platform}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
+                    <div>
+                      <span className="text-xs font-black text-rose-600 dark:text-rose-400 uppercase tracking-wider mb-1.5 block">
+                        {vid.subject}
+                      </span>
+                      <h3 className="text-base font-extrabold text-slate-900 dark:text-white mb-3 line-clamp-2 leading-snug group-hover:text-rose-600 transition-colors">
+                        {vid.title}
+                      </h3>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
+                      <span className="font-bold text-slate-700 dark:text-slate-300">By {vid.instructor}</span>
+                      <span className="flex items-center gap-1">
+                        <Eye className="w-3.5 h-3.5" />
+                        {formatViewCount(vid.views)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
       </div>
     </section>

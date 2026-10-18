@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Layers, Sparkles, CheckCircle2, Clock, Users, ArrowRight, ShieldCheck, Zap, Lock } from 'lucide-react';
 
 export const PaidBatchesSection: React.FC = () => {
-  const { courses, startEnrollment, currentStudent, navigateTo, websiteSettings } = useApp();
+  const { courses, startEnrollment, currentStudent, navigateTo, websiteSettings, isInitialSyncLoading } = useApp();
 
   const paidCourses = courses.filter(c => c.isPaid);
 
@@ -25,9 +25,29 @@ export const PaidBatchesSection: React.FC = () => {
           </p>
         </div>
 
-        {/* Paid Batches Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {paidCourses.slice(0, 3).map((course, idx) => {
+        {/* Skeleton Shimmer Loaders on Reload */}
+        {isInitialSyncLoading && paidCourses.length === 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            {[1, 2, 3].map(n => (
+              <div key={n} className="rounded-3xl p-8 bg-[#F8FAFC] border border-slate-200/90 shadow-card-clean space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="w-20 h-5 rounded-full skeleton-shimmer" />
+                  <div className="w-12 h-4 rounded skeleton-shimmer" />
+                </div>
+                <div className="h-6 rounded skeleton-shimmer w-4/5" />
+                <div className="h-14 rounded-2xl skeleton-shimmer w-full" />
+                <div className="space-y-2 pt-4">
+                  <div className="h-3 rounded skeleton-shimmer w-full" />
+                  <div className="h-3 rounded skeleton-shimmer w-5/6" />
+                  <div className="h-3 rounded skeleton-shimmer w-2/3" />
+                </div>
+                <div className="h-10 rounded-xl skeleton-shimmer w-full pt-4" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            {paidCourses.slice(0, 3).map((course, idx) => {
             const isEnrolled = !!currentStudent?.enrolledCourses?.includes(course.id);
             const isFeatured = idx === 1; // Highlight middle card
 
@@ -140,6 +160,7 @@ export const PaidBatchesSection: React.FC = () => {
             );
           })}
         </div>
+      )}
 
         {/* Bottom Trust Guarantee Strip */}
         <div className="p-6 rounded-3xl bg-blue-50/70 border border-blue-100 flex flex-col sm:flex-row items-center justify-between gap-4">

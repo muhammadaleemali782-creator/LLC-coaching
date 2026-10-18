@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { getTranslation, AppLanguage } from '../../utils/i18n';
 import { saveOfflineDoc, isDocOffline } from '../../utils/offlineStorage';
+import { extractVideoId, formatViewCount } from '../../utils/mediaExtractor';
 import { Course, VideoLecture, GalleryItem, InstagramPost } from '../../types';
 import { ADMIN_GALLERY_ITEMS } from '../../data/adminGallery';
 import defaultLogo from '../../assets/logo.jpg';
@@ -105,7 +106,8 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
     setIsStudentAuthModalOpen,
     setIsLiveSupportChatOpen,
     navigateTo,
-    showToast
+    showToast,
+    isInitialSyncLoading
   } = useApp();
 
   const t = getTranslation(language);
@@ -509,7 +511,29 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           </button>
         </div>
 
-        {displayPersonalizedCourses.length === 0 ? (
+        {isInitialSyncLoading && displayPersonalizedCourses.length === 0 ? (
+          <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+            {[1, 2, 3].map(n => (
+              <div
+                key={n}
+                className="shrink-0 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between bg-white border border-slate-200"
+                style={{ width: '220px', height: '220px' }}
+              >
+                <div className="skeleton-shimmer" style={{ height: '110px' }} />
+                <div className="p-3 space-y-2 flex-1 flex flex-col justify-between">
+                  <div className="space-y-1.5">
+                    <div className="h-3.5 rounded skeleton-shimmer w-4/5" />
+                    <div className="h-2.5 rounded skeleton-shimmer w-3/5" />
+                  </div>
+                  <div className="pt-2 border-t border-slate-100 flex justify-between items-center">
+                    <div className="h-4 rounded skeleton-shimmer w-1/3" />
+                    <div className="h-6 rounded-xl skeleton-shimmer w-1/3" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : displayPersonalizedCourses.length === 0 ? (
           <div className="p-4 rounded-2xl border border-dashed border-blue-200 bg-blue-50/50 text-center">
             <span className="text-[10px] font-black uppercase text-[#0066FF] px-2 py-0.5 rounded bg-blue-100">
               Pending / Coming Soon
@@ -593,7 +617,20 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           </span>
         </div>
 
-        {displayPersonalizedNotes.length === 0 ? (
+        {isInitialSyncLoading && displayPersonalizedNotes.length === 0 ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map(n => (
+              <div key={n} className="p-3 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between gap-3">
+                <div className="w-9 h-9 rounded-xl skeleton-shimmer shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3.5 rounded skeleton-shimmer w-3/4" />
+                  <div className="h-2.5 rounded skeleton-shimmer w-1/2" />
+                </div>
+                <div className="w-16 h-7 rounded-xl skeleton-shimmer shrink-0" />
+              </div>
+            ))}
+          </div>
+        ) : displayPersonalizedNotes.length === 0 ? (
           <div className="p-4 rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/50 text-center">
             <span className="text-[10px] font-black uppercase text-emerald-700 px-2 py-0.5 rounded bg-emerald-100">
               Pending / Uploading Soon
@@ -679,7 +716,23 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           )}
         </div>
 
-        {(!videos || videos.length === 0) ? (
+        {isInitialSyncLoading && (!videos || videos.length === 0) ? (
+          <div className="flex gap-2.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+            {[1, 2, 3].map(n => (
+              <div
+                key={n}
+                className="shrink-0 rounded-2xl overflow-hidden shadow-xs bg-white border border-slate-200"
+                style={{ width: '180px', height: '170px' }}
+              >
+                <div className="skeleton-shimmer" style={{ aspectRatio: '16/9' }} />
+                <div className="p-2 space-y-1.5">
+                  <div className="h-3 rounded skeleton-shimmer w-4/5" />
+                  <div className="h-2 rounded skeleton-shimmer w-3/5" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (!videos || videos.length === 0) ? (
           <div className="p-4 rounded-2xl border border-dashed border-rose-200 bg-rose-50/50 text-center">
             <span className="text-[10px] font-black uppercase text-rose-700 px-2 py-0.5 rounded bg-rose-100">
               Pending / Live Recording
@@ -725,9 +778,10 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                   <h4 className="text-[11px] font-bold line-clamp-1 leading-tight" style={{ color: '#1e293b' }}>
                     {vid.title}
                   </h4>
-                  <p className="text-[10px] mt-0.5" style={{ color: '#94a3b8' }}>
-                    {vid.instructor || `${websiteSettings?.directorName || 'Aman Singh Gautam'} Sir`}
-                  </p>
+                  <div className="flex items-center justify-between text-[10px] mt-0.5" style={{ color: '#94a3b8' }}>
+                    <span className="truncate max-w-[100px]">{vid.instructor || `${websiteSettings?.directorName || 'Aman Singh Gautam'} Sir`}</span>
+                    <span className="font-bold text-rose-500 shrink-0">{formatViewCount(vid.views)}</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -794,7 +848,20 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
           </button>
         </div>
 
-        {courses.length === 0 ? (
+        {isInitialSyncLoading && courses.length === 0 ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map(n => (
+              <div key={n} className="rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm bg-white border border-slate-200">
+                <div className="w-12 h-12 rounded-xl skeleton-shimmer shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3.5 rounded skeleton-shimmer w-3/4" />
+                  <div className="h-2.5 rounded skeleton-shimmer w-1/2" />
+                </div>
+                <div className="w-16 h-8 rounded-xl skeleton-shimmer shrink-0" />
+              </div>
+            ))}
+          </div>
+        ) : courses.length === 0 ? (
           <div className="p-4 rounded-2xl border border-dashed border-slate-200 bg-white text-center shadow-xs">
             <span className="text-[10px] font-black uppercase text-[#0066FF] px-2 py-0.5 rounded bg-blue-50">
               Pending / Updating
@@ -1071,7 +1138,20 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
 
             {/* Video List */}
             <div className="p-4 overflow-y-auto space-y-3 flex-1">
-              {(!videos || videos.length === 0) ? (
+              {isInitialSyncLoading && (!videos || videos.length === 0) ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map(n => (
+                    <div key={n} className="p-2.5 rounded-2xl border border-slate-200 bg-white flex gap-3 items-center">
+                      <div className="w-24 h-16 rounded-xl skeleton-shimmer shrink-0" />
+                      <div className="flex-1 space-y-1.5">
+                        <div className="w-12 h-3 rounded skeleton-shimmer" />
+                        <div className="w-4/5 h-3.5 rounded skeleton-shimmer" />
+                        <div className="w-1/2 h-2.5 rounded skeleton-shimmer" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (!videos || videos.length === 0) ? (
                 <div className="p-8 text-center text-slate-500">
                   <span className="text-[10px] font-black uppercase text-rose-700 px-2 py-0.5 rounded bg-rose-50">
                     Pending / In Production
@@ -1111,9 +1191,10 @@ export const MobileAppHome: React.FC<MobileAppHomeProps> = ({
                       <h4 className="text-xs font-bold text-slate-900 leading-tight mt-1 line-clamp-2">
                         {vid.title}
                       </h4>
-                      <p className="text-[10px] text-slate-500 mt-0.5">
-                        {vid.instructor} • {vid.duration || 'Video'}
-                      </p>
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 mt-0.5">
+                        <span className="truncate">{vid.instructor} • {vid.duration || 'Video'}</span>
+                        <span className="font-bold text-rose-600 shrink-0">{formatViewCount(vid.views)}</span>
+                      </div>
                     </div>
                   </div>
                 ))

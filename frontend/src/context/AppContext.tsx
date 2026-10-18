@@ -368,12 +368,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [videos, setVideos] = useState<VideoLecture[]>(() => {
     const saved = loadSaved<VideoLecture[]>('lcc_videos', INITIAL_VIDEOS);
     const cleaned = (saved || []).filter(v => v.id === 'v-1789836144774' || v.id.startsWith('v-17') || (v.id !== 'vid-1' && v.id !== 'vid-2' && v.id !== 'vid-3' && v.id !== 'vid-4' && v.id !== 'vid-5' && v.id !== 'v-1' && v.id !== 'v-2' && v.id !== 'v-3' && v.id !== 'v-4' && v.id !== 'v-5'));
-    if (cleaned.length === 0) {
-      localStorage.setItem('lcc_videos', JSON.stringify(INITIAL_VIDEOS));
-      return INITIAL_VIDEOS;
-    }
-    localStorage.setItem('lcc_videos', JSON.stringify(cleaned));
-    return cleaned;
+    const source = cleaned.length > 0 ? cleaned : INITIAL_VIDEOS;
+    const normalized = source.map(v => {
+      if (v.videoId === '65m6YcL0HjE' || (v.title && v.title.toLowerCase().includes('constitution'))) {
+        return { ...v, views: '150 views', instructor: 'Director Aman Singh Gautam' };
+      }
+      if (v.videoId === 't1a9Kmd_cS8' || (v.title && v.title.toLowerCase().includes('this that'))) {
+        return { ...v, views: '230 views', instructor: 'Director Aman Singh Gautam' };
+      }
+      if (!v.views || v.views === '0' || v.views === '0 views' || v.views === '1.2K' || v.views === '1.2K views') {
+        return { ...v, views: '150+ views' };
+      }
+      return v;
+    });
+    localStorage.setItem('lcc_videos', JSON.stringify(normalized));
+    return normalized;
   });
   const [instagramPosts, setInstagramPosts] = useState<InstagramPost[]>(() => {
     const saved = loadSaved<InstagramPost[]>('lcc_instagram', []);
@@ -432,7 +441,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     (window as any).__lcc_current_selected_doc = doc;
     setSelectedDocForPreviewState(doc);
   }, []);
-  const [selectedVideoForPlayer, setSelectedVideoForPlayer] = useState<VideoLecture | null>(null);
+  const [selectedVideoForPlayer, setSelectedVideoForPlayerState] = useState<VideoLecture | null>(null);
+  const setSelectedVideoForPlayer = useCallback((vid: VideoLecture | null) => {
+    if (vid) {
+      const raw = String(vid.views || '150 views').replace(/[^0-9]/g, '');
+      const count = parseInt(raw, 10) || 150;
+      const updatedViews = `${count + 1} views`;
+      const updated = { ...vid, views: updatedViews };
+      setVideos(prev => {
+        const next = prev.map(v => v.id === vid.id ? { ...v, views: updatedViews } : v);
+        try { localStorage.setItem('lcc_videos', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+      setSelectedVideoForPlayerState(updated);
+    } else {
+      setSelectedVideoForPlayerState(null);
+    }
+  }, []);
   const [isStudentAuthModalOpen, setIsStudentAuthModalOpen] = useState(false);
   const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
 

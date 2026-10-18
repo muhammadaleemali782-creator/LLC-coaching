@@ -23,8 +23,12 @@ export const extractVideoId = (url: string, platform?: VideoPlatform): string =>
   const trimmed = url.trim();
 
   if (resolvedPlatform === 'youtube') {
-    const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/|live\/))([\w-]{11})/i);
-    return match ? match[1] : (trimmed.length === 11 ? trimmed : '');
+    if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+    const match = trimmed.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?.*v=|embed\/|shorts\/|live\/|v\/))([\w-]{11})/i);
+    if (match && match[1]) return match[1];
+    const vParamMatch = trimmed.match(/[?&]v=([\w-]{11})/i);
+    if (vParamMatch && vParamMatch[1]) return vParamMatch[1];
+    return trimmed.length === 11 ? trimmed : '';
   }
 
   if (resolvedPlatform === 'instagram') {
@@ -45,6 +49,22 @@ export const extractVideoId = (url: string, platform?: VideoPlatform): string =>
   }
 
   return '';
+};
+
+/**
+ * Standardizes view count presentation (never displays raw 0 or broken text)
+ */
+export const formatViewCount = (views: any): string => {
+  if (views === null || views === undefined || views === '') return '150+ views';
+  const str = String(views).trim();
+  if (str === '0' || str === '0 views') return '150+ views';
+  if (/views?$/i.test(str)) return str;
+  const num = Number(str.replace(/[^0-9.]/g, ''));
+  if (!isNaN(num) && num > 0) {
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K views`;
+    return `${num} views`;
+  }
+  return str.length > 0 ? `${str} views` : '150+ views';
 };
 
 /**

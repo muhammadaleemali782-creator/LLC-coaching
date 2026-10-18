@@ -19,7 +19,7 @@ import {
 import { AdBanner } from './ads/AdBanner';
 
 export const StudyMaterialSection: React.FC = () => {
-  const { studyMaterials, setSelectedDocForPreview, showToast } = useApp();
+  const { studyMaterials, setSelectedDocForPreview, showToast, isInitialSyncLoading } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -139,9 +139,30 @@ export const StudyMaterialSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Materials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMaterials.map((mat) => (
+        {/* Skeleton Shimmer Loaders on Reload */}
+        {isInitialSyncLoading && filteredMaterials.length === 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map(n => (
+              <div key={n} className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-card-clean space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="w-16 h-4 rounded-full skeleton-shimmer" />
+                  <div className="w-20 h-3 rounded skeleton-shimmer" />
+                </div>
+                <div className="h-5 rounded skeleton-shimmer w-4/5" />
+                <div className="space-y-1.5">
+                  <div className="h-3 rounded skeleton-shimmer w-full" />
+                  <div className="h-3 rounded skeleton-shimmer w-2/3" />
+                </div>
+                <div className="pt-3 border-t border-slate-100 flex justify-between">
+                  <div className="w-20 h-7 rounded-full skeleton-shimmer" />
+                  <div className="w-24 h-7 rounded-full skeleton-shimmer" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredMaterials.map((mat) => (
             <div
               key={mat.id}
               className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-card-clean hover:shadow-learner-lg transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between space-y-4 group"
@@ -185,6 +206,7 @@ export const StudyMaterialSection: React.FC = () => {
             </div>
           ))}
         </div>
+      )}
 
         {filteredMaterials.length === 0 && (
           <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 text-slate-500 text-xs font-medium">

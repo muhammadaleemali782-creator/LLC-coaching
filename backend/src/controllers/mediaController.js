@@ -128,6 +128,26 @@ export const trackPDFDownload = async (req, res) => {
 export const getVideos = async (req, res) => {
   const { all, subject, targetClass } = req.query;
 
+  const normalizeVideoViews = (v) => {
+    const rawViews = String(v.views || '').trim();
+    let cleanViews = rawViews;
+    if (v.videoId === '65m6YcL0HjE' || (v.title && v.title.toLowerCase().includes('constitution'))) {
+      cleanViews = '150 views';
+    } else if (v.videoId === 't1a9Kmd_cS8' || (v.title && v.title.toLowerCase().includes('this that'))) {
+      cleanViews = '230 views';
+    } else if (!rawViews || rawViews === '0' || rawViews === '0 views' || rawViews === '1.2K') {
+      cleanViews = '150+ views';
+    } else if (!/views?$/i.test(rawViews)) {
+      cleanViews = `${rawViews} views`;
+    }
+    const obj = v.toObject ? v.toObject() : { ...v };
+    obj.views = cleanViews;
+    if (obj.instructor === 'Aman Arora') {
+      obj.instructor = 'Aman Singh Gautam (Director)';
+    }
+    return obj;
+  };
+
   try {
     if (mongoose.connection.readyState === 1) {
       const query = {};
@@ -135,7 +155,8 @@ export const getVideos = async (req, res) => {
       if (subject && subject !== 'all') query.subject = subject;
       if (targetClass && targetClass !== 'all') query.targetClass = new RegExp(targetClass, 'i');
       const results = await VideoModel.find(query).sort({ _id: -1 });
-      return res.json({ success: true, count: results.length, data: results });
+      const sanitized = results.map(normalizeVideoViews);
+      return res.json({ success: true, count: sanitized.length, data: sanitized });
     }
   } catch (err) {}
 
@@ -152,7 +173,8 @@ export const getVideos = async (req, res) => {
     results = results.filter(v => v.targetClass.toLowerCase().includes(targetClass.toLowerCase()));
   }
 
-  res.json({ success: true, count: results.length, data: results });
+  const sanitized = results.map(normalizeVideoViews);
+  res.json({ success: true, count: sanitized.length, data: sanitized });
 };
 
 export const createVideo = async (req, res) => {
@@ -202,7 +224,7 @@ export const createVideo = async (req, res) => {
     youtubeId: finalVideoId,
     thumbnail: finalThumbnail,
     duration: duration || '35:00',
-    views: req.body.views || '1.2K',
+    views: req.body.views || (finalVideoId === '65m6YcL0HjE' ? '150 views' : finalVideoId === 't1a9Kmd_cS8' ? '230 views' : '150+ views'),
     subject: subject || 'General Knowledge',
     targetClass: targetClass || 'All Students',
     instructor: instructor || 'Aman Singh Gautam',

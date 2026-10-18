@@ -269,6 +269,22 @@ export const INITIAL_NOTICES: Notice[] = [
 
 export const INITIAL_VIDEOS: VideoLecture[] = [
   {
+    id: 'v-1791690905080',
+    title: 'Why do we need Constitution',
+    subject: 'Civics & Indian Constitution',
+    targetClass: 'All Batches (Classes 1–12)',
+    duration: '01:00',
+    youtubeId: '65m6YcL0HjE',
+    videoId: '65m6YcL0HjE',
+    youtubeUrl: 'https://youtube.com/shorts/65m6YcL0HjE?si=E6Zu-KORO1JrtbKc',
+    videoUrl: 'https://youtube.com/shorts/65m6YcL0HjE?si=E6Zu-KORO1JrtbKc',
+    thumbnail: 'https://img.youtube.com/vi/65m6YcL0HjE/hqdefault.jpg',
+    instructor: 'Director Aman Singh Gautam',
+    views: '150 views',
+    isFeatured: true,
+    notesPdfUrl: '#'
+  },
+  {
     id: 'v-1789836144774',
     title: 'This That Detail explaination',
     subject: 'English Grammar & Concept Mastery',
@@ -277,9 +293,10 @@ export const INITIAL_VIDEOS: VideoLecture[] = [
     youtubeId: 't1a9Kmd_cS8',
     videoId: 't1a9Kmd_cS8',
     youtubeUrl: 'https://www.youtube.com/watch?v=t1a9Kmd_cS8',
+    videoUrl: 'https://www.youtube.com/watch?v=t1a9Kmd_cS8',
     thumbnail: 'https://img.youtube.com/vi/t1a9Kmd_cS8/hqdefault.jpg',
     instructor: 'Director Aman Singh Gautam',
-    views: '1.2K views',
+    views: '230 views',
     isFeatured: true,
     notesPdfUrl: '#'
   }

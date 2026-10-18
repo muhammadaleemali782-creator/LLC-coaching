@@ -138,6 +138,23 @@
   ],
   "videos": [
     {
+      "id": "v-1791690905080",
+      "title": "Why do we need Constitution",
+      "youtubeUrl": "https://youtube.com/shorts/65m6YcL0HjE?si=E6Zu-KORO1JrtbKc",
+      "videoUrl": "https://youtube.com/shorts/65m6YcL0HjE?si=E6Zu-KORO1JrtbKc",
+      "videoId": "65m6YcL0HjE",
+      "youtubeId": "65m6YcL0HjE",
+      "thumbnail": "https://img.youtube.com/vi/65m6YcL0HjE/hqdefault.jpg",
+      "duration": "01:00",
+      "views": "150 views",
+      "subject": "Civics & Indian Constitution",
+      "targetClass": "Class 1–12",
+      "instructor": "Aman Singh Gautam (Director)",
+      "isPublished": true,
+      "isFeatured": true,
+      "dateAdded": "2026-10-11"
+    },
+    {
       "id": "v-1789836144774",
       "title": "This That Detail explaination",
       "youtubeUrl": "https://www.youtube.com/watch?v=t1a9Kmd_cS8",
@@ -145,12 +162,14 @@
       "youtubeId": "t1a9Kmd_cS8",
       "thumbnail": "https://img.youtube.com/vi/t1a9Kmd_cS8/hqdefault.jpg",
       "duration": "12:45",
-      "views": "1.2K",
+      "views": "230 views",
       "subject": "Spoken English & Grammar",
       "targetClass": "Class 1–12",
       "instructor": "Aman Singh Gautam (Director)",
       "isPublished": true,
-      "dateAdded": "2026-08-20"
+      "dateAdded": "2026-08-20",
+      "videoUrl": "https://www.youtube.com/watch?v=t1a9Kmd_cS8",
+      "isFeatured": true
     }
   ],
   "reviews": [

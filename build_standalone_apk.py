@@ -150,6 +150,7 @@ public class MainActivity extends Activity {
         s.setAllowUniversalAccessFromFileURLs(true);
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
+        s.setMediaPlaybackRequiresUserGesture(false);
         s.setTextZoom(100);
         s.setDefaultFontSize(14);
         s.setDefaultFixedFontSize(13);
@@ -160,6 +161,10 @@ public class MainActivity extends Activity {
         s.setSupportZoom(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
         s.setRenderPriority(WebSettings.RenderPriority.HIGH);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             s.setForceDark(WebSettings.FORCE_DARK_OFF);
@@ -233,9 +238,13 @@ public class MainActivity extends Activity {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 if (request != null && request.getUrl() != null) {
                     String url = request.getUrl().toString();
+                    // Do NOT intercept embedded video players/iframes
+                    if (!request.isForMainFrame() || url.contains("/embed/") || url.contains("youtube-nocookie.com/embed")) {
+                        return false;
+                    }
                     if (url.startsWith("http://") || url.startsWith("https://")) {
                         if (url.contains("whatsapp.com") || url.contains("wa.me") || 
-                            url.contains("youtube.com") || url.contains("youtu.be") || 
+                            url.contains("youtube.com/watch") || url.contains("youtu.be/") || 
                             url.contains("instagram.com") || url.contains("t.me")) {
                             try {
                                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
@@ -513,11 +522,16 @@ print("\nSUCCESS! Standalone APK generated at:")
 print(final_apk)
 print(f"File size: {size_mb:.2f} MB")
 
-# Copy to user Downloads directory
+# Copy to user Downloads directory and web assets
 downloads_apk = r"C:\Users\suppo\Downloads\LCC-Coaching-v1.0.apk"
-try:
-    shutil.copy2(final_apk, downloads_apk)
-    print(f"Successfully copied APK to user Downloads: {downloads_apk}")
-except Exception as e:
-    print(f"Notice: Could not copy to Downloads: {e}")
+public_apk = os.path.join(BASE_DIR, "frontend", "public", "LCC-Coaching-v1.0.apk")
+dist_apk = os.path.join(BASE_DIR, "frontend", "dist", "LCC-Coaching-v1.0.apk")
+
+for dest in [downloads_apk, public_apk, dist_apk]:
+    try:
+        shutil.copy2(final_apk, dest)
+        print(f"Successfully copied APK to: {dest}")
+    except Exception as e:
+        print(f"Notice: Could not copy to {dest}: {e}")
+
 

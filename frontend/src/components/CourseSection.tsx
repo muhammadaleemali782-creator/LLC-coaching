@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export const CourseSection: React.FC = () => {
-  const { courses, updateCourse, isAdminAuthenticated, navigateTo, showToast, startEnrollment, websiteSettings } = useApp();
+  const { courses, updateCourse, isAdminAuthenticated, navigateTo, showToast, startEnrollment, websiteSettings, isInitialSyncLoading } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -208,9 +208,27 @@ export const CourseSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Course Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {filteredCourses.map((course, idx) => (
+        {/* Skeleton Shimmer Loaders on Reload */}
+        {isInitialSyncLoading && filteredCourses.length === 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {[1, 2, 3].map(n => (
+              <div key={n} className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl overflow-hidden shadow-card-clean flex flex-col justify-between">
+                <div className="h-48 sm:h-52 skeleton-shimmer" />
+                <div className="p-6 space-y-3">
+                  <div className="h-4 rounded skeleton-shimmer w-1/3" />
+                  <div className="h-6 rounded skeleton-shimmer w-4/5" />
+                  <div className="h-3.5 rounded skeleton-shimmer w-full" />
+                  <div className="pt-4 border-t border-slate-100 flex justify-between">
+                    <div className="h-4 rounded skeleton-shimmer w-1/4" />
+                    <div className="h-8 rounded-xl skeleton-shimmer w-1/3" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {filteredCourses.map((course, idx) => (
             <div
               key={course.id}
               style={{ animationDelay: `${idx * 80}ms` }}
@@ -305,6 +323,7 @@ export const CourseSection: React.FC = () => {
             </div>
           ))}
         </div>
+      )}
 
         {filteredCourses.length === 0 && (
           <div className="p-12 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-center space-y-3">

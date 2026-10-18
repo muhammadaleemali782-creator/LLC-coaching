@@ -21,6 +21,7 @@ export const YouTubeManager: React.FC = () => {
     subject: string;
     targetClass: string;
     instructor: string;
+    views: string;
   }>({
     title: '',
     videoUrl: '',
@@ -29,7 +30,8 @@ export const YouTubeManager: React.FC = () => {
     duration: '15:00',
     subject: 'Mathematics',
     targetClass: 'Class 10',
-    instructor: websiteSettings?.directorName || 'Aman Singh Gautam'
+    instructor: websiteSettings?.directorName || 'Aman Singh Gautam',
+    views: '150 views'
   });
 
   const handleNewUrlChange = (url: string) => {
@@ -104,8 +106,9 @@ export const YouTubeManager: React.FC = () => {
       subject: newVideo.subject,
       targetClass: newVideo.targetClass,
       instructor: newVideo.instructor,
-      isFeatured: true
-    });
+      isFeatured: true,
+      views: newVideo.views || '150 views'
+    } as any);
 
     setIsAdding(false);
     setNewVideo({
@@ -116,7 +119,8 @@ export const YouTubeManager: React.FC = () => {
       duration: '15:00',
       subject: 'Mathematics',
       targetClass: 'Class 10',
-      instructor: websiteSettings?.directorName || 'Aman Singh Gautam'
+      instructor: websiteSettings?.directorName || 'Aman Singh Gautam',
+      views: '150 views'
     });
     showToast(`${platform.toUpperCase()} video lecture published!`, 'success');
   };
@@ -140,6 +144,7 @@ export const YouTubeManager: React.FC = () => {
         subject: editingVideo.subject,
         instructor: editingVideo.instructor,
         duration: editingVideo.duration,
+        views: editingVideo.views || '150 views',
         videoId,
         youtubeId: videoId,
         thumbnail
@@ -265,6 +270,16 @@ export const YouTubeManager: React.FC = () => {
                     className="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
                   />
                 </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Views Count (e.g. 150 views, 1.2K)</label>
+                  <input
+                    type="text"
+                    value={editingVideo.views || '150 views'}
+                    onChange={e => setEditingVideo({ ...editingVideo, views: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+                  />
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
@@ -365,6 +380,17 @@ export const YouTubeManager: React.FC = () => {
                 className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
               />
             </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Views Count</label>
+              <input
+                type="text"
+                placeholder="e.g. 150 views, 1.2K"
+                value={newVideo.views}
+                onChange={e => setNewVideo({ ...newVideo, views: e.target.value })}
+                className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#0066FF]"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
@@ -381,13 +407,14 @@ export const YouTubeManager: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {videos.map(v => {
           const platform = v.platform || (v.youtubeUrl && v.youtubeUrl.includes('instagram') ? 'instagram' : v.youtubeUrl && v.youtubeUrl.includes('facebook') ? 'facebook' : 'youtube');
+          const cleanYtId = extractVideoId(v.videoUrl || v.youtubeUrl || v.videoId || v.youtubeId || '', 'youtube') || v.videoId || v.youtubeId || 't1a9Kmd_cS8';
           
           return (
             <div key={v.id} className="bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden flex flex-col justify-between shadow-lg">
               <div className="relative aspect-video bg-slate-900 overflow-hidden">
                 {platform === 'youtube' ? (
                   <iframe
-                    src={`https://www.youtube.com/embed/${v.videoId || v.youtubeId || 'kJQP7kiw5Fk'}`}
+                    src={`https://www.youtube-nocookie.com/embed/${cleanYtId}?rel=0`}
                     title={v.title}
                     className="w-full h-full border-none"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

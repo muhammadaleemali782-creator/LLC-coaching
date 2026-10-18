@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Video, X, Eye, Clock, User, Share2 } from 'lucide-react';
+import { Video, X, Eye, Clock, User, Share2, ExternalLink } from 'lucide-react';
 import { recordLearningHistory } from '../../utils/learningHistory';
+import { extractVideoId, formatViewCount } from '../../utils/mediaExtractor';
 
 export const VideoPlayerModal: React.FC = () => {
   const { selectedVideoForPlayer, setSelectedVideoForPlayer, showToast, currentStudent } = useApp();
@@ -21,16 +22,24 @@ export const VideoPlayerModal: React.FC = () => {
 
   if (!selectedVideoForPlayer) return null;
 
+  const rawUrl = selectedVideoForPlayer.videoUrl || selectedVideoForPlayer.youtubeUrl || '';
+  const platform = selectedVideoForPlayer.platform || (rawUrl.includes('instagram') ? 'instagram' : rawUrl.includes('facebook') ? 'facebook' : rawUrl.includes('twitter') || rawUrl.includes('x.com') ? 'twitter' : 'youtube');
+  const cleanVideoId = extractVideoId(rawUrl, platform) || extractVideoId(selectedVideoForPlayer.videoId || '', platform) || extractVideoId(selectedVideoForPlayer.youtubeId || '', platform) || selectedVideoForPlayer.videoId || selectedVideoForPlayer.youtubeId || 't1a9Kmd_cS8';
+
   const handleShare = () => {
-    navigator.clipboard.writeText(selectedVideoForPlayer.youtubeUrl);
+    const shareUrl = platform === 'youtube' && cleanVideoId
+      ? `https://youtu.be/${cleanVideoId}`
+      : rawUrl;
+    navigator.clipboard.writeText(shareUrl);
     showToast('Video link copied to clipboard!', 'info');
   };
 
-  const rawUrl = selectedVideoForPlayer.videoUrl || selectedVideoForPlayer.youtubeUrl || '';
-  const platform = selectedVideoForPlayer.platform || (rawUrl.includes('instagram') ? 'instagram' : rawUrl.includes('facebook') ? 'facebook' : rawUrl.includes('twitter') || rawUrl.includes('x.com') ? 'twitter' : 'youtube');
-  const videoId = selectedVideoForPlayer.videoId || selectedVideoForPlayer.youtubeId || 'kJQP7kiw5Fk';
+  const directExternalUrl = platform === 'youtube'
+    ? `https://www.youtube.com/watch?v=${cleanVideoId}`
+    : rawUrl;
 
-  let playerIframeSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+  const originUrl = typeof window !== 'undefined' ? window.location.origin : 'https://lcc-coaching-center.vercel.app';
+  let playerIframeSrc = `https://www.youtube-nocookie.com/embed/${cleanVideoId}?autoplay=1&rel=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(originUrl)}`;
   if (platform === 'instagram') {
     const cleanUrl = rawUrl.split('?')[0].replace(/\/+$/, '');
     playerIframeSrc = `${cleanUrl}/embed/`;
@@ -68,6 +77,18 @@ export const VideoPlayerModal: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {platform === 'youtube' && (
+              <a
+                href={directExternalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                title="Watch directly on YouTube App"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Open in App</span>
+              </a>
+            )}
             <button
               onClick={handleShare}
               className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
@@ -90,7 +111,8 @@ export const VideoPlayerModal: React.FC = () => {
             src={playerIframeSrc}
             title={selectedVideoForPlayer.title}
             className="w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="no-referrer-when-downgrade"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
             allowFullScreen
           />
         </div>
@@ -108,7 +130,7 @@ export const VideoPlayerModal: React.FC = () => {
             </span>
             <span className="flex items-center gap-1">
               <Eye className="w-3.5 h-3.5" />
-              {selectedVideoForPlayer.views} Views
+              {formatViewCount(selectedVideoForPlayer.views)}
             </span>
           </div>
 
