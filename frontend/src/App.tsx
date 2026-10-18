@@ -44,45 +44,6 @@ import { StudentGoalModal } from './components/modals/StudentGoalModal';
 import { OfflineVaultModal } from './components/common/OfflineVaultModal';
 import { saveOfflineDoc } from './utils/offlineStorage';
 
-// Progressive Chunked Fake Screen (Skeleton Shimmer) for instant perception while DB connects
-const SkeletonHomeScreen: React.FC = () => {
-  return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-8 animate-pulse">
-      {/* Fake Header Alert Banner */}
-      <div className="h-10 w-full rounded-xl skeleton-shimmer" />
-
-      {/* Fake Hero Grid (Quick Links, Center Slider, Director Card) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-        <div className="lg:col-span-3 h-80 rounded-2xl skeleton-shimmer" />
-        <div className="lg:col-span-6 h-80 rounded-2xl skeleton-shimmer" />
-        <div className="lg:col-span-3 h-80 rounded-2xl skeleton-shimmer" />
-      </div>
-
-      {/* Fake Category Filter Tabs */}
-      <div className="flex gap-3 overflow-hidden py-2">
-        {[1, 2, 3, 4, 5, 6].map(i => (
-          <div key={i} className="h-10 w-32 rounded-full skeleton-shimmer shrink-0" />
-        ))}
-      </div>
-
-      {/* Fake Course Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="rounded-3xl border border-slate-200 overflow-hidden bg-white p-4 space-y-4">
-            <div className="h-48 rounded-2xl skeleton-shimmer w-full" />
-            <div className="h-5 rounded-md skeleton-shimmer w-3/4" />
-            <div className="h-4 rounded-md skeleton-shimmer w-1/2" />
-            <div className="flex justify-between items-center pt-2">
-              <div className="h-8 w-24 rounded-lg skeleton-shimmer" />
-              <div className="h-8 w-28 rounded-xl skeleton-shimmer" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 const MainContent: React.FC = () => {
   const {
     activeView,
@@ -149,53 +110,51 @@ const MainContent: React.FC = () => {
     }
   }, [setIsStudentAuthModalOpen]);
 
-  // Apply visual overrides across page reloads and dynamic renders permanently
+  // Apply visual overrides when settings load or view changes (no continuous body observation)
   React.useEffect(() => {
     const overrides = websiteSettings?.visualOverrides;
     if (!overrides || Object.keys(overrides).length === 0) return;
 
-    applyVisualOverrides(overrides);
+    const timer = setTimeout(() => {
+      applyVisualOverrides(overrides);
+    }, 60);
 
-    let rafId: number | null = null;
-    const debouncedApply = () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        applyVisualOverrides(overrides);
-      });
-    };
-
-    const observer = new MutationObserver(() => {
-      debouncedApply();
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      observer.disconnect();
-    };
+    return () => clearTimeout(timer);
   }, [websiteSettings?.visualOverrides, activeView]);
+
+  const [isMobileScreen, setIsMobileScreen] = React.useState(() => {
+    return typeof window !== 'undefined' ? window.innerWidth < 1024 : false;
+  });
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobileScreen(prev => (prev !== mobile ? mobile : prev));
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const sectionMap: Record<string, React.ReactNode> = {
     hero: <Hero key="hero" />,
-    about: <AboutSection key="about" />,
-    methodology: <MethodologySection key="methodology" />,
-    ad_top: <AdBanner key="ad_top" placement="hero_top" />,
-    courses: <CourseSection key="courses" />,
-    batches: <PaidBatchesSection key="batches" />,
-    guarantee: <GuaranteeSection key="guarantee" />,
-    what_we_do: <WhatWeDoSection key="what_we_do" />,
-    ad_middle: <AdBanner key="ad_middle" placement="between_sections" />,
-    'study-material': <StudyMaterialSection key="study-material" />,
-    syllabus: <SyllabusSection key="syllabus" />,
-    videos: <YouTubeSection key="videos" />,
-    reviews: <ReviewsSection key="reviews" />,
-    instagram: <InstagramSection key="instagram" />,
-    gallery: <GallerySection key="gallery" />,
-    app_download: <AppDownloadSection key="app_download" />,
-    admission: <AdmissionSection key="admission" />,
-    faq: <FaqSection key="faq" />,
-    contact: <ContactSection key="contact" />
+    about: <div key="about" className="content-visibility-auto"><AboutSection /></div>,
+    methodology: <div key="methodology" className="content-visibility-auto"><MethodologySection /></div>,
+    ad_top: <div key="ad_top" className="content-visibility-auto"><AdBanner placement="hero_top" /></div>,
+    courses: <div key="courses" className="content-visibility-auto"><CourseSection /></div>,
+    batches: <div key="batches" className="content-visibility-auto"><PaidBatchesSection /></div>,
+    guarantee: <div key="guarantee" className="content-visibility-auto"><GuaranteeSection /></div>,
+    what_we_do: <div key="what_we_do" className="content-visibility-auto"><WhatWeDoSection /></div>,
+    ad_middle: <div key="ad_middle" className="content-visibility-auto"><AdBanner placement="between_sections" /></div>,
+    'study-material': <div key="study-material" className="content-visibility-auto"><StudyMaterialSection /></div>,
+    syllabus: <div key="syllabus" className="content-visibility-auto"><SyllabusSection /></div>,
+    videos: <div key="videos" className="content-visibility-auto"><YouTubeSection /></div>,
+    reviews: <div key="reviews" className="content-visibility-auto"><ReviewsSection /></div>,
+    instagram: <div key="instagram" className="content-visibility-auto"><InstagramSection /></div>,
+    gallery: <div key="gallery" className="content-visibility-auto"><GallerySection /></div>,
+    app_download: <div key="app_download" className="content-visibility-auto"><AppDownloadSection /></div>,
+    admission: <div key="admission" className="content-visibility-auto"><AdmissionSection /></div>,
+    faq: <div key="faq" className="content-visibility-auto"><FaqSection /></div>,
+    contact: <div key="contact" className="content-visibility-auto"><ContactSection /></div>
   };
 
   const currentSectionOrder = (websiteSettings.sectionOrder && websiteSettings.sectionOrder.length > 0)
@@ -215,20 +174,22 @@ const MainContent: React.FC = () => {
           {activeView === 'home' && (
             <>
               {/* Mobile View: Dedicated Physics Wallah Mobile App Experience */}
-              <div className="block lg:hidden w-full max-w-full overflow-x-hidden">
-                {!isAuthenticated ? null : (
-                  <MobileAppHome
-                    onOpenDrawer={() => setIsDrawerOpen(true)}
-                    onOpenGoalModal={() => setIsGoalModalOpen(true)}
-                    onOpenOfflineVault={() => setIsOfflineVaultOpen(true)}
-                  />
-                )}
-              </div>
-
-              {/* Desktop View: Grand Educational Institute Web Experience */}
-              <div className="hidden lg:block">
-                {currentSectionOrder.map(secKey => sectionMap[secKey] || null)}
-              </div>
+              {isMobileScreen ? (
+                <div className="w-full max-w-full overflow-x-hidden">
+                  {!isAuthenticated ? null : (
+                    <MobileAppHome
+                      onOpenDrawer={() => setIsDrawerOpen(true)}
+                      onOpenGoalModal={() => setIsGoalModalOpen(true)}
+                      onOpenOfflineVault={() => setIsOfflineVaultOpen(true)}
+                    />
+                  )}
+                </div>
+              ) : (
+                /* Desktop View: Grand Educational Institute Web Experience */
+                <div className="w-full">
+                  {currentSectionOrder.map(secKey => sectionMap[secKey] || null)}
+                </div>
+              )}
             </>
           )}
 

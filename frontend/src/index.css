@@ -27,17 +27,35 @@ html, body {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Hardware Accelerated Transforms for low-end mobile CPUs */
+/* Hardware Accelerated Transforms & Touch optimization */
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button {
   -webkit-appearance: none;
   appearance: none;
+}
+
+/* Content visibility auto for silky smooth 60fps scrolling */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 500px;
+}
+
+/* Disable expensive backdrop-blur GPU resamples on mobile screens */
+@media (max-width: 768px) {
+  .backdrop-blur-md,
+  .backdrop-blur-sm,
+  .backdrop-blur-lg,
+  .backdrop-blur-xl {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
 }
 
 /* Custom Utilities */

@@ -306,10 +306,10 @@ export const applyVisualOverrides = (overrides?: Record<string, VisualOverrideIt
           }
         }
       } else {
-        const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, button, li, div');
+        const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, button, li');
         for (const el of Array.from(elements)) {
           const htmlEl = el as HTMLElement;
-          if (htmlEl.innerText?.trim() === item.originalValue.trim()) {
+          if (htmlEl.textContent?.trim() === item.originalValue.trim()) {
             targetEl = htmlEl;
             break;
           }
