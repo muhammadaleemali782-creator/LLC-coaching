@@ -3,7 +3,7 @@ import { Award, BookOpen, Clock, HeartHandshake, Sparkles, Target, Users, CheckC
 import { useApp } from '../context/AppContext';
 
 export const AboutSection: React.FC = () => {
-  const { websiteSettings } = useApp();
+  const { websiteSettings, isInitialSyncLoading } = useApp();
   const director = websiteSettings?.directorName || 'Aman Singh Gautam';
   const institute = websiteSettings?.instituteName || 'Learning Coaching Center (L.C.C.)';
 
@@ -68,58 +68,79 @@ export const AboutSection: React.FC = () => {
           
           {/* Left Column: Founder Spotlight Card */}
           <div className="lg:col-span-6">
-            <div className="bg-gradient-to-br from-blue-50/80 via-white to-blue-50/40 rounded-3xl p-6 sm:p-8 border-2 border-blue-200/80 shadow-learner-lg space-y-6">
-              
-              <div className="flex flex-col sm:flex-row items-center gap-6">
-                <div className="relative shrink-0">
-                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl overflow-hidden border-4 border-[#0066FF] shadow-lg shadow-blue-500/25 bg-slate-900">
-                    <img
-                      src={websiteSettings?.visualOverrides?.['section#about-section > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > img:nth-of-type(1)']?.value || websiteSettings?.directorPhotoUrl || "/assets/founder.png"}
-                      alt={`${director} - Founder & Director`}
-                      onContextMenu={(e: any) => e.preventDefault()}
-                      onDragStart={(e: any) => e.preventDefault()}
-                      onError={(e: any) => {
-                        e.target.src = '/assets/founder.png';
-                      }}
-                      className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-300 protected-media select-none"
-                    />
-                  </div>
-                  <div className="absolute -bottom-2 -right-2 p-2 rounded-2xl bg-[#0066FF] text-white shadow-md">
-                    <ShieldCheck className="w-4 h-4" />
+            {isInitialSyncLoading ? (
+              <div className="bg-gradient-to-br from-blue-50/80 via-white to-blue-50/40 rounded-3xl p-6 sm:p-8 border-2 border-blue-200/80 shadow-learner-lg space-y-6">
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl skeleton-shimmer shrink-0" />
+                  <div className="space-y-2 text-center sm:text-left w-full">
+                    <div className="h-5 w-48 rounded-full skeleton-shimmer mx-auto sm:mx-0" />
+                    <div className="h-7 w-40 rounded-lg skeleton-shimmer mx-auto sm:mx-0" />
+                    <div className="h-4 w-56 rounded-md skeleton-shimmer mx-auto sm:mx-0" />
                   </div>
                 </div>
 
-                <div className="space-y-1.5 text-center sm:text-left">
-                  <span className="px-3 py-1 rounded-full bg-[#0066FF] text-white font-black text-[10px] uppercase tracking-wider">
-                    FOUNDER & MANAGING DIRECTOR
-                  </span>
-                  <h3 className="text-2xl font-black text-slate-900">{director}</h3>
-                  <p className="text-xs text-[#0066FF] font-bold">
-                    Lead Educator & Academic Mentor • {institute}
-                  </p>
+                <div className="h-16 rounded-2xl skeleton-shimmer w-full" />
+
+                <div className="grid grid-cols-3 gap-2.5 pt-1 text-center">
+                  <div className="h-16 rounded-2xl skeleton-shimmer" />
+                  <div className="h-16 rounded-2xl skeleton-shimmer" />
+                  <div className="h-16 rounded-2xl skeleton-shimmer" />
                 </div>
               </div>
+            ) : (
+              <div className="bg-gradient-to-br from-blue-50/80 via-white to-blue-50/40 rounded-3xl p-6 sm:p-8 border-2 border-blue-200/80 shadow-learner-lg space-y-6">
+                
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                  <div className="relative shrink-0">
+                    <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl overflow-hidden border-4 border-[#0066FF] shadow-lg shadow-blue-500/25 bg-slate-900">
+                      <img
+                        src={websiteSettings?.visualOverrides?.['section#about-section > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > img:nth-of-type(1)']?.value || websiteSettings?.directorPhotoUrl || "/assets/founder.png"}
+                        alt={`${director} - Founder & Director`}
+                        onContextMenu={(e: any) => e.preventDefault()}
+                        onDragStart={(e: any) => e.preventDefault()}
+                        onError={(e: any) => {
+                          e.target.src = '/assets/founder.png';
+                        }}
+                        className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-300 protected-media select-none"
+                      />
+                    </div>
+                    <div className="absolute -bottom-2 -right-2 p-2 rounded-2xl bg-[#0066FF] text-white shadow-md">
+                      <ShieldCheck className="w-4 h-4" />
+                    </div>
+                  </div>
 
-              <div className="p-4 rounded-2xl bg-white border border-blue-100 shadow-sm text-xs sm:text-sm text-slate-700 italic leading-relaxed">
-                "Har student me ek topper chupa hota hai. Bas use sahi guidance, daily practice aur self-belief ki zaroorat hoti hai. L.C.C. me hum har ek bachhe par personally focus karte hain."
+                  <div className="space-y-1.5 text-center sm:text-left">
+                    <span className="px-3 py-1 rounded-full bg-[#0066FF] text-white font-black text-[10px] uppercase tracking-wider">
+                      FOUNDER & MANAGING DIRECTOR
+                    </span>
+                    <h3 className="text-2xl font-black text-slate-900">{director}</h3>
+                    <p className="text-xs text-[#0066FF] font-bold">
+                      Lead Educator & Academic Mentor • {institute}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-blue-100 shadow-sm text-xs sm:text-sm text-slate-700 italic leading-relaxed">
+                  "{websiteSettings?.directorMessage || "Har student me ek topper chupa hota hai. Bas use sahi guidance, daily practice aur self-belief ki zaroorat hoti hai. L.C.C. me hum har ek bachhe par personally focus karte hain."}"
+                </div>
+
+                <div className="grid grid-cols-3 gap-2.5 pt-1 text-center">
+                  <div className="p-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm">
+                    <span className="text-lg sm:text-xl font-black text-[#0066FF] block">10+</span>
+                    <span className="text-[10px] text-slate-500 font-bold">Years Mentorship</span>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm">
+                    <span className="text-lg sm:text-xl font-black text-[#0066FF] block">5,000+</span>
+                    <span className="text-[10px] text-slate-500 font-bold">Students Taught</span>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm">
+                    <span className="text-lg sm:text-xl font-black text-[#0066FF] block">98.6%</span>
+                    <span className="text-[10px] text-slate-500 font-bold">Board Success</span>
+                  </div>
+                </div>
+
               </div>
-
-              <div className="grid grid-cols-3 gap-2.5 pt-1 text-center">
-                <div className="p-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm">
-                  <span className="text-lg sm:text-xl font-black text-[#0066FF] block">10+</span>
-                  <span className="text-[10px] text-slate-500 font-bold">Years Mentorship</span>
-                </div>
-                <div className="p-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm">
-                  <span className="text-lg sm:text-xl font-black text-[#0066FF] block">5,000+</span>
-                  <span className="text-[10px] text-slate-500 font-bold">Students Taught</span>
-                </div>
-                <div className="p-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm">
-                  <span className="text-lg sm:text-xl font-black text-[#0066FF] block">98.6%</span>
-                  <span className="text-[10px] text-slate-500 font-bold">Board Success</span>
-                </div>
-              </div>
-
-            </div>
+            )}
           </div>
 
           {/* Right Column: Mission & Core Pedagogy */}

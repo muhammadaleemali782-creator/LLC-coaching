@@ -262,6 +262,7 @@ export interface WebsiteSettings {
   defaultPlaylistRedirectUrl?: string;
   heroPosterUrl?: string;
   directorPhotoUrl?: string;
+  directorMessage?: string;
   instituteSubtagline?: string;
   ratingBadgeTop?: string;
   ratingBadgeGrade?: string;

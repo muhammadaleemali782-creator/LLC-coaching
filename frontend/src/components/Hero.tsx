@@ -21,7 +21,7 @@ import { AdBanner } from './ads/AdBanner';
 import { ADMIN_GALLERY_ITEMS } from '../data/adminGallery';
 
 export const Hero: React.FC = () => {
-  const { navigateTo, setIsStudentAuthModalOpen, websiteSettings, galleryItems, courses } = useApp();
+  const { navigateTo, setIsStudentAuthModalOpen, websiteSettings, galleryItems, courses, isInitialSyncLoading } = useApp();
 
   // Slide Images strictly using official Admin-uploaded Gallery items only
   const sourceGallery = (galleryItems && galleryItems.length > 0) ? galleryItems : ADMIN_GALLERY_ITEMS;
@@ -260,54 +260,72 @@ export const Hero: React.FC = () => {
               </div>
             ),
             'leadership': (
-              <div key="leadership" id="hero-leadership-box" className="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 sm:p-4 flex flex-col justify-between space-y-3 transition-colors">
-                <div>
-                  <div id="hero-leadership-header" className="bg-[#D32F2F] text-white px-3 py-2 rounded-xl flex items-center justify-between mb-3 shadow-xs transition-colors">
-                    <span className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-                      <Award className="w-3.5 h-3.5 text-amber-300" />
-                      Leadership
-                    </span>
-                    <span className="text-[10px] bg-white text-[#D32F2F] font-black px-1.5 py-0.5 rounded">DIRECTOR</span>
-                  </div>
-
-                  {/* Director Card */}
-                  <div className="text-center space-y-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                    <div className="w-24 h-24 mx-auto rounded-xl overflow-hidden border-2 border-[#0B3B95] shadow-md bg-slate-900">
-                      <img
-                        src={websiteSettings?.visualOverrides?.['div#hero-leadership-box > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > img:nth-of-type(1)']?.value || websiteSettings?.directorPhotoUrl || "/assets/founder.png"}
-                        alt={directorName}
-                        decoding="async"
-                        onContextMenu={(e: any) => e.preventDefault()}
-                        onDragStart={(e: any) => e.preventDefault()}
-                        onError={(e: any) => {
-                          e.target.src = '/assets/founder.png';
-                        }}
-                        className="w-full h-full object-cover object-top protected-media select-none"
-                      />
+              isInitialSyncLoading ? (
+                <div key="leadership" id="hero-leadership-box" className="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 sm:p-4 flex flex-col justify-between space-y-3">
+                  <div>
+                    <div className="h-9 rounded-xl skeleton-shimmer mb-3 w-full" />
+                    <div className="text-center space-y-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                      <div className="w-24 h-24 mx-auto rounded-xl skeleton-shimmer" />
+                      <div className="space-y-1.5 flex flex-col items-center">
+                        <div className="h-4 w-32 rounded-md skeleton-shimmer" />
+                        <div className="h-3 w-24 rounded-md skeleton-shimmer" />
+                        <div className="h-2.5 w-40 rounded-md skeleton-shimmer" />
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-black text-slate-900 leading-tight">{directorName}</h4>
-                      <p className="text-[11px] font-bold text-[#0B3B95]">Director & Founder</p>
-                      <p className="text-[10px] text-slate-500 font-medium mt-0.5 leading-snug">
-                        Lead Academic Mentor & Student Career Counselor
-                      </p>
-                    </div>
+                    <div className="mt-2.5 h-12 rounded-lg skeleton-shimmer w-full" />
                   </div>
-
-                  {/* Message excerpt */}
-                  <div className="mt-2.5 p-2 bg-blue-50/60 rounded-lg border border-blue-100 text-[11px] text-slate-700 leading-relaxed italic">
-                    "Our single focus is conceptual clarity, 1:1 computer practice, and making every student confident in life."
-                  </div>
+                  <div className="h-9 rounded-xl skeleton-shimmer w-full" />
                 </div>
+              ) : (
+                <div key="leadership" id="hero-leadership-box" className="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 sm:p-4 flex flex-col justify-between space-y-3 transition-colors">
+                  <div>
+                    <div id="hero-leadership-header" className="bg-[#D32F2F] text-white px-3 py-2 rounded-xl flex items-center justify-between mb-3 shadow-xs transition-colors">
+                      <span className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
+                        <Award className="w-3.5 h-3.5 text-amber-300" />
+                        Leadership
+                      </span>
+                      <span className="text-[10px] bg-white text-[#D32F2F] font-black px-1.5 py-0.5 rounded">DIRECTOR</span>
+                    </div>
 
-                <button
-                  onClick={() => navigateTo('home', 'about-section')}
-                  className="w-full py-2 rounded-xl bg-slate-100 hover:bg-[#0B3B95] hover:text-white text-slate-800 text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-slate-200"
-                >
-                  <span>View Profile & Story</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
+                    {/* Director Card */}
+                    <div className="text-center space-y-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                      <div className="w-24 h-24 mx-auto rounded-xl overflow-hidden border-2 border-[#0B3B95] shadow-md bg-slate-900">
+                        <img
+                          src={websiteSettings?.visualOverrides?.['div#hero-leadership-box > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > img:nth-of-type(1)']?.value || websiteSettings?.directorPhotoUrl || "/assets/founder.png"}
+                          alt={directorName}
+                          decoding="async"
+                          onContextMenu={(e: any) => e.preventDefault()}
+                          onDragStart={(e: any) => e.preventDefault()}
+                          onError={(e: any) => {
+                            e.target.src = '/assets/founder.png';
+                          }}
+                          className="w-full h-full object-cover object-top protected-media select-none"
+                        />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-black text-slate-900 leading-tight">{directorName}</h4>
+                        <p className="text-[11px] font-bold text-[#0B3B95]">Director & Founder</p>
+                        <p className="text-[10px] text-slate-500 font-medium mt-0.5 leading-snug">
+                          Lead Academic Mentor & Student Career Counselor
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Message excerpt */}
+                    <div className="mt-2.5 p-2 bg-blue-50/60 rounded-lg border border-blue-100 text-[11px] text-slate-700 leading-relaxed italic">
+                      "{websiteSettings?.directorMessage || "Our single focus is conceptual clarity, 1:1 computer practice, and making every student confident in life."}"
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => navigateTo('home', 'about-section')}
+                    className="w-full py-2 rounded-xl bg-slate-100 hover:bg-[#0B3B95] hover:text-white text-slate-800 text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-slate-200"
+                  >
+                    <span>View Profile & Story</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )
             )
           };
 
