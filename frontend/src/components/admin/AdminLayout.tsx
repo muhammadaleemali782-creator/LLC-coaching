@@ -45,9 +45,10 @@ interface AdminLayoutProps {
   activeTab: AdminTab;
   setActiveTab: (tab: AdminTab) => void;
   children: React.ReactNode;
+  isStandalone?: boolean;
 }
 
-export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTab, children }) => {
+export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTab, children, isStandalone = false }) => {
   const { logoutAdmin, navigateTo } = useApp();
 
   const navItems = [
@@ -76,14 +77,25 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
       <div className="md:hidden bg-slate-950 border-b border-slate-800 sticky top-0 z-30">
         <div className="p-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigateTo('home')}
-              className="p-1.5 rounded-lg bg-slate-800 text-white flex items-center gap-1 cursor-pointer"
-              title="Back to Public Website"
-            >
-              <ArrowLeft className="w-4 h-4 text-amber-400" />
-              <span className="text-[11px] font-bold">Back</span>
-            </button>
+            {!isStandalone ? (
+              <button
+                onClick={() => navigateTo('home')}
+                className="p-1.5 rounded-lg bg-slate-800 text-white flex items-center gap-1 cursor-pointer"
+                title="Back to Public Website"
+              >
+                <ArrowLeft className="w-4 h-4 text-amber-400" />
+                <span className="text-[11px] font-bold">Back</span>
+              </button>
+            ) : activeTab !== 'overview' ? (
+              <button
+                onClick={() => setActiveTab('overview')}
+                className="p-1.5 rounded-lg bg-slate-800 text-white flex items-center gap-1 cursor-pointer"
+                title="Back to Overview"
+              >
+                <ArrowLeft className="w-4 h-4 text-amber-400" />
+                <span className="text-[11px] font-bold">Overview</span>
+              </button>
+            ) : null}
 
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-[#0066FF] flex items-center justify-center text-white">
@@ -94,13 +106,15 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
           </div>
 
           <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => navigateTo('home')}
-              className="px-2 py-1 rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
-            >
-              <ExternalLink className="w-3 h-3" />
-              <span>Website</span>
-            </button>
+            {!isStandalone && (
+              <button
+                onClick={() => navigateTo('home')}
+                className="px-2 py-1 rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+              >
+                <ExternalLink className="w-3 h-3" />
+                <span>Website</span>
+              </button>
+            )}
             <button
               onClick={logoutAdmin}
               className="p-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 cursor-pointer"
@@ -196,13 +210,15 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
 
         {/* Footer Navigation Actions */}
         <div className="p-4 border-t border-slate-800 space-y-2">
-          <button
-            onClick={() => navigateTo('home')}
-            className="w-full px-4 py-2.5 rounded-2xl bg-[#0066FF] hover:bg-blue-600 text-xs font-black text-white flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
-          >
-            <ArrowLeft className="w-4 h-4 text-amber-300" />
-            <span>Back to Public Website</span>
-          </button>
+          {!isStandalone && (
+            <button
+              onClick={() => navigateTo('home')}
+              className="w-full px-4 py-2.5 rounded-2xl bg-[#0066FF] hover:bg-blue-600 text-xs font-black text-white flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
+            >
+              <ArrowLeft className="w-4 h-4 text-amber-300" />
+              <span>Back to Public Website</span>
+            </button>
+          )}
 
           <button
             onClick={logoutAdmin}
@@ -218,31 +234,35 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ activeTab, setActiveTa
       <main className="flex-1 p-4 sm:p-8 lg:p-10 overflow-y-auto pb-36 md:pb-16 max-w-7xl mx-auto w-full space-y-4">
         
         {/* Universal Back Navigation Bar */}
-        <div className="flex items-center justify-between bg-slate-950/80 border border-slate-800/80 px-4 py-2.5 rounded-2xl">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                if (activeTab !== 'overview') {
-                  setActiveTab('overview');
-                } else {
-                  navigateTo('home');
-                }
-              }}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-black text-white flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4 text-amber-400" />
-              <span>{activeTab !== 'overview' ? '← Back to Overview KPIs' : '← Back to Public Website'}</span>
-            </button>
-          </div>
+        {(!isStandalone || activeTab !== 'overview') && (
+          <div className="flex items-center justify-between bg-slate-950/80 border border-slate-800/80 px-4 py-2.5 rounded-2xl">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  if (activeTab !== 'overview') {
+                    setActiveTab('overview');
+                  } else if (!isStandalone) {
+                    navigateTo('home');
+                  }
+                }}
+                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-black text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4 text-amber-400" />
+                <span>{activeTab !== 'overview' ? '← Back to Overview KPIs' : '← Back to Public Website'}</span>
+              </button>
+            </div>
 
-          <button
-            onClick={() => navigateTo('home')}
-            className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-[#0066FF] hover:underline"
-          >
-            <span>View Public Website</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </button>
-        </div>
+            {!isStandalone && (
+              <button
+                onClick={() => navigateTo('home')}
+                className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-[#0066FF] hover:underline"
+              >
+                <span>View Public Website</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        )}
 
         {children}
       </main>

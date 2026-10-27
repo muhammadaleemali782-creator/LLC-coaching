@@ -34,6 +34,8 @@ __pycache__/
 
 # Temporary Build Artifacts
 build_apk_tmp/
+build_apk_*/
+*.idsig
 .gradle/
 local.properties
 

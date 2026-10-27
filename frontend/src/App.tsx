@@ -33,6 +33,7 @@ import { LiveSupportChatModal } from './components/modals/LiveSupportChatModal';
 import { StudentDashboard } from './components/student/StudentDashboard';
 import { StaffDashboard } from './components/staff/StaffDashboard';
 import { AdminPanel } from './components/admin/AdminPanel';
+import { StandaloneAdminLogin } from './components/admin/StandaloneAdminLogin';
 import { LiveVisualEditor, applyVisualOverrides, DEFAULT_SECTION_ORDER } from './components/admin/LiveVisualEditor';
 import { ToastContainer } from './components/Toast';
 import { ScreenProtectionGuard } from './components/common/ScreenProtectionGuard';
@@ -370,10 +371,48 @@ const MainContent: React.FC = () => {
   );
 };
 
+const StaffApp: React.FC = () => (
+  <div className="min-h-screen bg-slate-950 text-slate-100">
+    <StaffDashboard isStandalone={true} />
+    <ToastContainer />
+    <ScreenProtectionGuard />
+  </div>
+);
+
+const AdminApp: React.FC = () => {
+  const { isAdminAuthenticated } = useApp();
+  return (
+    <div className="min-h-screen bg-slate-900 text-slate-100">
+      {isAdminAuthenticated ? (
+        <AdminPanel isStandalone={true} />
+      ) : (
+        <StandaloneAdminLogin />
+      )}
+      <ToastContainer />
+      <ScreenProtectionGuard />
+    </div>
+  );
+};
+
+const AppRouter: React.FC = () => {
+  const appMode = React.useMemo<'student' | 'staff' | 'admin'>(() => {
+    if (typeof window === 'undefined') return 'student';
+    const params = new URLSearchParams(window.location.search);
+    const m = (params.get('mode') || params.get('app') || '').toLowerCase();
+    if (m === 'staff' || window.location.hash.toLowerCase() === '#staff') return 'staff';
+    if (m === 'admin' || window.location.hash.toLowerCase() === '#admin') return 'admin';
+    return 'student';
+  }, []);
+
+  if (appMode === 'staff') return <StaffApp />;
+  if (appMode === 'admin') return <AdminApp />;
+  return <MainContent />;
+};
+
 export function App() {
   return (
     <AppProvider>
-      <MainContent />
+      <AppRouter />
     </AppProvider>
   );
 }

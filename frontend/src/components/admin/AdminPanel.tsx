@@ -18,12 +18,16 @@ import { WebsiteSettings } from './WebsiteSettings';
 import { MobilePreview } from './MobilePreview';
 import { StaffBranchCommandCenter } from './StaffBranchCommandCenter';
 
-export const AdminPanel: React.FC = () => {
+interface AdminPanelProps {
+  isStandalone?: boolean;
+}
+
+export const AdminPanel: React.FC<AdminPanelProps> = ({ isStandalone = false }) => {
   const { isAdminAuthenticated } = useApp();
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
 
   return (
-    <AdminLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+    <AdminLayout activeTab={activeTab} setActiveTab={setActiveTab} isStandalone={isStandalone}>
       {activeTab === 'overview' && <DashboardOverview onSelectTab={setActiveTab} />}
       {activeTab === 'branches-staff' && <StaffBranchCommandCenter />}
       {activeTab === 'courses' && <CourseManager />}
