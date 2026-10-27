@@ -108,11 +108,7 @@ export const StaffDashboard: React.FC = () => {
     setIsLoggingIn(false);
   };
 
-  // Quick autofill for demo staff logins
-  const autofillStaff = (email: string) => {
-    setLoginEmail(email);
-    setLoginPassword('Staff@123');
-  };
+
 
   // Handle marking self attendance
   const handleAttendanceSubmit = async (e: React.FormEvent) => {
@@ -136,14 +132,8 @@ export const StaffDashboard: React.FC = () => {
       (r.assignedTeacherId === currentStaff.id || r.assignedTeacherName === currentStaff.name || r.branch === currentStaff.branch)
   );
 
-  // Default mock students if none enrolled yet
-  const displayStudents = teacherEnrolledStudents.length > 0 ? teacherEnrolledStudents : [
-    { id: 'st-01', studentName: 'Aarav Sharma', parentName: 'Ramesh Sharma', targetClass: 'Class 10', phone: '9876543211', branch: currentStaff?.branch || 'Palahipatti' },
-    { id: 'st-02', studentName: 'Kavya Singh', parentName: 'Sanjay Singh', targetClass: 'Class 9', phone: '9876543212', branch: currentStaff?.branch || 'Palahipatti' },
-    { id: 'st-03', studentName: 'Rohan Gupta', parentName: 'Manish Gupta', targetClass: 'Class 12', phone: '9876543213', branch: currentStaff?.branch || 'Palahipatti' },
-    { id: 'st-04', studentName: 'Sneha Patel', parentName: 'Rajesh Patel', targetClass: 'Class 10', phone: '9876543214', branch: currentStaff?.branch || 'Palahipatti' },
-    { id: 'st-05', studentName: 'Vikas Maurya', parentName: 'Sunil Maurya', targetClass: 'Class 11', phone: '9876543215', branch: currentStaff?.branch || 'Palahipatti' }
-  ];
+  // Real enrolled students under this teacher/branch
+  const displayStudents = teacherEnrolledStudents;
 
   // Handle student attendance submission
   const handleSaveStudentAttendance = async () => {
@@ -324,58 +314,7 @@ export const StaffDashboard: React.FC = () => {
             </button>
           </form>
 
-          {/* Quick Demo Staff Logins */}
-          <div className="mt-8 pt-6 border-t border-slate-800">
-            <p className="text-xs text-slate-400 font-semibold mb-3 text-center">
-              Quick Faculty Accounts:
-            </p>
-            <div className="grid grid-cols-1 gap-2">
-              <button
-                type="button"
-                onClick={() => autofillStaff('rajesh@lcc.edu')}
-                className="w-full text-left bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 rounded-xl p-2.5 transition-all flex items-center justify-between text-xs cursor-pointer"
-              >
-                <div>
-                  <p className="font-bold text-white">Rajesh Verma (Senior Faculty)</p>
-                  <p className="text-[11px] text-slate-400">Palahipatti Main Campus • rajesh@lcc.edu</p>
-                </div>
-                <span className="text-[10px] bg-primary-950 text-primary-300 border border-primary-800 px-2 py-0.5 rounded font-mono">
-                  Select
-                </span>
-              </button>
 
-              <button
-                type="button"
-                onClick={() => autofillStaff('ananya@lcc.edu')}
-                className="w-full text-left bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 rounded-xl p-2.5 transition-all flex items-center justify-between text-xs cursor-pointer"
-              >
-                <div>
-                  <p className="font-bold text-white">Mrs. Ananya Sharma (Specialist)</p>
-                  <p className="text-[11px] text-slate-400">Sindhora Market Branch • ananya@lcc.edu</p>
-                </div>
-                <span className="text-[10px] bg-primary-950 text-primary-300 border border-primary-800 px-2 py-0.5 rounded font-mono">
-                  Select
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => autofillStaff('amit@lcc.edu')}
-                className="w-full text-left bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 rounded-xl p-2.5 transition-all flex items-center justify-between text-xs cursor-pointer"
-              >
-                <div>
-                  <p className="font-bold text-white">Amit Kumar (Counselor & Commerce)</p>
-                  <p className="text-[11px] text-slate-400">Babatpur City Center • amit@lcc.edu</p>
-                </div>
-                <span className="text-[10px] bg-primary-950 text-primary-300 border border-primary-800 px-2 py-0.5 rounded font-mono">
-                  Select
-                </span>
-              </button>
-            </div>
-            <p className="text-[11px] text-slate-500 text-center mt-3">
-              Default password: <span className="text-slate-300 font-mono">Staff@123</span>
-            </p>
-          </div>
         </div>
       </div>
     );

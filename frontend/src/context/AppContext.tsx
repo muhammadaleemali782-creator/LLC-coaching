@@ -1065,47 +1065,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         navigateTo('staff-portal');
         return true;
       }
-      if (
-        clean === 'rajesh@lcc.edu' ||
-        clean === 'ananya@lcc.edu' ||
-        clean === 'amit@lcc.edu' ||
-        clean === 'aman.faculty@lcc.edu'
-      ) {
-        const demoStaff: StaffMember = {
-          id: clean.includes('aman')
-            ? 'staff-aman'
-            : clean.includes('rajesh')
-            ? 'staff-rajesh'
-            : clean.includes('ananya')
-            ? 'staff-ananya'
-            : 'staff-amit',
-          name: clean.includes('aman')
-            ? `${websiteSettings?.directorName || 'Aman Singh Gautam'} (Director & Head Faculty)`
-            : clean.includes('rajesh')
-            ? 'Rajesh Verma (Senior Faculty)'
-            : clean.includes('ananya')
-            ? 'Mrs. Ananya Sharma'
-            : 'Amit Kumar',
+      if (clean === 'aman.faculty@lcc.edu' || clean === 'director@lcc.edu' || clean === 'admin@lcc.edu') {
+        const directorStaff: StaffMember = {
+          id: 'staff-director',
+          name: `${websiteSettings?.directorName || 'Aman Singh Gautam'} (Director)`,
           email: clean,
           role: 'staff',
-          branch: clean.includes('aman') || clean.includes('rajesh')
-            ? 'Palahipatti Main Campus (Sindhora Rd)'
-            : clean.includes('ananya')
-            ? 'Sindhora Market Branch'
-            : 'Babatpur City Center',
-          designation: clean.includes('aman')
-            ? 'Campus Director & Head Mentor'
-            : clean.includes('rajesh')
-            ? 'Senior Mathematics Faculty'
-            : clean.includes('ananya')
-            ? 'Science Specialist'
-            : 'Commerce Counselor',
+          branch: 'Palahipatti Main Campus (Sindhora Rd)',
+          designation: 'Campus Director & Head Mentor',
           isActive: true
         };
-        localStorage.setItem('lcc_staff_session', JSON.stringify(demoStaff));
-        setCurrentStaff(demoStaff);
+        localStorage.setItem('lcc_staff_session', JSON.stringify(directorStaff));
+        setCurrentStaff(directorStaff);
         await refreshStaffData();
-        showToast(`Welcome ${demoStaff.name}! Logged in to Staff Portal.`, 'success');
+        showToast(`Welcome Director Aman Singh Gautam! Logged in to Staff Portal.`, 'success');
         navigateTo('staff-portal');
         return true;
       }
