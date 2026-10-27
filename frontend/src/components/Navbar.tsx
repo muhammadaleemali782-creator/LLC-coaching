@@ -264,16 +264,6 @@ export const Navbar: React.FC = () => {
           ) : (
             <div className="flex items-center gap-1.5 sm:gap-2">
               <button
-                id="btn-public-staff-portal"
-                onClick={() => navigateTo('staff-portal')}
-                className="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer border border-indigo-400/30"
-                title="Employee & Faculty Portal"
-              >
-                <GraduationCap className="w-3.5 h-3.5 text-white shrink-0" />
-                <span className="whitespace-nowrap">Employee / Staff</span>
-              </button>
-
-              <button
                 id="btn-public-student-portal"
                 onClick={() => setIsStudentAuthModalOpen(true)}
                 style={{ backgroundColor: '#fbbf24', color: '#020617' }}
@@ -339,18 +329,6 @@ export const Navbar: React.FC = () => {
                 </button>
               ) : (
                 <div className="space-y-2">
-                  <button
-                    id="mobile-staff-portal-btn"
-                    onClick={() => {
-                      navigateTo('staff-portal');
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider text-center shadow-md flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <GraduationCap className="w-4 h-4 text-white" />
-                    <span>Employee / Staff Portal</span>
-                  </button>
-
                   <button
                     id="mobile-student-portal-btn"
                     onClick={() => {
